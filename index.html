@@ -1,1100 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Agentic AI Engineer — Quest Board</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #18181f;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8e8f0;
-    --muted: #7a7a8c;
-    --dim: #4a4a5a;
-    --purple: #a78bfa;
-    --purple-bg: rgba(167,139,250,0.1);
-    --purple-border: rgba(167,139,250,0.25);
-    --teal: #34d399;
-    --teal-bg: rgba(52,211,153,0.1);
-    --teal-border: rgba(52,211,153,0.25);
-    --amber: #fbbf24;
-    --amber-bg: rgba(251,191,36,0.1);
-    --amber-border: rgba(251,191,36,0.25);
-    --blue: #60a5fa;
-    --blue-bg: rgba(96,165,250,0.1);
-    --blue-border: rgba(96,165,250,0.25);
-    --font-head: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-mono);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
-
-  /* Scanline texture overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap { max-width: 780px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
-
-  /* Header */
-  header {
-    padding: 60px 0 40px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 40px;
-  }
-
-  .header-tag {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    color: var(--purple);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .header-tag::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--purple);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  h1 {
-    font-family: var(--font-head);
-    font-size: clamp(28px, 5vw, 46px);
-    font-weight: 800;
-    color: var(--text);
-    line-height: 1.1;
-    margin-bottom: 12px;
-    letter-spacing: -0.02em;
-  }
-
-  h1 span { color: var(--purple); }
-
-  .header-sub {
-    font-size: 14px;
-    color: var(--muted);
-    max-width: 480px;
-    line-height: 1.7;
-  }
-
-  /* Stats bar */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
-  .stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-  }
-
-  .stat-val {
-    font-family: var(--font-head);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  /* Progress */
-  .progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 40px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .progress-track {
-    flex: 1;
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 99px;
-    background: var(--purple);
-    transition: width 0.5s ease;
-  }
-
-  /* Level cards */
-  .level-card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .level-card:hover { border-color: var(--border2); }
-
-  .level-card.locked {
-    opacity: 0.45;
-    pointer-events: none;
-  }
-
-  .level-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 20px;
-    cursor: pointer;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-  }
-
-  .level-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .level-num {
-    font-family: var(--font-head);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 4px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .level-title-block { flex: 1; min-width: 0; }
-
-  .level-name {
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .level-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-
-  .level-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-
-  .level-pct { font-size: 12px; color: var(--muted); }
-
-  .chevron {
-    width: 16px;
-    height: 16px;
-    color: var(--dim);
-    transition: transform 0.25s;
-    flex-shrink: 0;
-  }
-
-  .level-card.open .chevron { transform: rotate(180deg); }
-
-  .level-progress-bar {
-    height: 2px;
-    background: var(--surface2);
-  }
-
-  .level-progress-fill {
-    height: 100%;
-    transition: width 0.4s ease;
-  }
-
-  /* Level body */
-  .level-body {
-    display: none;
-    background: var(--bg);
-  }
-
-  .level-card.open .level-body { display: block; }
-
-  /* Section */
-  .section-header {
-    padding: 16px 20px 6px;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
-
-  /* Quest item */
-  .quest {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 20px;
-    border-top: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
-  .quest:hover { background: var(--surface2); }
-
-  .quest.done { opacity: 0.5; }
-  .quest.done .quest-label { text-decoration: line-through; }
-
-  .quest-cb {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-    border: 1px solid var(--dim);
-    flex-shrink: 0;
-    margin-top: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-
-  .quest.done .quest-cb {
-    background: var(--purple);
-    border-color: var(--purple);
-  }
-
-  .quest.done .quest-cb::after {
-    content: '';
-    display: block;
-    width: 8px;
-    height: 4px;
-    border-left: 1.5px solid #fff;
-    border-bottom: 1.5px solid #fff;
-    transform: rotate(-45deg) translate(1px,-1px);
-  }
-
-  .quest-body { flex: 1; min-width: 0; }
-
-  .quest-label {
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1.5;
-    margin-bottom: 3px;
-  }
-
-  .quest-detail { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-  .quest-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 6px;
-  }
-
-  .tag {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 3px;
-    letter-spacing: 0.05em;
-    font-weight: 500;
-  }
-
-  .tag-resource {
-    background: rgba(96,165,250,0.12);
-    color: var(--blue);
-    border: 1px solid rgba(96,165,250,0.2);
-  }
-
-  .tag-project {
-    background: rgba(52,211,153,0.1);
-    color: var(--teal);
-    border: 1px solid rgba(52,211,153,0.2);
-  }
-
-  .tag-concept {
-    background: rgba(167,139,250,0.1);
-    color: var(--purple);
-    border: 1px solid rgba(167,139,250,0.2);
-  }
-
-  .tag-tool {
-    background: rgba(251,191,36,0.1);
-    color: var(--amber);
-    border: 1px solid rgba(251,191,36,0.2);
-  }
-
-  .quest-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .xp-badge {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 3px;
-    background: var(--purple-bg);
-    color: var(--purple);
-    border: 1px solid var(--purple-border);
-    white-space: nowrap;
-  }
-
-  /* Resource links */
-  .resource-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    color: var(--blue);
-    text-decoration: none;
-    padding: 1px 0;
-  }
-
-  .resource-link:hover { text-decoration: underline; }
-
-  .quest-resources {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 6px;
-  }
-
-  /* Unlock notice */
-  .unlock-notice {
-    padding: 14px 20px;
-    font-size: 12px;
-    color: var(--muted);
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: var(--surface);
-  }
-
-  .unlock-btn {
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 4px;
-    border: 1px solid var(--purple-border);
-    background: var(--purple-bg);
-    color: var(--purple);
-    cursor: pointer;
-    white-space: nowrap;
-    pointer-events: all;
-    font-family: var(--font-mono);
-  }
-
-  .unlock-btn:hover { background: rgba(167,139,250,0.2); }
-
-  /* Footer */
-  footer {
-    padding: 40px 0 60px;
-    margin-top: 20px;
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--dim);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .reset-btn {
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 4px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: var(--font-mono);
-  }
-
-  .reset-btn:hover { border-color: rgba(239,68,68,0.4); color: #ef4444; }
-
-  @media (max-width: 540px) {
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    h1 { font-size: 26px; }
-    header { padding: 40px 0 28px; }
-  }
-</style>
-</head>
-<body>
-<div class="wrap">
-
-  <header>
-    <div class="header-tag">Intermediate track · 3 months</div>
-    <h1>Agentic AI<br><span>Engineer Quest</span></h1>
-    <p class="header-sub">A skill-tree for engineers who already write code and want to build autonomous AI systems that actually work in production.</p>
-  </header>
-
-  <div class="stats-row">
-    <div class="stat"><div class="stat-val" id="s-xp">0</div><div class="stat-label">XP Earned</div></div>
-    <div class="stat"><div class="stat-val" id="s-done">0/32</div><div class="stat-label">Quests</div></div>
-    <div class="stat"><div class="stat-val" id="s-lvl">1</div><div class="stat-label">Level</div></div>
-    <div class="stat"><div class="stat-val" id="s-streak">0</div><div class="stat-label">This week</div></div>
-  </div>
-
-  <div class="progress-wrap">
-    <span id="prog-label">0% complete</span>
-    <div class="progress-track"><div class="progress-fill" id="main-bar" style="width:0%"></div></div>
-    <span id="prog-xp">0 / 1 540 XP</span>
-  </div>
-
-  <div id="levels-container"></div>
-
-  <footer>
-    <span>Progress is saved in your browser · <a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use" style="color:var(--blue);text-decoration:none;" target="_blank">Anthropic tool use docs ↗</a></span>
-    <button class="reset-btn" onclick="resetAll()">Reset progress</button>
-  </footer>
-
-</div>
-
-<script>
-const LEVELS = [
-  {
-    id: 1,
-    name: "Agent Foundations",
-    subtitle: "How autonomous systems actually think",
-    color: "#a78bfa",
-    bg: "rgba(167,139,250,0.1)",
-    border: "rgba(167,139,250,0.25)",
-    barColor: "#a78bfa",
-    sections: [
-      {
-        label: "Core concepts",
-        quests: [
-          {
-            id: "q1",
-            label: "Read the ReAct paper and implement the loop from scratch",
-            detail: "No LangChain. No AutoGen. Just raw prompting + a Python while loop. This is how you truly understand agents.",
-            xp: 60,
-            tags: [["concept","concept"],["resource","resource"]],
-            resources: [
-              { label: "ReAct paper (arXiv)", url: "https://arxiv.org/abs/2210.03629" },
-              { label: "Anthropic tool use docs", url: "https://docs.anthropic.com/en/docs/build-with-claude/tool-use" }
-            ]
-          },
-          {
-            id: "q2",
-            label: "Master the anatomy: system prompt, tool schemas, user turn, assistant turn, tool result",
-            detail: "Draw this on paper. Then trace it in the API response. You'll debug faster for knowing this cold.",
-            xp: 40,
-            tags: [["concept","concept"]],
-            resources: [
-              { label: "Messages API reference", url: "https://docs.anthropic.com/en/api/messages" }
-            ]
-          },
-          {
-            id: "q3",
-            label: "Understand token budgets and why context window management is an agent superpower",
-            detail: "A bloated context = slow, expensive, and forgetful agents. Learn the trade-offs early.",
-            xp: 40,
-            tags: [["concept","concept"],["resource","resource"]],
-            resources: [
-              { label: "Anthropic extended thinking", url: "https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking" }
-            ]
-          }
-        ]
-      },
-      {
-        label: "First builds",
-        quests: [
-          {
-            id: "q4",
-            label: "Build a CLI agent with 3 tools: read_file, write_file, run_shell",
-            detail: "Real autonomy means real side effects. Build this before you add safety rails so you understand why the rails exist.",
-            xp: 80,
-            tags: [["project","project"],["tool","tool"]],
-            resources: [
-              { label: "Python subprocess docs", url: "https://docs.python.org/3/library/subprocess.html" }
-            ]
-          },
-          {
-            id: "q5",
-            label: "Add a vector store: agent retrieves relevant context before every response",
-            detail: "Use ChromaDB or Qdrant locally. Embed with the Anthropic embeddings endpoint or use sentence-transformers.",
-            xp: 70,
-            tags: [["project","project"],["tool","tool"]],
-            resources: [
-              { label: "ChromaDB quickstart", url: "https://docs.trychroma.com/getting-started" },
-              { label: "Qdrant docs", url: "https://qdrant.tech/documentation/" }
-            ]
-          },
-          {
-            id: "q6",
-            label: "Ship it: make your agent summarise and answer questions about a full codebase",
-            detail: "Pick any OSS repo. Your agent should be able to explain architecture, find bugs, and suggest refactors. No handholding.",
-            xp: 100,
-            tags: [["project","project"]],
-            resources: []
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Tool Craft",
-    subtitle: "Build, harden, and evaluate your tools",
-    color: "#34d399",
-    bg: "rgba(52,211,153,0.1)",
-    border: "rgba(52,211,153,0.25)",
-    barColor: "#34d399",
-    sections: [
-      {
-        label: "Tool design patterns",
-        quests: [
-          {
-            id: "q7",
-            label: "Write 5 tool schemas with intentionally ambiguous names, then fix them",
-            detail: "Bad schemas cause hallucinated tool calls. This exercise trains you to see the failure mode before it bites you.",
-            xp: 50,
-            tags: [["concept","concept"]],
-            resources: [
-              { label: "Tool use best practices", url: "https://docs.anthropic.com/en/docs/build-with-claude/tool-use/best-practices-for-tool-definitions" }
-            ]
-          },
-          {
-            id: "q8",
-            label: "Build an agent that calls the GitHub API to triage issues automatically",
-            detail: "Auth, pagination, rate limits — real API integration has all of these. Build this and you've handled them all.",
-            xp: 90,
-            tags: [["project","project"],["tool","tool"]],
-            resources: [
-              { label: "GitHub REST API", url: "https://docs.github.com/en/rest" }
-            ]
-          },
-          {
-            id: "q9",
-            label: "Implement retries, exponential backoff, and graceful fallbacks for all tools",
-            detail: "External tools fail. Your agent should degrade gracefully, not crash and burn mid-task.",
-            xp: 60,
-            tags: [["concept","concept"],["project","project"]],
-            resources: [
-              { label: "tenacity (Python retry lib)", url: "https://tenacity.readthedocs.io/" }
-            ]
-          }
-        ]
-      },
-      {
-        label: "Evaluation & observability",
-        quests: [
-          {
-            id: "q10",
-            label: "Write an eval harness: 30 test cases, automated pass/fail, regression tracking",
-            detail: "If it's not measured, it's not improved. Write evals before you write more features.",
-            xp: 90,
-            tags: [["project","project"],["concept","concept"]],
-            resources: [
-              { label: "Anthropic evals guide", url: "https://docs.anthropic.com/en/docs/test-and-evaluate/eval-tool" },
-              { label: "promptfoo", url: "https://www.promptfoo.dev/" }
-            ]
-          },
-          {
-            id: "q11",
-            label: "Add structured logging with LangSmith or Langfuse — trace every token",
-            detail: "Every tool call, latency, and token cost logged. You'll wonder how you survived without this.",
-            xp: 60,
-            tags: [["tool","tool"]],
-            resources: [
-              { label: "Langfuse docs", url: "https://langfuse.com/docs" },
-              { label: "LangSmith", url: "https://smith.langchain.com/" }
-            ]
-          },
-          {
-            id: "q12",
-            label: "Red-team your agent: attempt prompt injection via tool results",
-            detail: "Your agent reads web pages. What if the web page says 'Ignore previous instructions'? Find out before your users do.",
-            xp: 100,
-            tags: [["concept","concept"],["project","project"]],
-            resources: [
-              { label: "Prompt injection guide", url: "https://simonwillison.net/2023/Apr/14/worst-that-could-happen/" }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Orchestration",
-    subtitle: "Multi-agent systems that divide and conquer",
-    color: "#fbbf24",
-    bg: "rgba(251,191,36,0.1)",
-    border: "rgba(251,191,36,0.25)",
-    barColor: "#fbbf24",
-    sections: [
-      {
-        label: "Multi-agent patterns",
-        quests: [
-          {
-            id: "q13",
-            label: "Build a planner → executor pattern: orchestrator breaks task, subagent executes",
-            detail: "The orchestrator never calls tools directly. It only delegates. Implement this separation strictly.",
-            xp: 100,
-            tags: [["concept","concept"],["project","project"]],
-            resources: [
-              { label: "Anthropic multi-agent guide", url: "https://docs.anthropic.com/en/docs/build-with-claude/agents-and-tools/build-multi-agent-systems" }
-            ]
-          },
-          {
-            id: "q14",
-            label: "Add a critic agent: it reviews the executor's output and triggers retries",
-            detail: "Self-correcting pipelines dramatically improve output quality. The critic should have a strict rubric.",
-            xp: 90,
-            tags: [["concept","concept"],["project","project"]],
-            resources: []
-          },
-          {
-            id: "q15",
-            label: "Implement parallel subagents: fan out 5 tasks simultaneously, merge results",
-            detail: "Use asyncio. Learn the performance difference vs sequential. Understand the merge step — it's the hard part.",
-            xp: 90,
-            tags: [["project","project"],["tool","tool"]],
-            resources: [
-              { label: "Python asyncio docs", url: "https://docs.python.org/3/library/asyncio.html" }
-            ]
-          },
-          {
-            id: "q16",
-            label: "Build and expose your own MCP server — publish tools other agents can use",
-            detail: "MCP is becoming the standard. Build a server that wraps a database or internal API and connect it to Claude.",
-            xp: 120,
-            tags: [["project","project"],["tool","tool"]],
-            resources: [
-              { label: "MCP specification", url: "https://modelcontextprotocol.io/introduction" },
-              { label: "Claude MCP docs", url: "https://docs.anthropic.com/en/docs/build-with-claude/mcp" }
-            ]
-          }
-        ]
-      },
-      {
-        label: "Memory & state",
-        quests: [
-          {
-            id: "q17",
-            label: "Build persistent episodic memory: agent recalls past tasks across sessions",
-            detail: "Store summaries of completed tasks in a vector DB. On startup, the agent retrieves relevant memories before acting.",
-            xp: 90,
-            tags: [["project","project"],["concept","concept"]],
-            resources: [
-              { label: "Mem0 (agent memory library)", url: "https://docs.mem0.ai/" }
-            ]
-          },
-          {
-            id: "q18",
-            label: "Implement a shared scratchpad for multi-agent coordination",
-            detail: "A simple key-value store both agents can read/write. Implement optimistic locking so they don't clobber each other.",
-            xp: 70,
-            tags: [["project","project"]],
-            resources: []
-          },
-          {
-            id: "q19",
-            label: "Solve context pressure: implement automatic summarisation when approaching limits",
-            detail: "Every token costs. Build a compressor that turns 50k tokens of history into a 2k summary without losing critical state.",
-            xp: 80,
-            tags: [["concept","concept"],["project","project"]],
-            resources: []
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 4,
-    name: "Production Architect",
-    subtitle: "Ship agents real people rely on",
-    color: "#60a5fa",
-    bg: "rgba(96,165,250,0.1)",
-    border: "rgba(96,165,250,0.25)",
-    barColor: "#60a5fa",
-    sections: [
-      {
-        label: "Reliability & safety",
-        quests: [
-          {
-            id: "q20",
-            label: "Design human-in-the-loop checkpoints: agent pauses and asks before destructive actions",
-            detail: "Define a taxonomy of action risk levels. The agent should know when to ask, not just when to act.",
-            xp: 90,
-            tags: [["concept","concept"],["project","project"]],
-            resources: [
-              { label: "Anthropic safety guide", url: "https://docs.anthropic.com/en/docs/build-with-claude/agents-and-tools/agent-tools/computer-use" }
-            ]
-          },
-          {
-            id: "q21",
-            label: "Make all tool calls idempotent — safe to retry without double side effects",
-            detail: "Network failures happen. If your send_email tool fires twice, someone gets two emails. Fix this.",
-            xp: 70,
-            tags: [["concept","concept"]],
-            resources: []
-          },
-          {
-            id: "q22",
-            label: "Build circuit breakers: halt the agent if a tool starts returning errors repeatedly",
-            detail: "Inspired by distributed systems. After 3 consecutive failures, a tool goes into cooldown. The agent reroutes.",
-            xp: 80,
-            tags: [["project","project"],["concept","concept"]],
-            resources: [
-              { label: "Circuit breaker pattern", url: "https://martinfowler.com/bliki/CircuitBreaker.html" }
-            ]
-          }
-        ]
-      },
-      {
-        label: "Security",
-        quests: [
-          {
-            id: "q23",
-            label: "Harden against prompt injection: sanitise all external data before it enters context",
-            detail: "Web content, emails, documents — all of it is untrusted. Build a sanitisation layer. Test it.",
-            xp: 100,
-            tags: [["concept","concept"],["project","project"]],
-            resources: [
-              { label: "OWASP LLM Top 10", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/" }
-            ]
-          },
-          {
-            id: "q24",
-            label: "Implement least-privilege scoping: each subagent gets only the tools it needs",
-            detail: "Your file reader doesn't need database write access. Enforce this at instantiation time.",
-            xp: 70,
-            tags: [["concept","concept"]],
-            resources: []
-          },
-          {
-            id: "q25",
-            label: "Build an immutable audit trail: every action the agent takes is logged and signed",
-            detail: "You'll need this for debugging, compliance, and post-mortems. Build it from day one.",
-            xp: 80,
-            tags: [["project","project"]],
-            resources: []
-          }
-        ]
-      },
-      {
-        label: "Ship it",
-        quests: [
-          {
-            id: "q26",
-            label: "Deploy to production with cost + latency dashboards (Grafana, Datadog, or Langfuse)",
-            detail: "Real traffic surfaces every assumption you made. Track p95 latency and cost per task from day one.",
-            xp: 120,
-            tags: [["project","project"],["tool","tool"]],
-            resources: [
-              { label: "Langfuse analytics", url: "https://langfuse.com/docs/analytics/overview" }
-            ]
-          },
-          {
-            id: "q27",
-            label: "Write a post-mortem on the first thing that breaks in production",
-            detail: "5 Whys. Timeline. What you'd do differently. Share it with someone. Every incident is an XP drop.",
-            xp: 80,
-            tags: [["concept","concept"]],
-            resources: [
-              { label: "How to write a post-mortem", url: "https://sre.google/sre-book/postmortem-culture/" }
-            ]
-          },
-          {
-            id: "q28",
-            label: "Open-source or publicly demo one complete agent project",
-            detail: "The best portfolio is a shipped thing other people can try. README, demo video, Loom — just put it out there.",
-            xp: 150,
-            tags: [["project","project"]],
-            resources: []
-          }
-        ]
-      }
-    ]
-  }
-];
-
-const TOTAL_Q = LEVELS.flatMap(l => l.sections).flatMap(s => s.quests).length;
-const TOTAL_XP = LEVELS.flatMap(l => l.sections).flatMap(s => s.quests).reduce((a, q) => a + q.xp, 0);
-const UNLOCK_THRESHOLD = 0.55;
-
-let state = {};
-let weeklyDone = 0;
-try {
-  const saved = JSON.parse(localStorage.getItem('aiq2_state') || '{}');
-  state = saved.checks || {};
-  const savedWeek = saved.week;
-  const nowWeek = getWeekKey();
-  weeklyDone = savedWeek === nowWeek ? (saved.weeklyDone || 0) : 0;
-} catch(e) {}
-
-function getWeekKey() {
-  const d = new Date();
-  const jan1 = new Date(d.getFullYear(), 0, 1);
-  return d.getFullYear() + '-' + Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
-}
-
-function save() {
-  try {
-    localStorage.setItem('aiq2_state', JSON.stringify({
-      checks: state,
-      week: getWeekKey(),
-      weeklyDone
-    }));
-  } catch(e) {}
-}
-
-function resetAll() {
-  if (!confirm('Reset all progress?')) return;
-  state = {};
-  weeklyDone = 0;
-  save();
-  renderAll();
-}
-
-function getTotalXP() {
-  return LEVELS.flatMap(l => l.sections).flatMap(s => s.quests)
-    .filter(q => state[q.id]).reduce((a, q) => a + q.xp, 0);
-}
-
-function getTotalDone() {
-  return LEVELS.flatMap(l => l.sections).flatMap(s => s.quests)
-    .filter(q => state[q.id]).length;
-}
-
-function getLevelProgress(lvl) {
-  const qs = lvl.sections.flatMap(s => s.quests);
-  const done = qs.filter(q => state[q.id]).length;
-  return { done, total: qs.length, pct: Math.round((done / qs.length) * 100) };
-}
-
-function getUnlocked() {
-  const set = new Set([1]);
-  LEVELS.forEach((lvl, i) => {
-    if (i === 0) return;
-    if (state['unlock_' + lvl.id]) { set.add(lvl.id); return; }
-    const prev = LEVELS[i - 1];
-    const { done, total } = getLevelProgress(prev);
-    if (done / total >= UNLOCK_THRESHOLD) set.add(lvl.id);
-  });
-  return set;
-}
-
-function getCurrentLevel() {
-  let cur = 1;
-  LEVELS.forEach(lvl => {
-    const { done } = getLevelProgress(lvl);
-    if (done > 0) cur = Math.max(cur, lvl.id);
-  });
-  return cur;
-}
-
-function tagEl(text, type) {
-  const el = document.createElement('span');
-  el.className = 'tag tag-' + type;
-  el.textContent = text;
-  return el;
-}
-
-function renderAll() {
-  const unlocked = getUnlocked();
-  const container = document.getElementById('levels-container');
-  container.innerHTML = '';
-
-  LEVELS.forEach(lvl => {
-    const isLocked = !unlocked.has(lvl.id);
-    const { done, total, pct } = getLevelProgress(lvl);
-    const isOpen = state['open_' + lvl.id] || (!isLocked && done < total && lvl.id === getCurrentLevel());
-
-    const card = document.createElement('div');
-    card.className = 'level-card' + (isLocked ? ' locked' : '') + (isOpen ? ' open' : '');
-    card.style.borderColor = isOpen ? lvl.border : '';
-
-    const header = document.createElement('div');
-    header.className = 'level-header';
-    header.innerHTML = `
-      <div class="level-header-left">
-        <span class="level-num" style="background:${lvl.bg};color:${lvl.color};border:1px solid ${lvl.border};">LVL ${lvl.id}</span>
-        <div class="level-title-block">
-          <div class="level-name">${lvl.name}</div>
-          <div class="level-sub">${lvl.subtitle}</div>
-        </div>
-      </div>
-      <div class="level-meta">
-        <span class="level-pct">${done}/${total}</span>
-        <svg class="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M4 6l4 4 4-4"/>
-        </svg>
-      </div>`;
-
-    header.addEventListener('click', () => {
-      if (isLocked) return;
-      state['open_' + lvl.id] = !state['open_' + lvl.id];
-      save();
-      renderAll();
-    });
-
-    card.appendChild(header);
-
-    const progressBar = document.createElement('div');
-    progressBar.className = 'level-progress-bar';
-    progressBar.innerHTML = `<div class="level-progress-fill" style="width:${pct}%;background:${lvl.barColor};"></div>`;
-    card.appendChild(progressBar);
-
-    const body = document.createElement('div');
-    body.className = 'level-body';
-
-    lvl.sections.forEach(sec => {
-      const secHead = document.createElement('div');
-      secHead.className = 'section-header';
-      secHead.textContent = sec.label;
-      body.appendChild(secHead);
-
-      sec.quests.forEach(q => {
-        const checked = !!state[q.id];
-        const item = document.createElement('div');
-        item.className = 'quest' + (checked ? ' done' : '');
-
-        const cb = document.createElement('div');
-        cb.className = 'quest-cb';
-
-        const qbody = document.createElement('div');
-        qbody.className = 'quest-body';
-
-        const ql = document.createElement('div');
-        ql.className = 'quest-label';
-        ql.textContent = q.label;
-
-        const qd = document.createElement('div');
-        qd.className = 'quest-detail';
-        qd.textContent = q.detail;
-
-        const tags = document.createElement('div');
-        tags.className = 'quest-tags';
-        q.tags.forEach(([text, type]) => tags.appendChild(tagEl(text, type)));
-
-        qbody.appendChild(ql);
-        qbody.appendChild(qd);
-        qbody.appendChild(tags);
-
-        if (q.resources && q.resources.length > 0) {
-          const res = document.createElement('div');
-          res.className = 'quest-resources';
-          q.resources.forEach(r => {
-            const a = document.createElement('a');
-            a.className = 'resource-link';
-            a.href = r.url;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            a.textContent = '↗ ' + r.label;
-            res.appendChild(a);
-          });
-          qbody.appendChild(res);
-        }
-
-        const right = document.createElement('div');
-        right.className = 'quest-right';
-        const xpBadge = document.createElement('div');
-        xpBadge.className = 'xp-badge';
-        xpBadge.textContent = '+' + q.xp + ' XP';
-        right.appendChild(xpBadge);
-
-        item.appendChild(cb);
-        item.appendChild(qbody);
-        item.appendChild(right);
-
-        item.addEventListener('click', () => {
-          const wasChecked = !!state[q.id];
-          state[q.id] = !wasChecked;
-          if (!wasChecked) weeklyDone++;
-          else weeklyDone = Math.max(0, weeklyDone - 1);
-          save();
-          renderAll();
-        });
-
-        body.appendChild(item);
-      });
-    });
-
-    if (isLocked) {
-      const prev = LEVELS[lvl.id - 2];
-      const prevP = getLevelProgress(prev);
-      const needed = Math.ceil(prev.sections.flatMap(s => s.quests).length * UNLOCK_THRESHOLD);
-      const notice = document.createElement('div');
-      notice.className = 'unlock-notice';
-      notice.innerHTML = `<span>Complete ${needed} quests in "${prev.name}" to unlock · or</span>`;
-      const btn = document.createElement('button');
-      btn.className = 'unlock-btn';
-      btn.textContent = 'Unlock now';
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        state['unlock_' + lvl.id] = true;
-        save();
-        renderAll();
-      });
-      notice.appendChild(btn);
-      body.appendChild(notice);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Quest Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e12;
+      --surface: #16161c;
+      --surface2: #1e1e26;
+      --border: #2a2a38;
+      --accent: #7c6af7;
+      --accent2: #4fcf8e;
+      --accent3: #f7c06a;
+      --accent4: #f76a8a;
+      --text: #e8e8f0;
+      --muted: #7a7a96;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
     }
 
-    card.appendChild(body);
-    container.appendChild(card);
-  });
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
 
-  const xp = getTotalXP();
-  const done = getTotalDone();
-  const pct = Math.round((xp / TOTAL_XP) * 100);
-  document.getElementById('s-xp').textContent = xp.toLocaleString();
-  document.getElementById('s-done').textContent = done + '/' + TOTAL_Q;
-  document.getElementById('s-lvl').textContent = getCurrentLevel();
-  document.getElementById('s-streak').textContent = weeklyDone;
-  document.getElementById('main-bar').style.width = pct + '%';
-  document.getElementById('prog-label').textContent = pct + '% complete';
-  document.getElementById('prog-xp').textContent = xp.toLocaleString() + ' / ' + TOTAL_XP.toLocaleString() + ' XP';
-}
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .header-left h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .header-left p { font-size: 13px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+    .date-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+    }
 
-renderAll();
-</script>
+    .xp-bar-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .xp-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .xp-label { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    .xp-num { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--accent); }
+    .xp-track { height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(.4,2,.6,1);
+    }
+    .level-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .level-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 1px solid;
+    }
+    .lv-ai  { color: #7c6af7; border-color: #7c6af740; background: #7c6af710; }
+    .lv-dsa { color: #4fcf8e; border-color: #4fcf8e40; background: #4fcf8e10; }
+    .lv-web { color: #f7c06a; border-color: #f7c06a40; background: #f7c06a10; }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .quests { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+    .quest {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .quest:hover { border-color: #3a3a52; background: var(--surface2); }
+    .quest.done { opacity: 0.5; }
+    .quest.done .quest-name { text-decoration: line-through; color: var(--muted); }
+    .quest-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      background: transparent;
+    }
+    .quest.done .quest-check { background: var(--accent2); border-color: var(--accent2); }
+    .quest-check svg { display: none; }
+    .quest.done .quest-check svg { display: block; }
+    .quest-info { flex: 1; }
+    .quest-name { font-size: 14px; font-weight: 500; }
+    .quest-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .quest-xp {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+    .xp-ai    { color: #7c6af7; background: #7c6af715; }
+    .xp-dsa   { color: #4fcf8e; background: #4fcf8e15; }
+    .xp-web   { color: #f7c06a; background: #f7c06a15; }
+    .xp-bonus { color: #f76a8a; background: #f76a8a15; }
+
+    .rewards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .reward-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .reward-card.unlocked { border-color: var(--accent2); background: #4fcf8e08; }
+    .reward-card.locked { opacity: 0.5; }
+    .reward-icon { font-size: 24px; margin-bottom: 8px; }
+    .reward-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .reward-xp { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .reward-card.unlocked .reward-xp { color: var(--accent2); }
+    .unlock-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: #4fcf8e20;
+      color: var(--accent2);
+      border: 1px solid #4fcf8e40;
+    }
+
+    .streak-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+    .streak-day {
+      flex: 1;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 4px;
+    }
+    .streak-day.active { background: #7c6af715; border-color: #7c6af750; }
+    .streak-day .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      margin: 0 auto 4px;
+    }
+    .streak-day.active .dot { background: var(--accent); }
+    .streak-day .day-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+    .reset-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+      transition: all 0.2s;
+    }
+    .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent2);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Daily Quest Board</h1>
+      <p>// complete quests → earn XP → unlock rewards</p>
+    </div>
+    <div class="date-badge" id="dateBadge"></div>
+  </div>
+
+  <div class="xp-bar-wrap">
+    <div class="xp-bar-top">
+      <span class="xp-label">DAILY XP</span>
+      <span class="xp-num" id="xpCount">0 / 400 XP</span>
+    </div>
+    <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="level-row">
+      <div class="level-chip lv-ai"  id="chip-ai">⬡ AI/RAG — LV 1</div>
+      <div class="level-chip lv-dsa" id="chip-dsa">⬡ DSA — LV 1</div>
+      <div class="level-chip lv-web" id="chip-web">⬡ Web — LV 1</div>
+    </div>
+  </div>
+
+  <div class="section-title">Today's quests</div>
+  <div class="quests" id="questList"></div>
+
+  <div class="section-title">Streak</div>
+  <div class="streak-row" id="streakRow"></div>
+
+  <div class="section-title" style="margin-top:1.5rem">Rewards</div>
+  <div class="rewards-grid" id="rewardsGrid"></div>
+
+  <button class="reset-btn" onclick="resetDay()">↺ reset day</button>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const QUESTS = [
+      { id:'q1', name:'LeetCode problem',       sub:'1 easy/medium — NeetCode 150',          xp:50,  tag:'dsa',   cls:'xp-dsa'   },
+      { id:'q2', name:'RAG / Agents session',   sub:'45 min hands-on build time',             xp:80,  tag:'ai',    cls:'xp-ai'    },
+      { id:'q3', name:'System design concept',  sub:'1 topic — e.g. URL shortener',           xp:60,  tag:'dsa',   cls:'xp-dsa'   },
+      { id:'q4', name:'AI reading / course',    sub:'DeepLearning.AI or Anthropic cookbook',  xp:50,  tag:'ai',    cls:'xp-ai'    },
+      { id:'q5', name:'Website work',           sub:'Any progress on portfolio',              xp:60,  tag:'web',   cls:'xp-web'   },
+      { id:'q6', name:'No gaming before quests',sub:'Quests first, then game guilt-free',     xp:30,  tag:'bonus', cls:'xp-bonus' },
+      { id:'q7', name:'Full day streak bonus',  sub:'Complete all 6 quests above',            xp:70,  tag:'bonus', cls:'xp-bonus' },
+    ];
+
+    const REWARDS = [
+      { id:'r1', name:'Game session',    icon:'🎮', xp:100 },
+      { id:'r2', name:'Takeout treat',   icon:'🍜', xp:200 },
+      { id:'r3', name:'Movie night',     icon:'🎬', xp:250 },
+      { id:'r4', name:'Buy a course',    icon:'📚', xp:350 },
+      { id:'r5', name:'Full rest day',   icon:'🛋️', xp:400 },
+    ];
+
+    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    let state = JSON.parse(localStorage.getItem('questState') || 'null') || { done: [], xpByTag: { ai:0, dsa:0, web:0 } };
+
+    function save() { localStorage.setItem('questState', JSON.stringify(state)); }
+
+    function totalXP() {
+      return state.done.reduce((sum, id) => {
+        const q = QUESTS.find(q => q.id === id);
+        return sum + (q ? q.xp : 0);
+      }, 0);
+    }
+
+    function renderQuests() {
+      const el = document.getElementById('questList');
+      el.innerHTML = '';
+      QUESTS.forEach(q => {
+        const done = state.done.includes(q.id);
+        const div = document.createElement('div');
+        div.className = 'quest' + (done ? ' done' : '');
+        div.innerHTML = `
+          <div class="quest-check">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <polyline points="2,6 5,9 10,3" stroke="#0e0e12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="quest-info">
+            <div class="quest-name">${q.name}</div>
+            <div class="quest-sub">${q.sub}</div>
+          </div>
+          <span class="quest-xp ${q.cls}">+${q.xp} XP</span>
+        `;
+        div.onclick = () => toggleQuest(q.id);
+        el.appendChild(div);
+      });
+    }
+
+    function toggleQuest(id) {
+      const q = QUESTS.find(q => q.id === id);
+      if (state.done.includes(id)) {
+        state.done = state.done.filter(x => x !== id);
+        if (q.tag !== 'bonus') state.xpByTag[q.tag] = Math.max(0, (state.xpByTag[q.tag] || 0) - q.xp);
+      } else {
+        state.done.push(id);
+        if (q.tag !== 'bonus') state.xpByTag[q.tag] = (state.xpByTag[q.tag] || 0) + q.xp;
+        showToast('+' + q.xp + ' XP earned!');
+        const mainDone = state.done.filter(x => !['q6','q7'].includes(x)).length;
+        if (mainDone === 5 && !state.done.includes('q7')) {
+          setTimeout(() => showToast('🔥 All quests done! Claim your streak bonus!'), 700);
+        }
+      }
+      save();
+      render();
+    }
+
+    function renderXP() {
+      const xp = totalXP();
+      document.getElementById('xpCount').textContent = xp + ' / 400 XP';
+      document.getElementById('xpFill').style.width = Math.min(100, Math.round((xp / 400) * 100)) + '%';
+
+      const tags  = ['ai', 'dsa', 'web'];
+      const ids   = ['chip-ai', 'chip-dsa', 'chip-web'];
+      const names = ['AI/RAG', 'DSA', 'Web'];
+      tags.forEach((t, i) => {
+        const pts = state.xpByTag[t] || 0;
+        const lv  = Math.floor(pts / 150) + 1;
+        document.getElementById(ids[i]).textContent = '⬡ ' + names[i] + ' — LV ' + lv;
+      });
+    }
+
+    function renderRewards() {
+      const xp = totalXP();
+      const el = document.getElementById('rewardsGrid');
+      el.innerHTML = '';
+      REWARDS.forEach(r => {
+        const unlocked = xp >= r.xp;
+        const div = document.createElement('div');
+        div.className = 'reward-card ' + (unlocked ? 'unlocked' : 'locked');
+        div.innerHTML = `
+          <div class="reward-icon">${r.icon}</div>
+          <div class="reward-name">${r.name}</div>
+          <div class="reward-xp">${r.xp} XP needed</div>
+          ${unlocked ? '<div class="unlock-badge">✓ unlocked</div>' : ''}
+        `;
+        el.appendChild(div);
+      });
+    }
+
+    function renderStreak() {
+      const el = document.getElementById('streakRow');
+      el.innerHTML = '';
+      const today = new Date().getDay();
+      DAYS.forEach((d, i) => {
+        const div = document.createElement('div');
+        div.className = 'streak-day' + (i === today ? ' active' : '');
+        div.innerHTML = '<div class="dot"></div><div class="day-label">' + d + '</div>';
+        el.appendChild(div);
+      });
+    }
+
+    function renderDate() {
+      document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-IN', {
+        weekday: 'short', day: 'numeric', month: 'short'
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function resetDay() {
+      state.done = [];
+      save();
+      render();
+      showToast("Day reset. Let's go!");
+    }
+
+    function render() {
+      renderQuests();
+      renderXP();
+      renderRewards();
+      renderStreak();
+      renderDate();
+    }
+
+    render();
+  </script>
 </body>
 </html>
