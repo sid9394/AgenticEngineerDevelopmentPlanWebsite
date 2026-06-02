@@ -6,21 +6,25 @@
   <title>Daily Quest Board</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0e0e12;
-      --surface: #16161c;
-      --surface2: #1e1e26;
-      --border: #2a2a38;
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a24;
+      --surface3: #20202e;
+      --border: #252535;
+      --border2: #30304a;
       --accent: #7c6af7;
       --accent2: #4fcf8e;
       --accent3: #f7c06a;
       --accent4: #f76a8a;
-      --text: #e8e8f0;
-      --muted: #7a7a96;
+      --accent5: #5bc4f5;
+      --text: #e8e8f2;
+      --muted: #6868888;
+      --muted: #686890;
       --mono: 'Space Mono', monospace;
       --sans: 'Syne', sans-serif;
     }
@@ -30,21 +34,36 @@
       color: var(--text);
       font-family: var(--sans);
       min-height: 100vh;
-      padding: 2rem;
-      max-width: 700px;
+      padding: 2rem 1.5rem 4rem;
+      max-width: 740px;
       margin: 0 auto;
     }
 
+    /* ── HEADER ── */
     .header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
       gap: 1rem;
     }
-    .header-left h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-    .header-left p { font-size: 13px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text) 40%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
     .date-badge {
       font-family: var(--mono);
       font-size: 11px;
@@ -54,165 +73,320 @@
       border-radius: 6px;
       padding: 5px 12px;
     }
+    .streak-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent3);
+      background: #f7c06a12;
+      border: 1px solid #f7c06a30;
+      border-radius: 6px;
+      padding: 5px 12px;
+    }
 
-    .xp-bar-wrap {
+    /* ── XP BAR ── */
+    .xp-wrap {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
+      border-radius: 14px;
+      padding: 1.25rem;
       margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
     }
-    .xp-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .xp-label { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-    .xp-num { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--accent); }
-    .xp-track { height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .xp-wrap::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, #7c6af720 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .xp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .xp-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1.5px; }
+    .xp-num { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--accent); }
+    .xp-track { height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
     .xp-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
       border-radius: 99px;
-      transition: width 0.5s cubic-bezier(.4,2,.6,1);
+      transition: width 0.6s cubic-bezier(.4,2,.6,1);
     }
-    .level-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-    .level-chip {
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
       font-family: var(--mono);
       font-size: 11px;
-      padding: 3px 10px;
+      padding: 3px 11px;
       border-radius: 99px;
       border: 1px solid;
+      transition: all 0.3s;
     }
-    .lv-ai  { color: #7c6af7; border-color: #7c6af740; background: #7c6af710; }
+    .lv-ai  { color: #9d8fff; border-color: #7c6af740; background: #7c6af710; }
     .lv-dsa { color: #4fcf8e; border-color: #4fcf8e40; background: #4fcf8e10; }
     .lv-web { color: #f7c06a; border-color: #f7c06a40; background: #f7c06a10; }
 
-    .section-title {
+    /* ── SECTION TITLE ── */
+    .sec {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sec::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
     }
 
-    .quests { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+    /* ── QUESTS ── */
+    .quests { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2rem; }
+
     .quest {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .quest:hover { border-color: var(--border2); }
+    .quest.done { opacity: 0.55; }
+    .quest.done .qname { text-decoration: line-through; color: var(--muted); }
+
+    .quest-main {
       display: flex;
       align-items: center;
       gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
       padding: 12px 14px;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
       user-select: none;
     }
-    .quest:hover { border-color: #3a3a52; background: var(--surface2); }
-    .quest.done { opacity: 0.5; }
-    .quest.done .quest-name { text-decoration: line-through; color: var(--muted); }
-    .quest-check {
-      width: 22px;
-      height: 22px;
+
+    .check {
+      width: 22px; height: 22px;
       border-radius: 6px;
-      border: 1.5px solid var(--border);
+      border: 1.5px solid var(--border2);
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      background: transparent;
     }
-    .quest.done .quest-check { background: var(--accent2); border-color: var(--accent2); }
-    .quest-check svg { display: none; }
-    .quest.done .quest-check svg { display: block; }
-    .quest-info { flex: 1; }
-    .quest-name { font-size: 14px; font-weight: 500; }
-    .quest-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .quest-xp {
+    .quest.done .check { background: var(--accent2); border-color: var(--accent2); }
+    .check svg { display: none; }
+    .quest.done .check svg { display: block; }
+
+    .qinfo { flex: 1; min-width: 0; }
+    .qname-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .qname { font-size: 14px; font-weight: 500; }
+    .diff-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 99px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .diff-easy   { color: #4fcf8e; border-color: #4fcf8e50; background: #4fcf8e12; }
+    .diff-medium { color: #f7c06a; border-color: #f7c06a50; background: #f7c06a12; }
+    .diff-hard   { color: #f76a8a; border-color: #f76a8a50; background: #f76a8a12; }
+
+    .qsub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .quest-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .qxp {
       font-family: var(--mono);
       font-size: 12px;
       font-weight: 700;
       padding: 3px 9px;
       border-radius: 99px;
+    }
+    .t-ai    { color: #9d8fff; background: #7c6af715; }
+    .t-dsa   { color: #4fcf8e; background: #4fcf8e15; }
+    .t-web   { color: #f7c06a; background: #f7c06a15; }
+    .t-bonus { color: #f76a8a; background: #f76a8a15; }
+
+    .note-toggle {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
       flex-shrink: 0;
     }
-    .xp-ai    { color: #7c6af7; background: #7c6af715; }
-    .xp-dsa   { color: #4fcf8e; background: #4fcf8e15; }
-    .xp-web   { color: #f7c06a; background: #f7c06a15; }
-    .xp-bonus { color: #f76a8a; background: #f76a8a15; }
+    .note-toggle:hover { color: var(--text); border-color: var(--border2); }
+    .note-toggle.has-note { color: var(--accent2); border-color: #4fcf8e40; background: #4fcf8e10; }
 
+    .note-area {
+      padding: 0 14px 12px 48px;
+      display: none;
+    }
+    .note-area.open { display: block; }
+    .note-area textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 10px 12px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      min-height: 64px;
+    }
+    .note-area textarea:focus { border-color: var(--accent); }
+    .note-area textarea::placeholder { color: var(--muted); }
+
+    /* ── WEEKLY STREAK ── */
+    .streak-section { margin-bottom: 2rem; }
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .week-day {
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 4px 8px;
+      transition: all 0.3s;
+    }
+    .week-day.today { border-color: #7c6af750; background: #7c6af710; }
+    .week-day.completed { border-color: #4fcf8e50; background: #4fcf8e10; }
+    .week-day.partial { border-color: #f7c06a40; background: #f7c06a08; }
+    .wd-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      margin: 0 auto 5px;
+      transition: background 0.3s;
+    }
+    .week-day.today .wd-dot { background: var(--accent); }
+    .week-day.completed .wd-dot { background: var(--accent2); }
+    .week-day.partial .wd-dot { background: var(--accent3); }
+    .wd-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+    .week-day.today .wd-label { color: var(--accent); }
+    .wd-score { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
+    .week-day.completed .wd-score { color: var(--accent2); }
+    .week-day.partial .wd-score { color: var(--accent3); }
+
+    /* ── REWARDS ── */
     .rewards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 10px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
-    .reward-card {
+    .rcard {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px;
+      padding: 14px 10px;
       text-align: center;
       transition: all 0.3s;
     }
-    .reward-card.unlocked { border-color: var(--accent2); background: #4fcf8e08; }
-    .reward-card.locked { opacity: 0.5; }
-    .reward-icon { font-size: 24px; margin-bottom: 8px; }
-    .reward-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-    .reward-xp { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-    .reward-card.unlocked .reward-xp { color: var(--accent2); }
-    .unlock-badge {
+    .rcard.unlocked { border-color: #4fcf8e50; background: #4fcf8e06; }
+    .rcard.locked { opacity: 0.4; }
+    .rico { font-size: 24px; margin-bottom: 8px; }
+    .rname { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+    .rxp { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+    .rcard.unlocked .rxp { color: var(--accent2); }
+    .ubadge {
       display: inline-block;
       margin-top: 6px;
       font-family: var(--mono);
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 99px;
-      background: #4fcf8e20;
+      background: #4fcf8e18;
       color: var(--accent2);
       border: 1px solid #4fcf8e40;
     }
 
-    .streak-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
-    .streak-day {
-      flex: 1;
-      text-align: center;
+    /* ── LOG ── */
+    .log-section { margin-bottom: 2rem; }
+    .log-entries { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+    .log-entry {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      padding: 6px 12px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 4px;
+      border-radius: 6px;
+      display: flex;
+      gap: 10px;
     }
-    .streak-day.active { background: #7c6af715; border-color: #7c6af750; }
-    .streak-day .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      margin: 0 auto 4px;
-    }
-    .streak-day.active .dot { background: var(--accent); }
-    .streak-day .day-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+    .log-time { color: var(--accent); flex-shrink: 0; }
+    .log-empty { font-family: var(--mono); font-size: 11px; color: var(--muted); font-style: italic; }
 
-    .reset-btn {
+    /* ── FOOTER ── */
+    .footer-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
       font-family: var(--mono);
       font-size: 11px;
       color: var(--muted);
       background: none;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 6px 14px;
+      padding: 7px 16px;
       cursor: pointer;
-      display: block;
-      margin: 0 auto;
       transition: all 0.2s;
     }
-    .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+    .btn:hover { color: var(--text); border-color: var(--border2); }
+    .btn.danger:hover { color: #f76a8a; border-color: #f76a8a50; }
 
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0fcc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      padding: 1rem;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 420px;
+      transform: translateY(10px);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .modal p { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 1.2rem; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── TOAST ── */
     .toast {
       position: fixed;
       bottom: 24px;
       right: 24px;
       background: var(--surface2);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border2);
       border-radius: 10px;
       padding: 10px 16px;
       font-family: var(--mono);
@@ -223,6 +397,7 @@
       transition: all 0.3s;
       pointer-events: none;
       z-index: 999;
+      max-width: 280px;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
   </style>
@@ -230,187 +405,448 @@
 <body>
 
   <div class="header">
-    <div class="header-left">
+    <div>
       <h1>Daily Quest Board</h1>
-      <p>// complete quests → earn XP → unlock rewards</p>
+      <div class="header-sub">// complete quests → earn XP → unlock rewards</div>
     </div>
-    <div class="date-badge" id="dateBadge"></div>
+    <div class="header-right">
+      <div class="date-badge" id="dateBadge"></div>
+      <div class="streak-badge" id="streakBadge">🔥 0 day streak</div>
+    </div>
   </div>
 
-  <div class="xp-bar-wrap">
-    <div class="xp-bar-top">
+  <!-- XP BAR -->
+  <div class="xp-wrap">
+    <div class="xp-top">
       <span class="xp-label">DAILY XP</span>
       <span class="xp-num" id="xpCount">0 / 400 XP</span>
     </div>
     <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-    <div class="level-row">
-      <div class="level-chip lv-ai"  id="chip-ai">⬡ AI/RAG — LV 1</div>
-      <div class="level-chip lv-dsa" id="chip-dsa">⬡ DSA — LV 1</div>
-      <div class="level-chip lv-web" id="chip-web">⬡ Web — LV 1</div>
+    <div class="chip-row">
+      <span class="chip lv-ai"  id="chip-ai">⬡ AI/RAG — LV 1</span>
+      <span class="chip lv-dsa" id="chip-dsa">⬡ DSA — LV 1</span>
+      <span class="chip lv-web" id="chip-web">⬡ Web — LV 1</span>
     </div>
   </div>
 
-  <div class="section-title">Today's quests</div>
+  <!-- QUESTS -->
+  <div class="sec">Today's quests</div>
   <div class="quests" id="questList"></div>
 
-  <div class="section-title">Streak</div>
-  <div class="streak-row" id="streakRow"></div>
+  <!-- WEEKLY STREAK -->
+  <div class="streak-section">
+    <div class="sec">Weekly streak</div>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
 
-  <div class="section-title" style="margin-top:1.5rem">Rewards</div>
+  <!-- REWARDS -->
+  <div class="sec">Rewards</div>
   <div class="rewards-grid" id="rewardsGrid"></div>
 
-  <button class="reset-btn" onclick="resetDay()">↺ reset day</button>
+  <!-- LOG -->
+  <div class="log-section">
+    <div class="sec">Activity log</div>
+    <div class="log-entries" id="logEntries"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-row">
+    <button class="btn" onclick="exportNotes()">↓ export notes</button>
+    <button class="btn danger" onclick="showResetModal()">↺ reset today</button>
+    <button class="btn danger" onclick="showWipeModal()">⊗ wipe all data</button>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="resetModal">
+    <div class="modal">
+      <h3>Reset today?</h3>
+      <p>All quest completions for today will be cleared. Notes are kept. Weekly data is preserved.</p>
+      <div class="modal-btns">
+        <button class="btn" onclick="closeModals()">Cancel</button>
+        <button class="btn danger" onclick="confirmReset()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="wipeModal">
+    <div class="modal">
+      <h3>Wipe all data?</h3>
+      <p>This deletes all XP, streaks, notes, and logs. Cannot be undone.</p>
+      <div class="modal-btns">
+        <button class="btn" onclick="closeModals()">Cancel</button>
+        <button class="btn danger" onclick="confirmWipe()">Wipe everything</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
-  <script>
-    const QUESTS = [
-      { id:'q1', name:'LeetCode problem',       sub:'1 easy/medium — NeetCode 150',          xp:50,  tag:'dsa',   cls:'xp-dsa'   },
-      { id:'q2', name:'RAG / Agents session',   sub:'45 min hands-on build time',             xp:80,  tag:'ai',    cls:'xp-ai'    },
-      { id:'q3', name:'System design concept',  sub:'1 topic — e.g. URL shortener',           xp:60,  tag:'dsa',   cls:'xp-dsa'   },
-      { id:'q4', name:'AI reading / course',    sub:'DeepLearning.AI or Anthropic cookbook',  xp:50,  tag:'ai',    cls:'xp-ai'    },
-      { id:'q5', name:'Website work',           sub:'Any progress on portfolio',              xp:60,  tag:'web',   cls:'xp-web'   },
-      { id:'q6', name:'No gaming before quests',sub:'Quests first, then game guilt-free',     xp:30,  tag:'bonus', cls:'xp-bonus' },
-      { id:'q7', name:'Full day streak bonus',  sub:'Complete all 6 quests above',            xp:70,  tag:'bonus', cls:'xp-bonus' },
-    ];
+<script>
+// ── DATA ──────────────────────────────────────────────
+const QUESTS = [
+  { id:'q1', name:'LeetCode problem',        sub:'NeetCode 150 — pick a problem',          xp:{easy:50,medium:70,hard:100}, tag:'dsa', cls:'t-dsa', hasDiff:true  },
+  { id:'q2', name:'RAG / Agents session',    sub:'45 min hands-on build time',              xp:{easy:80,medium:80,hard:80},  tag:'ai',  cls:'t-ai',  hasDiff:false },
+  { id:'q3', name:'System design concept',   sub:'1 topic — URL shortener, etc.',           xp:{easy:40,medium:60,hard:90},  tag:'dsa', cls:'t-dsa', hasDiff:true  },
+  { id:'q4', name:'AI reading / course',     sub:'DeepLearning.AI or Anthropic cookbook',   xp:{easy:50,medium:50,hard:50},  tag:'ai',  cls:'t-ai',  hasDiff:false },
+  { id:'q5', name:'Portfolio / website work',sub:'Any meaningful progress',                 xp:{easy:40,medium:60,hard:80},  tag:'web', cls:'t-web', hasDiff:true  },
+  { id:'q6', name:'No gaming before quests', sub:'Quests first, then game guilt-free',      xp:{easy:30,medium:30,hard:30},  tag:'bonus',cls:'t-bonus',hasDiff:false},
+  { id:'q7', name:'Full day streak bonus',   sub:'Complete all 6 quests above',             xp:{easy:70,medium:70,hard:70},  tag:'bonus',cls:'t-bonus',hasDiff:false},
+];
 
-    const REWARDS = [
-      { id:'r1', name:'Game session',    icon:'🎮', xp:100 },
-      { id:'r2', name:'Takeout treat',   icon:'🍜', xp:200 },
-      { id:'r3', name:'Movie night',     icon:'🎬', xp:250 },
-      { id:'r4', name:'Buy a course',    icon:'📚', xp:350 },
-      { id:'r5', name:'Full rest day',   icon:'🛋️', xp:400 },
-    ];
+const REWARDS = [
+  { id:'r1', name:'Game session',  icon:'🎮', xp:100 },
+  { id:'r2', name:'Takeout treat', icon:'🍜', xp:200 },
+  { id:'r3', name:'Movie night',   icon:'🎬', xp:250 },
+  { id:'r4', name:'Buy a course',  icon:'📚', xp:350 },
+  { id:'r5', name:'Full rest day', icon:'🛋️', xp:400 },
+];
 
-    const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DIFF_CYCLE = ['easy','medium','hard'];
 
-    let state = JSON.parse(localStorage.getItem('questState') || 'null') || { done: [], xpByTag: { ai:0, dsa:0, web:0 } };
+// ── STATE ─────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
-    function save() { localStorage.setItem('questState', JSON.stringify(state)); }
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem('questBoardV3') || 'null') || freshState();
+  } catch(e) { return freshState(); }
+}
 
-    function totalXP() {
-      return state.done.reduce((sum, id) => {
-        const q = QUESTS.find(q => q.id === id);
-        return sum + (q ? q.xp : 0);
-      }, 0);
-    }
+function freshState() {
+  return {
+    today: todayKey(),
+    done: [],
+    diffs: {},      // questId -> 'easy'|'medium'|'hard'
+    notes: {},      // questId -> string
+    xpByTag: { ai:0, dsa:0, web:0 },
+    weekData: {},   // dateKey -> { xp, completedMain }
+    log: [],        // [{time, msg}]
+  };
+}
 
-    function renderQuests() {
-      const el = document.getElementById('questList');
-      el.innerHTML = '';
-      QUESTS.forEach(q => {
-        const done = state.done.includes(q.id);
-        const div = document.createElement('div');
-        div.className = 'quest' + (done ? ' done' : '');
-        div.innerHTML = `
-          <div class="quest-check">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <polyline points="2,6 5,9 10,3" stroke="#0e0e12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+let state = loadState();
+
+// Auto-reset if it's a new day
+function checkDayReset() {
+  const key = todayKey();
+  if (state.today !== key) {
+    // Save yesterday's data into weekData
+    const xp = totalXP();
+    const mainDone = state.done.filter(x => !['q6','q7'].includes(x)).length;
+    state.weekData[state.today] = { xp, completedMain: mainDone >= 5 };
+    // Keep only last 7 days
+    const keys = Object.keys(state.weekData).sort();
+    if (keys.length > 7) { delete state.weekData[keys[0]]; }
+    // Reset today
+    state.today = key;
+    state.done = [];
+    state.xpByTag = { ai:0, dsa:0, web:0 };
+    state.log = [];
+    save();
+  }
+}
+
+function save() {
+  try { localStorage.setItem('questBoardV3', JSON.stringify(state)); } catch(e) {}
+}
+
+// ── XP ────────────────────────────────────────────────
+function getDiff(id) { return state.diffs[id] || 'easy'; }
+function getXP(q) { return q.xp[getDiff(q.id)]; }
+
+function totalXP() {
+  return state.done.reduce((sum, id) => {
+    const q = QUESTS.find(q => q.id === id);
+    return sum + (q ? getXP(q) : 0);
+  }, 0);
+}
+
+// ── STREAK ────────────────────────────────────────────
+function getStreak() {
+  let streak = 0;
+  const d = new Date();
+  for (let i = 1; i <= 30; i++) {
+    d.setDate(d.getDate() - 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const data = state.weekData[key];
+    if (data && data.completedMain) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ── RENDER ────────────────────────────────────────────
+function renderDate() {
+  document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-IN', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+  });
+}
+
+function renderStreak() {
+  const streak = getStreak();
+  document.getElementById('streakBadge').textContent = `🔥 ${streak} day streak`;
+}
+
+function renderQuests() {
+  const el = document.getElementById('questList');
+  el.innerHTML = '';
+  QUESTS.forEach(q => {
+    const done = state.done.includes(q.id);
+    const diff = getDiff(q.id);
+    const xp = getXP(q);
+    const note = state.notes[q.id] || '';
+    const noteOpen = false;
+
+    const div = document.createElement('div');
+    div.className = 'quest' + (done ? ' done' : '');
+    div.id = 'quest-' + q.id;
+
+    const diffBadge = q.hasDiff
+      ? `<span class="diff-badge diff-${diff}" data-id="${q.id}" title="Click to change difficulty">${diff}</span>`
+      : '';
+
+    const noteBtn = `<button class="note-toggle${note ? ' has-note' : ''}" data-id="${q.id}" title="Add note">${note ? '📝' : '+'} note</button>`;
+
+    div.innerHTML = `
+      <div class="quest-main" data-id="${q.id}">
+        <div class="check">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <polyline points="2,6 5,9 10,3" stroke="#0a0a0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="qinfo">
+          <div class="qname-row">
+            <span class="qname">${q.name}</span>
+            ${diffBadge}
           </div>
-          <div class="quest-info">
-            <div class="quest-name">${q.name}</div>
-            <div class="quest-sub">${q.sub}</div>
-          </div>
-          <span class="quest-xp ${q.cls}">+${q.xp} XP</span>
-        `;
-        div.onclick = () => toggleQuest(q.id);
-        el.appendChild(div);
-      });
-    }
+          <div class="qsub">${q.sub}</div>
+        </div>
+        <div class="quest-right">
+          ${noteBtn}
+          <span class="qxp ${q.cls}">+${xp} XP</span>
+        </div>
+      </div>
+      <div class="note-area" id="note-area-${q.id}">
+        <textarea placeholder="What did you do? (e.g. Two Sum, Kadane's, system design for TinyURL...)" data-id="${q.id}">${note}</textarea>
+      </div>
+    `;
 
-    function toggleQuest(id) {
-      const q = QUESTS.find(q => q.id === id);
-      if (state.done.includes(id)) {
-        state.done = state.done.filter(x => x !== id);
-        if (q.tag !== 'bonus') state.xpByTag[q.tag] = Math.max(0, (state.xpByTag[q.tag] || 0) - q.xp);
-      } else {
-        state.done.push(id);
-        if (q.tag !== 'bonus') state.xpByTag[q.tag] = (state.xpByTag[q.tag] || 0) + q.xp;
-        showToast('+' + q.xp + ' XP earned!');
-        const mainDone = state.done.filter(x => !['q6','q7'].includes(x)).length;
-        if (mainDone === 5 && !state.done.includes('q7')) {
-          setTimeout(() => showToast('🔥 All quests done! Claim your streak bonus!'), 700);
-        }
+    el.appendChild(div);
+
+    // Toggle quest completion
+    div.querySelector('.quest-main').addEventListener('click', (e) => {
+      if (e.target.classList.contains('diff-badge') || e.target.classList.contains('note-toggle')) return;
+      toggleQuest(q.id);
+    });
+
+    // Difficulty cycle
+    const db = div.querySelector('.diff-badge');
+    if (db) db.addEventListener('click', (e) => { e.stopPropagation(); cycleDiff(q.id); });
+
+    // Note toggle
+    div.querySelector('.note-toggle').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const area = document.getElementById('note-area-' + q.id);
+      area.classList.toggle('open');
+    });
+
+    // Note save on input
+    div.querySelector('textarea').addEventListener('input', (e) => {
+      state.notes[q.id] = e.target.value;
+      const btn = div.querySelector('.note-toggle');
+      btn.className = 'note-toggle' + (e.target.value ? ' has-note' : '');
+      btn.textContent = (e.target.value ? '📝' : '+') + ' note';
+      save();
+    });
+  });
+}
+
+function toggleQuest(id) {
+  const q = QUESTS.find(q => q.id === id);
+  const xp = getXP(q);
+  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+  if (state.done.includes(id)) {
+    state.done = state.done.filter(x => x !== id);
+    if (q.tag !== 'bonus') state.xpByTag[q.tag] = Math.max(0, (state.xpByTag[q.tag] || 0) - xp);
+    addLog(time, `Unchecked: ${q.name}`);
+  } else {
+    state.done.push(id);
+    if (q.tag !== 'bonus') state.xpByTag[q.tag] = (state.xpByTag[q.tag] || 0) + xp;
+    addLog(time, `+${xp} XP — ${q.name} [${getDiff(id)}]`);
+    showToast('+' + xp + ' XP — ' + q.name);
+    const mainDone = state.done.filter(x => !['q6','q7'].includes(x)).length;
+    if (mainDone === 5 && !state.done.includes('q7')) {
+      setTimeout(() => showToast('🔥 All quests done! Claim streak bonus!'), 800);
+    }
+  }
+  save();
+  render();
+}
+
+function cycleDiff(id) {
+  const cur = getDiff(id);
+  const idx = DIFF_CYCLE.indexOf(cur);
+  state.diffs[id] = DIFF_CYCLE[(idx + 1) % 3];
+  // If quest is done, recalculate xp
+  if (state.done.includes(id)) {
+    const q = QUESTS.find(q => q.id === id);
+    // Recalc from scratch
+    state.xpByTag = { ai:0, dsa:0, web:0 };
+    state.done.forEach(did => {
+      const dq = QUESTS.find(q => q.id === did);
+      if (dq && dq.tag !== 'bonus') {
+        state.xpByTag[dq.tag] = (state.xpByTag[dq.tag] || 0) + getXP(dq);
       }
-      save();
-      render();
+    });
+  }
+  save();
+  render();
+  showToast(`Difficulty → ${state.diffs[id]}`);
+}
+
+function renderXP() {
+  const xp = totalXP();
+  document.getElementById('xpCount').textContent = xp + ' / 400 XP';
+  document.getElementById('xpFill').style.width = Math.min(100, Math.round((xp / 400) * 100)) + '%';
+  ['ai','dsa','web'].forEach((t, i) => {
+    const pts = state.xpByTag[t] || 0;
+    const lv = Math.floor(pts / 150) + 1;
+    const names = ['AI/RAG','DSA','Web'];
+    document.getElementById('chip-' + t).textContent = '⬡ ' + names[i] + ' — LV ' + lv;
+  });
+}
+
+function renderWeekGrid() {
+  const el = document.getElementById('weekGrid');
+  el.innerHTML = '';
+  const today = (new Date().getDay() + 6) % 7;
+  DAYS.forEach((d, i) => {
+    // Find data for this day of the week (rough match within last 7 days)
+    const dayOffset = (i - today + 7) % 7;
+    const dt = new Date();
+    dt.setDate(dt.getDate() - (today - i + (today >= i ? 0 : 7)));
+    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    const data = i === today ? { xp: totalXP(), completedMain: state.done.filter(x => !['q6','q7'].includes(x)).length >= 5 } : state.weekData[key];
+
+    const div = document.createElement('div');
+    let cls = 'week-day';
+    if (i === today) cls += ' today';
+    else if (data && data.completedMain) cls += ' completed';
+    else if (data && data.xp > 0) cls += ' partial';
+    div.className = cls;
+
+    const score = data ? (i === today ? `${data.xp}xp` : (data.completedMain ? '✓' : `${data.xp}xp`)) : '–';
+    div.innerHTML = `<div class="wd-dot"></div><div class="wd-label">${d}</div><div class="wd-score">${score}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderRewards() {
+  const xp = totalXP();
+  const el = document.getElementById('rewardsGrid');
+  el.innerHTML = '';
+  REWARDS.forEach(r => {
+    const unlocked = xp >= r.xp;
+    const d = document.createElement('div');
+    d.className = 'rcard ' + (unlocked ? 'unlocked' : 'locked');
+    d.innerHTML = `<div class="rico">${r.icon}</div><div class="rname">${r.name}</div><div class="rxp">${r.xp} XP</div>${unlocked ? '<div class="ubadge">✓ unlocked</div>' : ''}`;
+    el.appendChild(d);
+  });
+}
+
+function renderLog() {
+  const el = document.getElementById('logEntries');
+  if (!state.log || state.log.length === 0) {
+    el.innerHTML = '<div class="log-empty">No activity yet today.</div>';
+    return;
+  }
+  el.innerHTML = '';
+  [...state.log].reverse().forEach(entry => {
+    const d = document.createElement('div');
+    d.className = 'log-entry';
+    d.innerHTML = `<span class="log-time">${entry.time}</span><span>${entry.msg}</span>`;
+    el.appendChild(d);
+  });
+}
+
+function addLog(time, msg) {
+  if (!state.log) state.log = [];
+  state.log.push({ time, msg });
+  if (state.log.length > 50) state.log = state.log.slice(-50);
+}
+
+// ── MODALS ────────────────────────────────────────────
+function showResetModal() { document.getElementById('resetModal').classList.add('open'); }
+function showWipeModal()  { document.getElementById('wipeModal').classList.add('open'); }
+function closeModals() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+}
+
+function confirmReset() {
+  state.done = [];
+  state.xpByTag = { ai:0, dsa:0, web:0 };
+  state.log = [];
+  save(); closeModals(); render();
+  showToast("Day reset. Let's go!");
+}
+
+function confirmWipe() {
+  localStorage.removeItem('questBoardV3');
+  state = freshState();
+  save(); closeModals(); render();
+  showToast('All data wiped.');
+}
+
+document.getElementById('resetModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModals(); });
+document.getElementById('wipeModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModals(); });
+
+// ── EXPORT ────────────────────────────────────────────
+function exportNotes() {
+  const lines = [`# Quest Notes — ${todayKey()}`, ''];
+  QUESTS.forEach(q => {
+    const note = state.notes[q.id];
+    if (note && note.trim()) {
+      lines.push(`## ${q.name}`);
+      lines.push(note.trim());
+      lines.push('');
     }
+  });
+  if (lines.length <= 2) { showToast('No notes to export yet.'); return; }
+  const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quest-notes-${todayKey()}.md`;
+  a.click();
+  showToast('Notes exported!');
+}
 
-    function renderXP() {
-      const xp = totalXP();
-      document.getElementById('xpCount').textContent = xp + ' / 400 XP';
-      document.getElementById('xpFill').style.width = Math.min(100, Math.round((xp / 400) * 100)) + '%';
+// ── TOAST ─────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 2400);
+}
 
-      const tags  = ['ai', 'dsa', 'web'];
-      const ids   = ['chip-ai', 'chip-dsa', 'chip-web'];
-      const names = ['AI/RAG', 'DSA', 'Web'];
-      tags.forEach((t, i) => {
-        const pts = state.xpByTag[t] || 0;
-        const lv  = Math.floor(pts / 150) + 1;
-        document.getElementById(ids[i]).textContent = '⬡ ' + names[i] + ' — LV ' + lv;
-      });
-    }
+// ── MAIN ──────────────────────────────────────────────
+function render() {
+  renderDate();
+  renderStreak();
+  renderQuests();
+  renderXP();
+  renderWeekGrid();
+  renderRewards();
+  renderLog();
+}
 
-    function renderRewards() {
-      const xp = totalXP();
-      const el = document.getElementById('rewardsGrid');
-      el.innerHTML = '';
-      REWARDS.forEach(r => {
-        const unlocked = xp >= r.xp;
-        const div = document.createElement('div');
-        div.className = 'reward-card ' + (unlocked ? 'unlocked' : 'locked');
-        div.innerHTML = `
-          <div class="reward-icon">${r.icon}</div>
-          <div class="reward-name">${r.name}</div>
-          <div class="reward-xp">${r.xp} XP needed</div>
-          ${unlocked ? '<div class="unlock-badge">✓ unlocked</div>' : ''}
-        `;
-        el.appendChild(div);
-      });
-    }
-
-    function renderStreak() {
-      const el = document.getElementById('streakRow');
-      el.innerHTML = '';
-      const today = (new Date().getDay() + 6) % 7; // Monday = 0
-      DAYS.forEach((d, i) => {
-        const div = document.createElement('div');
-        div.className = 'streak-day' + (i === today ? ' active' : '');
-        div.innerHTML = '<div class="dot"></div><div class="day-label">' + d + '</div>';
-        el.appendChild(div);
-      });
-    }
-
-    function renderDate() {
-      document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-IN', {
-        weekday: 'short', day: 'numeric', month: 'short'
-      });
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-    }
-
-    function resetDay() {
-      state.done = [];
-      save();
-      render();
-      showToast("Day reset. Let's go!");
-    }
-
-    function render() {
-      renderQuests();
-      renderXP();
-      renderRewards();
-      renderStreak();
-      renderDate();
-    }
-
-    render();
-  </script>
+checkDayReset();
+render();
+</script>
 </body>
 </html>
