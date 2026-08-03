@@ -1,852 +1,627 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Quest Board</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --surface2: #1a1a24;
-      --surface3: #20202e;
-      --border: #252535;
-      --border2: #30304a;
-      --accent: #7c6af7;
-      --accent2: #4fcf8e;
-      --accent3: #f7c06a;
-      --accent4: #f76a8a;
-      --accent5: #5bc4f5;
-      --text: #e8e8f2;
-      --muted: #6868888;
-      --muted: #686890;
-      --mono: 'Space Mono', monospace;
-      --sans: 'Syne', sans-serif;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      min-height: 100vh;
-      padding: 2rem 1.5rem 4rem;
-      max-width: 740px;
-      margin: 0 auto;
-    }
-
-    /* ── HEADER ── */
-    .header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .header h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, var(--text) 40%, var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .header-sub {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 5px;
-    }
-    .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-    .date-badge {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 12px;
-    }
-    .streak-badge {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent3);
-      background: #f7c06a12;
-      border: 1px solid #f7c06a30;
-      border-radius: 6px;
-      padding: 5px 12px;
-    }
-
-    /* ── XP BAR ── */
-    .xp-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .xp-wrap::before {
-      content: '';
-      position: absolute;
-      top: -30px; right: -30px;
-      width: 120px; height: 120px;
-      background: radial-gradient(circle, #7c6af720 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .xp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .xp-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1.5px; }
-    .xp-num { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--accent); }
-    .xp-track { height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
-    .xp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 99px;
-      transition: width 0.6s cubic-bezier(.4,2,.6,1);
-    }
-    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .chip {
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 3px 11px;
-      border-radius: 99px;
-      border: 1px solid;
-      transition: all 0.3s;
-    }
-    .lv-ai  { color: #9d8fff; border-color: #7c6af740; background: #7c6af710; }
-    .lv-dsa { color: #4fcf8e; border-color: #4fcf8e40; background: #4fcf8e10; }
-    .lv-web { color: #f7c06a; border-color: #f7c06a40; background: #f7c06a10; }
-
-    /* ── SECTION TITLE ── */
-    .sec {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .sec::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* ── QUESTS ── */
-    .quests { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2rem; }
-
-    .quest {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .quest:hover { border-color: var(--border2); }
-    .quest.done { opacity: 0.55; }
-    .quest.done .qname { text-decoration: line-through; color: var(--muted); }
-
-    .quest-main {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .check {
-      width: 22px; height: 22px;
-      border-radius: 6px;
-      border: 1.5px solid var(--border2);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .quest.done .check { background: var(--accent2); border-color: var(--accent2); }
-    .check svg { display: none; }
-    .quest.done .check svg { display: block; }
-
-    .qinfo { flex: 1; min-width: 0; }
-    .qname-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .qname { font-size: 14px; font-weight: 500; }
-    .diff-badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 1px 7px;
-      border-radius: 99px;
-      border: 1px solid;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .diff-easy   { color: #4fcf8e; border-color: #4fcf8e50; background: #4fcf8e12; }
-    .diff-medium { color: #f7c06a; border-color: #f7c06a50; background: #f7c06a12; }
-    .diff-hard   { color: #f76a8a; border-color: #f76a8a50; background: #f76a8a12; }
-
-    .qsub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-    .quest-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .qxp {
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 99px;
-    }
-    .t-ai    { color: #9d8fff; background: #7c6af715; }
-    .t-dsa   { color: #4fcf8e; background: #4fcf8e15; }
-    .t-web   { color: #f7c06a; background: #f7c06a15; }
-    .t-bonus { color: #f76a8a; background: #f76a8a15; }
-
-    .note-toggle {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .note-toggle:hover { color: var(--text); border-color: var(--border2); }
-    .note-toggle.has-note { color: var(--accent2); border-color: #4fcf8e40; background: #4fcf8e10; }
-
-    .note-area {
-      padding: 0 14px 12px 48px;
-      display: none;
-    }
-    .note-area.open { display: block; }
-    .note-area textarea {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 10px 12px;
-      resize: none;
-      outline: none;
-      transition: border-color 0.2s;
-      min-height: 64px;
-    }
-    .note-area textarea:focus { border-color: var(--accent); }
-    .note-area textarea::placeholder { color: var(--muted); }
-
-    /* ── WEEKLY STREAK ── */
-    .streak-section { margin-bottom: 2rem; }
-    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-    .week-day {
-      text-align: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 4px 8px;
-      transition: all 0.3s;
-    }
-    .week-day.today { border-color: #7c6af750; background: #7c6af710; }
-    .week-day.completed { border-color: #4fcf8e50; background: #4fcf8e10; }
-    .week-day.partial { border-color: #f7c06a40; background: #f7c06a08; }
-    .wd-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      margin: 0 auto 5px;
-      transition: background 0.3s;
-    }
-    .week-day.today .wd-dot { background: var(--accent); }
-    .week-day.completed .wd-dot { background: var(--accent2); }
-    .week-day.partial .wd-dot { background: var(--accent3); }
-    .wd-label { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-    .week-day.today .wd-label { color: var(--accent); }
-    .wd-score { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
-    .week-day.completed .wd-score { color: var(--accent2); }
-    .week-day.partial .wd-score { color: var(--accent3); }
-
-    /* ── REWARDS ── */
-    .rewards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-bottom: 2rem;
-    }
-    .rcard {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 10px;
-      text-align: center;
-      transition: all 0.3s;
-    }
-    .rcard.unlocked { border-color: #4fcf8e50; background: #4fcf8e06; }
-    .rcard.locked { opacity: 0.4; }
-    .rico { font-size: 24px; margin-bottom: 8px; }
-    .rname { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
-    .rxp { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-    .rcard.unlocked .rxp { color: var(--accent2); }
-    .ubadge {
-      display: inline-block;
-      margin-top: 6px;
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 99px;
-      background: #4fcf8e18;
-      color: var(--accent2);
-      border: 1px solid #4fcf8e40;
-    }
-
-    /* ── LOG ── */
-    .log-section { margin-bottom: 2rem; }
-    .log-entries { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
-    .log-entry {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      padding: 6px 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      display: flex;
-      gap: 10px;
-    }
-    .log-time { color: var(--accent); flex-shrink: 0; }
-    .log-empty { font-family: var(--mono); font-size: 11px; color: var(--muted); font-style: italic; }
-
-    /* ── FOOTER ── */
-    .footer-row {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .btn {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 7px 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn:hover { color: var(--text); border-color: var(--border2); }
-    .btn.danger:hover { color: #f76a8a; border-color: #f76a8a50; }
-
-    /* ── MODAL ── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: #0a0a0fcc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-      padding: 1rem;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 16px;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 420px;
-      transform: translateY(10px);
-      transition: transform 0.2s;
-    }
-    .modal-overlay.open .modal { transform: translateY(0); }
-    .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-    .modal p { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 1.2rem; }
-    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-
-    /* ── TOAST ── */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent2);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s;
-      pointer-events: none;
-      z-index: 999;
-      max-width: 280px;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sid's Senior AI Engineer Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1016;--surface2:#14151e;--surface3:#1a1b27;
+  --border:#1f2033;--border2:#2a2c48;--fg:#ddddf0;--muted:#6b6d90;--muted2:#4a4c6a;
+  --accent:#5b8ef0;--accent2:#3ecf8e;--accent3:#f0c060;--accent4:#e05c8a;--accent5:#a78bfa;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:14px;line-height:1.7;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+.shell{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.logo{padding:1.4rem 1.2rem .9rem;border-bottom:1px solid var(--border)}
+.logo-tag{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.logo-name{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--fg);line-height:1.2}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.nav{flex:1;padding:.9rem 0}
+.nav-section{margin-bottom:1.1rem}
+.nav-section-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);padding:0 1.2rem;margin-bottom:3px}
+.nav-link{display:flex;align-items:center;gap:8px;padding:5px 1.2rem;font-size:12px;color:var(--muted);text-decoration:none;transition:all .15s;border-left:2px solid transparent;cursor:pointer}
+.nav-link:hover{color:var(--fg);border-left-color:var(--border2)}
+.nav-link.active{color:var(--accent);border-left-color:var(--accent);background:rgba(91,142,240,.06)}
+.nav-link .dot{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .15s}
+.nav-link:hover .dot,.nav-link.active .dot{background:currentColor}
+.sidebar-footer{padding:.9rem 1.2rem;border-top:1px solid var(--border);font-size:11px;color:var(--muted2)}
+.phase-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid var(--border2);color:var(--muted);margin-bottom:5px}
+.main{flex:1;overflow:hidden}
+.page{display:none;padding:2.5rem 3rem;max-width:880px}
+.page.show{display:block}
+.hero{padding:3.5rem 3rem 2.5rem;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface) 0%,var(--bg) 100%);position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-80px;right:-60px;width:360px;height:360px;background:radial-gradient(circle,rgba(91,142,240,.07) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:.9rem}
+.hero-title{font-family:var(--serif);font-size:clamp(30px,3.5vw,48px);font-weight:700;line-height:1.1;color:var(--fg);margin-bottom:1.1rem}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-desc{font-size:13px;color:var(--muted);max-width:560px;line-height:1.85;margin-bottom:1.8rem}
+.hero-stats{display:flex;gap:2rem;flex-wrap:wrap}
+.stat{border-left:2px solid var(--border2);padding-left:.9rem}
+.stat-num{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1}
+.stat-label{font-size:11px;color:var(--muted);margin-top:3px}
+.sec-head{margin-bottom:1.8rem}
+.sec-eyebrow{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.sec-title{font-family:var(--serif);font-size:26px;font-weight:600;color:var(--fg);margin-bottom:7px}
+.sec-desc{font-size:13px;color:var(--muted);line-height:1.85;max-width:640px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:1.8rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
+.card-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--fg);margin-bottom:5px}
+.card-body{font-size:12px;color:var(--muted);line-height:1.7}
+.tag-ai{color:var(--accent)}.tag-dsa{color:var(--accent2)}.tag-sys{color:var(--accent3)}.tag-beh{color:var(--accent4)}.tag-prod{color:var(--accent5)}
+.timeline{position:relative;padding-left:1.8rem}
+.timeline::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:1.8rem}
+.tl-dot{position:absolute;left:-1.8rem;top:4px;width:13px;height:13px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);display:flex;align-items:center;justify-content:center}
+.tl-dot.active{border-color:var(--accent);background:rgba(91,142,240,.15)}
+.tl-dot.upcoming{border-color:var(--border2)}
+.tl-week{font-size:10px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.tl-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--fg);margin-bottom:5px}
+.tl-body{font-size:12px;color:var(--muted);line-height:1.7}
+.tl-tasks{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:3px}
+.tl-tasks li{font-size:12px;color:var(--muted);padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:flex-start;gap:7px}
+.tl-tasks li::before{content:'→';color:var(--accent);flex-shrink:0}
+.qa-list{display:flex;flex-direction:column;gap:7px;margin-bottom:1.8rem}
+.qa-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s}
+.qa-item:hover{border-color:var(--border2)}
+.qa-q{padding:.9rem 1.1rem;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:.9rem;user-select:none}
+.qa-q-text{font-size:13px;font-weight:500;color:var(--fg);line-height:1.5}
+.qa-toggle{flex-shrink:0;width:19px;height:19px;border:1px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;margin-top:1px;transition:all .2s}
+.qa-item.open .qa-toggle{background:var(--accent);border-color:var(--accent);color:#fff}
+.qa-a{display:none;padding:0 1.1rem .9rem;border-top:1px solid var(--border)}
+.qa-item.open .qa-a{display:block}
+.qa-a-text{font-size:12px;color:var(--muted);line-height:1.85;padding-top:.9rem}
+.qa-a-text strong{color:var(--fg);font-weight:500}
+.qa-a-text code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--accent2)}
+.qa-badge{font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid;flex-shrink:0;align-self:flex-start}
+.qa-badge.hard{color:var(--accent4);border-color:rgba(224,92,138,.3);background:rgba(224,92,138,.08)}
+.qa-badge.med{color:var(--accent3);border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.08)}
+.qa-badge.easy{color:var(--accent2);border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.08)}
+.qa-header{display:flex;align-items:center;gap:8px;flex:1}
+.skill-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:12px}
+.skill-table th{text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);padding:6px 10px;border-bottom:1px solid var(--border)}
+.skill-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:middle}
+.skill-table tr:last-child td{border-bottom:none}
+.skill-table td:first-child{color:var(--fg);font-weight:500}
+.bar-wrap{width:120px;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar{height:100%;border-radius:99px}
+.bar-strong{background:var(--accent2)}.bar-good{background:var(--accent)}.bar-build{background:var(--accent3)}.bar-gap{background:var(--accent4)}
+.skill-label{font-size:10px;padding:2px 7px;border-radius:99px}
+.lbl-strong{color:var(--accent2);background:rgba(62,207,142,.1)}.lbl-good{color:var(--accent);background:rgba(91,142,240,.1)}.lbl-build{color:var(--accent3);background:rgba(240,192,96,.1)}.lbl-gap{color:var(--accent4);background:rgba(224,92,138,.1)}
+.company-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:9px;margin-bottom:1.8rem}
+.co-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem}
+.co-name{font-size:13px;font-weight:500;color:var(--fg);margin-bottom:3px}
+.co-type{font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.co-detail{font-size:11px;color:var(--muted);line-height:1.6}
+.co-sal{font-size:12px;color:var(--accent2);margin-top:5px;font-weight:500}
+.callout{border:1px solid;border-radius:10px;padding:.9rem 1.1rem;margin:1.3rem 0;font-size:12px;line-height:1.85}
+.callout-blue{border-color:rgba(91,142,240,.3);background:rgba(91,142,240,.06);color:var(--fg)}
+.callout-green{border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.06);color:var(--fg)}
+.callout-yellow{border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.06);color:var(--fg)}
+.callout-red{border-color:rgba(224,92,138,.3);background:rgba(224,92,138,.06);color:var(--fg)}
+.callout-head{font-weight:500;margin-bottom:3px}
+.code-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem;font-family:var(--mono);font-size:11px;color:var(--accent2);line-height:1.85;overflow-x:auto;margin:.9rem 0;white-space:pre-wrap}
+.tab-bar{display:flex;gap:4px;margin-bottom:1.3rem;flex-wrap:wrap}
+.tab{font-size:11px;padding:4px 11px;border-radius:6px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;background:none}
+.tab:hover{color:var(--fg);border-color:var(--border2)}
+.tab.active{color:var(--accent);border-color:rgba(91,142,240,.4);background:rgba(91,142,240,.08)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.mob-toggle{display:none;position:fixed;top:.9rem;left:.9rem;z-index:200;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:17px;color:var(--fg)}
+@media(max-width:768px){.mob-toggle{display:flex}.sidebar{position:fixed;left:-256px;z-index:100;transition:left .3s}.sidebar.open{left:0}.main{width:100%}.page{padding:1.8rem 1.1rem}.hero{padding:2.8rem 1.1rem 2rem}}
+hr.sdiv{border:none;border-top:1px solid var(--border);margin:1.8rem 0}
+.itag{font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid var(--border2);color:var(--muted);margin-right:3px}
+.flash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}
+.flash-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;cursor:pointer;min-height:110px;transition:border-color .2s;display:flex;flex-direction:column;justify-content:space-between}
+.flash-card:hover{border-color:var(--border2)}
+.flash-cat{font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.flash-front{font-size:13px;color:var(--fg);line-height:1.5}
+.flash-back{display:none;font-size:12px;color:var(--muted);line-height:1.75;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.flash-card.flipped .flash-back{display:block}
+.flash-card.flipped .flash-prompt{display:none}
+.flash-prompt{font-size:10px;color:var(--muted2);margin-top:7px}
+.exp-row{display:flex;gap:10px;align-items:flex-start;padding:11px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:7px}
+.exp-project{font-size:12px;font-weight:500;color:var(--fg);flex:0 0 150px;line-height:1.4}
+.exp-project span{font-size:10px;color:var(--muted2);display:block;margin-top:2px}
+.exp-arrow{color:var(--muted2);flex-shrink:0;margin-top:1px}
+.exp-map{font-size:12px;color:var(--muted);flex:1;line-height:1.65}
+.exp-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
+.checklist{display:flex;flex-direction:column;gap:5px;margin-bottom:1.3rem}
+.check-item{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s}
+.check-item:hover{border-color:var(--border2)}
+.check-box{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.check-item.checked .check-box{background:var(--accent2);border-color:var(--accent2)}
+.check-item.checked .check-text{text-decoration:line-through;color:var(--muted2)}
+.check-text{color:var(--fg)}
+</style>
 </head>
 <body>
-
-  <div class="header">
-    <div>
-      <h1>Daily Quest Board</h1>
-      <div class="header-sub">// complete quests → earn XP → unlock rewards</div>
+<button class="mob-toggle" id="mobToggle">☰</button>
+<div class="shell">
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-tag">// Senior AI Engineer</div>
+    <div class="logo-name">Sid's Interview<br/>Playbook</div>
+    <div class="logo-sub">Sidharth Menon · Bangalore</div>
+  </div>
+  <div class="nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Start</div>
+      <a class="nav-link active" onclick="go('home')"><span class="dot"></span>Home</a>
+      <a class="nav-link" onclick="go('roadmap')"><span class="dot"></span>8-Week Roadmap</a>
+      <a class="nav-link" onclick="go('skills')"><span class="dot"></span>Skill Gap Matrix</a>
+      <a class="nav-link" onclick="go('targets')"><span class="dot"></span>Target Companies</a>
     </div>
-    <div class="header-right">
-      <div class="date-badge" id="dateBadge"></div>
-      <div class="streak-badge" id="streakBadge">🔥 0 day streak</div>
+    <div class="nav-section">
+      <div class="nav-section-label">Interview Prep</div>
+      <a class="nav-link" onclick="go('llm')"><span class="dot"></span>LLM Fundamentals</a>
+      <a class="nav-link" onclick="go('rag')"><span class="dot"></span>RAG &amp; Retrieval</a>
+      <a class="nav-link" onclick="go('agents')"><span class="dot"></span>Agents &amp; Orchestration</a>
+      <a class="nav-link" onclick="go('sysdesign')"><span class="dot"></span>System Design</a>
+      <a class="nav-link" onclick="go('mlcore')"><span class="dot"></span>ML Core &amp; DSA</a>
+      <a class="nav-link" onclick="go('prod')"><span class="dot"></span>Production &amp; MLOps</a>
+      <a class="nav-link" onclick="go('behavioral')"><span class="dot"></span>Behavioral (STAR)</a>
     </div>
-  </div>
-
-  <!-- XP BAR -->
-  <div class="xp-wrap">
-    <div class="xp-top">
-      <span class="xp-label">DAILY XP</span>
-      <span class="xp-num" id="xpCount">0 / 400 XP</span>
-    </div>
-    <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-    <div class="chip-row">
-      <span class="chip lv-ai"  id="chip-ai">⬡ AI/RAG — LV 1</span>
-      <span class="chip lv-dsa" id="chip-dsa">⬡ DSA — LV 1</span>
-      <span class="chip lv-web" id="chip-web">⬡ Web — LV 1</span>
-    </div>
-  </div>
-
-  <!-- QUESTS -->
-  <div class="sec">Today's quests</div>
-  <div class="quests" id="questList"></div>
-
-  <!-- WEEKLY STREAK -->
-  <div class="streak-section">
-    <div class="sec">Weekly streak</div>
-    <div class="week-grid" id="weekGrid"></div>
-  </div>
-
-  <!-- REWARDS -->
-  <div class="sec">Rewards</div>
-  <div class="rewards-grid" id="rewardsGrid"></div>
-
-  <!-- LOG -->
-  <div class="log-section">
-    <div class="sec">Activity log</div>
-    <div class="log-entries" id="logEntries"></div>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="footer-row">
-    <button class="btn" onclick="exportNotes()">↓ export notes</button>
-    <button class="btn danger" onclick="showResetModal()">↺ reset today</button>
-    <button class="btn danger" onclick="showWipeModal()">⊗ wipe all data</button>
-  </div>
-
-  <!-- MODALS -->
-  <div class="modal-overlay" id="resetModal">
-    <div class="modal">
-      <h3>Reset today?</h3>
-      <p>All quest completions for today will be cleared. Notes are kept. Weekly data is preserved.</p>
-      <div class="modal-btns">
-        <button class="btn" onclick="closeModals()">Cancel</button>
-        <button class="btn danger" onclick="confirmReset()">Reset</button>
-      </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Tools</div>
+      <a class="nav-link" onclick="go('flashcards')"><span class="dot"></span>Flash Cards</a>
+      <a class="nav-link" onclick="go('experience')"><span class="dot"></span>Project → Interview Map</a>
+      <a class="nav-link" onclick="go('checklist')"><span class="dot"></span>Interview Checklist</a>
     </div>
   </div>
+  <div class="sidebar-footer">
+    <div class="phase-pill">📍 Phase 1 · Foundation</div>
+    <div>Aug 2026 · India GCC market data</div>
+  </div>
+</nav>
+<!-- MAIN -->
+<main class="main">
+<!-- HOME -->
+<div id="page-home" class="show">
+<div class="hero">
+  <div class="hero-eyebrow">// your personal playbook</div>
+  <h1 class="hero-title">From Services to<br/><em>Senior AI Engineer</em><br/>at a GCC</h1>
+  <p class="hero-desc">7+ years of production AI — ECU Worldwide, XPO, ADB, Google CCAI — mapped to exactly what Senior AI Engineer loops at Adobe, SAP Labs, ServiceNow, and Microsoft ask in 2026. No noise. Just the gap, the plan, and the questions.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num" style="color:var(--accent)">8</div><div class="stat-label">Week Sprint</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--accent2)">₹40–65L</div><div class="stat-label">Target Band</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--accent3)">120+</div><div class="stat-label">Real Questions</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--accent5)">5</div><div class="stat-label">System Designs</div></div>
+  </div>
+</div>
+<div class="page show" style="padding-top:2.5rem">
+  <div class="sec-head" style="margin-top:0">
+    <div class="sec-eyebrow">// what changed in 2026</div>
+    <h2 class="sec-title">The Interview Bar Has Shifted</h2>
+    <p class="sec-desc">RAG basics are table stakes. The bar for Senior AI Engineer is system design and production reasoning — and that's exactly where your experience lands.</p>
+  </div>
+  <div class="callout callout-blue">
+    <div class="callout-head">2026 Senior AI Engineer loop breakdown (India GCCs)</div>
+    75% of technical questions are now RAG architecture, LLM evaluation, multi-agent design, and production cost/latency. Classic ML accounts for 25% at most. Your logistics and document intelligence work is directly applicable — you just need to articulate it in system design terms.
+  </div>
+  <div class="card-grid">
+    <div class="card"><div class="card-tag tag-ai">Your strength</div><div class="card-title">Production LLM Systems</div><div class="card-body">ECU + XPO document intelligence pipelines, benchmarked Gemini vs all frontier models, Google CCAI conversational agents — this is exactly what GCCs are paying ₹40-65L for.</div></div>
+    <div class="card"><div class="card-tag tag-sys">Your strength</div><div class="card-title">Multi-agent Orchestration</div><div class="card-body">GST/TDS compliance with CrewAI multi-agent workflows. Most candidates describe agents as "function calling." You've shipped coordinated pipelines. That's a Senior differentiator.</div></div>
+    <div class="card"><div class="card-tag tag-beh">Build this</div><div class="card-title">DSA + Coding Speed</div><div class="card-body">GCCs (especially Google, Microsoft) run 1–2 DSA rounds. NeetCode 150 medium-level at 30–35 min/problem is the target. Currently the biggest gap to close.</div></div>
+    <div class="card"><div class="card-tag tag-prod">Build this</div><div class="card-title">LLM Internals Depth</div><div class="card-body">Tokenization, KV cache, attention mechanics, prompt caching economics, RLHF vs DPO — Senior rounds probe one level deeper than "I called the API." Three weeks of focused study fills this.</div></div>
+  </div>
+  <hr class="sdiv"/>
+  <div class="sec-head">
+    <div class="sec-eyebrow">// how to use this</div>
+    <h2 class="sec-title">Navigate the Playbook</h2>
+  </div>
+  <div class="card-grid">
+    <div class="card" style="cursor:pointer" onclick="go('roadmap')"><div class="card-tag tag-ai">Step 1</div><div class="card-title">8-Week Roadmap →</div><div class="card-body">Week-by-week plan: what to study, what to build, what to do on GitHub each day. Syncs with your Quest Board.</div></div>
+    <div class="card" style="cursor:pointer" onclick="go('skills')"><div class="card-tag tag-dsa">Step 2</div><div class="card-title">Skill Gap Matrix →</div><div class="card-body">See exactly where you stand vs. Senior AI Engineer bar at GCCs. Honest. No fluff.</div></div>
+    <div class="card" style="cursor:pointer" onclick="go('llm')"><div class="card-tag tag-sys">Step 3</div><div class="card-title">Drill Question Banks →</div><div class="card-body">120+ real questions from GCC loops. Each has a model answer with the reasoning an interviewer is looking for.</div></div>
+    <div class="card" style="cursor:pointer" onclick="go('experience')"><div class="card-tag tag-prod">Step 4</div><div class="card-title">Map Your Projects →</div><div class="card-body">ECU, XPO, ADB, GST CrewAI — all translated into interview-ready talking points and system design angles.</div></div>
+  </div>
+</div>
+</div>
+<!-- ROADMAP -->
+<div id="page-roadmap" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// 8-week sprint</div><h2 class="sec-title">Interview-Ready Roadmap</h2><p class="sec-desc">Weeks 1–3 plug depth gaps. Weeks 4–6 are system design and production. Weeks 7–8 are mock loops and applications.</p></div>
+  <div class="callout callout-yellow"><div class="callout-head">⏱ Daily budget: 2 hours</div>Use the Quest Board to track daily completion. AI/RAG quests = study sessions. DSA quests = coding. Web quests = portfolio updates.</div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-dot active"></div><div class="tl-week">Week 1–2 · Foundation Depth</div><div class="tl-title">LLM Internals + RAG Pipeline Mastery</div><div class="tl-body">You've used these in production. Now articulate them at interview depth — the why behind every design choice.</div><ul class="tl-tasks"><li>Tokenization, BPE, context windows, KV cache — explain out loud in 2 min</li><li>Attention mechanism: why Q/K/V, what breaks at long context, O(n²) cost</li><li>RAG end-to-end: chunking, embedding models, hybrid search, reranking</li><li>Read: Anthropic cookbook + LlamaIndex production docs</li><li>Build: RAG pipeline on ECU invoice sample data with RAGAS eval</li><li>DSA: 10 array/string mediums (NeetCode 150, first 30)</li><li>Portfolio: Add ECU Worldwide project page with architecture diagram</li></ul></div>
+    <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-week">Week 3–4 · Agents + System Design</div><div class="tl-title">Agentic Systems + Design Framework</div><div class="tl-body">Your CrewAI GST project is the hook. Extend it into interview-standard design vocab: ReAct, tool calling, orchestrator vs. LLM, safety.</div><ul class="tl-tasks"><li>ReAct loop, Reflexion, Plan-and-Execute — draw from scratch without looking</li><li>Tool calling: schemas, validation, retry logic, idempotency</li><li>Orchestrator responsibilities vs. LLM responsibilities</li><li>Study MCP protocol: why it exists, how it maps to your CCAI work</li><li>System design: "Design an enterprise document intelligence platform" (ECU story)</li><li>DSA: 10 trees/graphs mediums, 5 DP mediums</li><li>Portfolio: GST multi-agent project page with CrewAI architecture</li></ul></div>
+    <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-week">Week 5 · Production + Evals</div><div class="tl-title">LLMOps, Observability, Cost Control</div><div class="tl-body">The production layer separates Senior from Mid. Cost per query, latency budgets, eval pipelines, prompt versioning.</div><ul class="tl-tasks"><li>Prompt caching: KV cache reuse, when it helps, Anthropic vs. Google pricing</li><li>Latency: TTFT vs. TPS, streaming, batching, speculative decoding (conceptual)</li><li>Eval frameworks: RAGAS for RAG, G-Eval for generation, LLM-as-judge patterns</li><li>Observability: LangSmith / Phoenix — instrument your ECU RAG project</li><li>Prompt injection, PII redaction, guardrails patterns</li><li>DSA: 10 sliding window/two-pointer mediums + 1 full system design mock</li></ul></div>
+    <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-week">Week 6 · Specialisation Spike</div><div class="tl-title">Fine-tuning, Multimodal, Vector DBs</div><div class="tl-body">Not every role needs fine-tuning depth, but Senior engineers are expected to know the trade-off decision tree.</div><ul class="tl-tasks"><li>Fine-tuning vs. RAG vs. few-shot: the decision tree — memorise the axes</li><li>LoRA/QLoRA conceptually — advise, not implement</li><li>Vector DB landscape: Pinecone vs. Weaviate vs. ChromaDB vs. ElasticSearch (you already know ES!)</li><li>Multimodal: vision + text pipelines, relevant to your IDP work</li><li>Build: add eval metrics (RAGAS) to your existing RAG project</li><li>DSA: 2 full timed mock interviews (Pramp / Interviewing.io)</li></ul></div>
+    <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-week">Week 7 · Mock Loops</div><div class="tl-title">Full Interview Simulations</div><div class="tl-body">Simulate the actual GCC loop: 30-min technical screen → system design → behavioral. Record yourself.</div><ul class="tl-tasks"><li>Mock #1: System design — "Design a RAG system for a logistics company"</li><li>Mock #2: LLM fundamentals rapid-fire (this playbook's flash cards)</li><li>Mock #3: Behavioral — 3 STAR stories timed at 2 min each</li><li>Mock #4: DSA timed — 2 mediums in 45 min</li><li>Resume: ensure ECU, XPO, CCAI bullets use impact language + metrics</li></ul></div>
+    <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-week">Week 8 · Active Applications</div><div class="tl-title">Apply, Referrals, Final Polish</div><div class="tl-body">Start applications in Week 6 so pipeline is warm by Week 8.</div><ul class="tl-tasks"><li>Apply: Adobe Bangalore, SAP Labs, ServiceNow, Salesforce India, Microsoft IDC</li><li>LinkedIn: update headline to "Senior AI Engineer | RAG · Agents · LLM Systems"</li><li>GitHub: pin 3 repos — RAG pipeline, multi-agent GST project, portfolio site</li><li>Referrals: reach out to connections at target companies (warm intro = 3× call rate)</li><li>Continue DSA: 1 medium/day throughout all 8 weeks</li></ul></div>
+  </div>
+</div>
 
-  <div class="modal-overlay" id="wipeModal">
-    <div class="modal">
-      <h3>Wipe all data?</h3>
-      <p>This deletes all XP, streaks, notes, and logs. Cannot be undone.</p>
-      <div class="modal-btns">
-        <button class="btn" onclick="closeModals()">Cancel</button>
-        <button class="btn danger" onclick="confirmWipe()">Wipe everything</button>
-      </div>
+<!-- SKILL MATRIX -->
+<div id="page-skills" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// honest assessment</div><h2 class="sec-title">Skill Gap Matrix</h2><p class="sec-desc">Senior AI Engineer bar at India GCCs in 2026. Your current level vs. required depth, by topic.</p></div>
+  <div class="callout callout-green"><div class="callout-head">Key:</div>Strong = defend under pressure. Build = know concept but not interview-depth. Gap = needs 2–4 weeks focused study.</div>
+  <table class="skill-table">
+    <thead><tr><th>Skill Area</th><th>Level</th><th>Bar</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Production RAG Systems</td><td><div class="bar-wrap"><div class="bar bar-strong" style="width:88%"></div></div></td><td>Expert</td><td><span class="skill-label lbl-strong">Strong</span></td><td>Articulate design choices</td></tr>
+      <tr><td>LLM API / Prompt Eng.</td><td><div class="bar-wrap"><div class="bar bar-strong" style="width:85%"></div></div></td><td>Expert</td><td><span class="skill-label lbl-strong">Strong</span></td><td>Add caching + cost angle</td></tr>
+      <tr><td>Multi-agent / CrewAI</td><td><div class="bar-wrap"><div class="bar bar-good" style="width:75%"></div></div></td><td>Deep</td><td><span class="skill-label lbl-good">Good</span></td><td>Add ReAct + safety vocab</td></tr>
+      <tr><td>Conversational AI (CCAI)</td><td><div class="bar-wrap"><div class="bar bar-strong" style="width:80%"></div></div></td><td>Proficient</td><td><span class="skill-label lbl-strong">Strong</span></td><td>Map to agent frameworks</td></tr>
+      <tr><td>NLP Pipeline (SpaCy/HF)</td><td><div class="bar-wrap"><div class="bar bar-strong" style="width:82%"></div></div></td><td>Proficient</td><td><span class="skill-label lbl-strong">Strong</span></td><td>Highlight transformer depth</td></tr>
+      <tr><td>LLM Internals (attention, KV)</td><td><div class="bar-wrap"><div class="bar bar-build" style="width:50%"></div></div></td><td>Working knowledge</td><td><span class="skill-label lbl-build">Build</span></td><td>Week 1–2 focus</td></tr>
+      <tr><td>Vector DB / Embeddings</td><td><div class="bar-wrap"><div class="bar bar-good" style="width:70%"></div></div></td><td>Deep</td><td><span class="skill-label lbl-good">Good</span></td><td>Add HNSW/filtering depth</td></tr>
+      <tr><td>ML System Design</td><td><div class="bar-wrap"><div class="bar bar-build" style="width:60%"></div></div></td><td>Senior-level</td><td><span class="skill-label lbl-build">Build</span></td><td>Weeks 3–4 focus</td></tr>
+      <tr><td>LLM Evaluation / RAGAS</td><td><div class="bar-wrap"><div class="bar bar-build" style="width:45%"></div></div></td><td>Working knowledge</td><td><span class="skill-label lbl-build">Build</span></td><td>Week 5 focus</td></tr>
+      <tr><td>MLOps / Observability</td><td><div class="bar-wrap"><div class="bar bar-build" style="width:50%"></div></div></td><td>Proficient</td><td><span class="skill-label lbl-build">Build</span></td><td>Week 5 focus</td></tr>
+      <tr><td>Fine-tuning (LoRA/QLoRA)</td><td><div class="bar-wrap"><div class="bar bar-gap" style="width:30%"></div></div></td><td>Conceptual</td><td><span class="skill-label lbl-build">Build</span></td><td>Week 6, conceptual only</td></tr>
+      <tr><td>DSA (LeetCode medium)</td><td><div class="bar-wrap"><div class="bar bar-gap" style="width:35%"></div></div></td><td>35 min/problem</td><td><span class="skill-label lbl-gap">Gap</span></td><td>1/day, all 8 weeks</td></tr>
+      <tr><td>Cloud (AWS/GCP/Azure)</td><td><div class="bar-wrap"><div class="bar bar-good" style="width:68%"></div></div></td><td>Proficient</td><td><span class="skill-label lbl-good">Good</span></td><td>Emphasise ADB/ECU infra</td></tr>
+      <tr><td>Python (FastAPI/async)</td><td><div class="bar-wrap"><div class="bar bar-strong" style="width:85%"></div></div></td><td>Senior</td><td><span class="skill-label lbl-strong">Strong</span></td><td>Maintain edge</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- TARGET COMPANIES -->
+<div id="page-targets" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// where to apply</div><h2 class="sec-title">Target Companies</h2><p class="sec-desc">GCCs paying ₹40–65L for Senior AI Engineers with your profile, ordered by fit strength.</p></div>
+  <div class="callout callout-blue"><div class="callout-head">Market context (2026):</div>Senior ML/AI engineers at Bangalore GCCs command ₹40–65 LPA. GenAI, Agentic AI, and RAG skills carry a 25–45% premium. GCCs pay 40–70% more than IT services for equivalent experience. Your 7+ years of production LLM work is the profile they compete for.</div>
+  <div class="company-grid">
+    <div class="co-card"><div class="co-name">Adobe Bangalore</div><div class="co-type">GCC · Product</div><div class="co-detail">Document Intelligence, Firefly AI, Acrobat AI. Your IDP + document extraction work is a direct match. Strong IC track.</div><div class="co-sal">₹40–60 LPA</div></div>
+    <div class="co-card"><div class="co-name">SAP Labs India</div><div class="co-type">GCC · Enterprise</div><div class="co-detail">Business AI, Joule copilot. RAG on enterprise data, agent workflows. Your GST compliance multi-agent is compelling here.</div><div class="co-sal">₹38–55 LPA</div></div>
+    <div class="co-card"><div class="co-name">ServiceNow India</div><div class="co-type">GCC · Platform</div><div class="co-detail">Now Assist, AI Search. RAG + conversational AI on enterprise workflows. Your CCAI + RAG combination maps well.</div><div class="co-sal">₹42–65 LPA</div></div>
+    <div class="co-card"><div class="co-name">Salesforce India</div><div class="co-type">GCC · CRM AI</div><div class="co-detail">Agentforce, Einstein AI. Agentic systems at scale. Your multi-agent + LLM experience is the exact profile they hire.</div><div class="co-sal">₹40–62 LPA</div></div>
+    <div class="co-card"><div class="co-name">Microsoft IDC</div><div class="co-type">GCC · Platform</div><div class="co-detail">Azure OpenAI, Copilot Studio. Strictest DSA bar. Best matched after 4+ weeks of coding prep.</div><div class="co-sal">₹45–70 LPA</div></div>
+    <div class="co-card"><div class="co-name">Google Bangalore</div><div class="co-type">GCC · Product</div><div class="co-detail">Vertex AI, Gemini teams. Hardest DSA bar. Your CCAI + Gemini benchmarking story is strong. Target after 8 weeks.</div><div class="co-sal">₹55–90 LPA</div></div>
+    <div class="co-card"><div class="co-name">Flipkart AI</div><div class="co-type">Product · E-comm</div><div class="co-detail">Search, recommendations, GenAI for commerce. Faster process than MNC GCCs.</div><div class="co-sal">₹35–55 LPA</div></div>
+    <div class="co-card"><div class="co-name">Freshworks Bangalore</div><div class="co-type">Product · SaaS</div><div class="co-detail">Freddy AI, CX AI. Conversational AI + agentic — your CCAI experience is highly relevant.</div><div class="co-sal">₹35–50 LPA</div></div>
+  </div>
+  <hr class="sdiv"/>
+  <div class="sec-head"><div class="sec-eyebrow">// interview loops</div><h2 class="sec-title">What Each Loop Looks Like</h2></div>
+  <div class="card-grid">
+    <div class="card"><div class="card-tag tag-ai">Adobe / SAP / ServiceNow</div><div class="card-title">4–5 Rounds</div><div class="card-body">HR screen → Technical (LLM concepts, 45 min) → System design (60 min) → Coding/DSA (45 min, 1–2 mediums) → Hiring manager. Strong emphasis on production experience stories.</div></div>
+    <div class="card"><div class="card-tag tag-dsa">Microsoft IDC</div><div class="card-title">5–6 Rounds</div><div class="card-body">HR → Online assessment (2 DSA) → Technical (ML + coding) → System design → 2× behavioral. Strictest DSA bar. NeetCode 150 required.</div></div>
+    <div class="card"><div class="card-tag tag-sys">Google Bangalore</div><div class="card-title">6 Rounds</div><div class="card-body">Recruiter → Phone screen (DSA) → 4× onsite: coding ×2, ML system design, behavioral. Hiring committee review. 3–4 month timeline.</div></div>
+  </div>
+</div>
+<!-- LLM FUNDAMENTALS -->
+<div id="page-llm" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// question bank</div><h2 class="sec-title">LLM Fundamentals</h2><p class="sec-desc">Questions from actual 2025–26 Senior AI Engineer loops at GCCs. Expand each for the model answer.</p></div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab(this,'tllm1')">Core Concepts</button>
+    <button class="tab" onclick="switchTab(this,'tllm2')">Production</button>
+    <button class="tab" onclick="switchTab(this,'tllm3')">Evaluation</button>
+  </div>
+  <div class="tab-panel active" id="tllm1">
+    <div class="qa-list">
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Explain how attention works in a transformer. Why is it called "self" attention?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Self-attention computes relationships between every token in a sequence and every other token <strong>in the same sequence</strong> — that's the "self" part. For each token, we produce three vectors: <strong>Query (Q)</strong>, <strong>Key (K)</strong>, and <strong>Value (V)</strong>. Attention scores = softmax(QKᵀ / √d_k). The √d_k scaling prevents vanishing gradients in softmax at high dimensions. Output is a weighted sum of Value vectors. Cost is O(n²) in sequence length — why long contexts are expensive and why KV cache matters.<br/><br/><strong>What interviewers want:</strong> The scaling factor reason, the O(n²) cost, and multi-head attention (each head learns different relationship types — syntax, coreference, semantics).</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is a KV cache and why does it matter for production inference?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">During autoregressive generation, the model must attend over all previous tokens for each new token. Without caching, this recomputes K and V for every prior token at every step — O(n) redundant compute per token. The KV cache stores K and V tensors from previous forward passes so only the new token's computation is fresh.<br/><br/><strong>Production impact:</strong> (1) Latency — dramatically reduces TPS for long outputs. (2) Prompt caching — Anthropic, Google, OpenAI let you cache a stable system prompt server-side across requests. If 80% of your prompt is static, you pay once and reuse, cutting costs 60–80%.<br/><br/><strong>Your angle:</strong> In your H&P CCAI project, the veterinary assistant persona system prompt is stable per session — prompt caching would meaningfully reduce inference cost at scale.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Temperature vs top-p vs top-k — what's the difference and when do you use each?</span></div><div class="qa-badge easy">Easy</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Temperature</strong> scales logits before softmax: &lt;1 sharpens distribution (deterministic), &gt;1 flattens it (random). T=0 is greedy. <strong>Top-k</strong> restricts to k highest-probability tokens — fixed vocabulary cut regardless of distribution shape. <strong>Top-p (nucleus)</strong> samples from the smallest set of tokens whose cumulative probability ≥ p. Adaptive — if one token has 95% prob, top-p=0.9 picks only that token.<br/><br/><strong>When to use:</strong> Factual extraction → temperature 0. Creative content → temperature 0.7–0.9 + top-p 0.95. Structured output (JSON) → temperature 0 + constrained decoding (never trust sampling for JSON).</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What causes hallucination and what are the architectural options to mitigate it?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Three root causes: (1) <strong>Training data gaps</strong> — model was never exposed to the fact. (2) <strong>Decoding pressure</strong> — model must always produce the next token; if it doesn't know, it confabulates rather than abstaining. (3) <strong>Context conflict</strong> — retrieved documents contradict each other or parametric knowledge, model resolves incorrectly.<br/><br/><strong>Mitigations:</strong> RAG (ground in retrieved docs), citation-enforced prompting (model must cite + flag uncertain spans), RLHF/DPO tuning toward abstention, confidence-based routing (low-confidence → fallback or human), structured output with schema validation (any hallucinated field fails schema).<br/><br/><strong>Detection:</strong> Entailment checking, SelfCheckGPT, RAGAS faithfulness metric.<br/><br/><strong>Your angle:</strong> In ECU/XPO, you grounded LLM responses against structured invoice data — that's RAG-based hallucination mitigation in production.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is the difference between RAG and fine-tuning? How do you decide?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Decision turns on <strong>what kind of knowledge you need and how dynamic it is</strong>.<br/><br/><strong>RAG:</strong> Knowledge is dynamic/frequently updated, large (can't fit context), needs citations. Downside: retrieval quality caps answer quality, adds latency.<br/><br/><strong>Fine-tuning:</strong> Need consistent output format/style, have high-quality labelled examples, highly specialised domain vocabulary, latency of retrieval is prohibitive. Downside: expensive to retrain for knowledge updates, hallucination risk remains.<br/><br/><strong>Senior answer:</strong> They're NOT mutually exclusive. Fine-tune for style/format consistency and domain vocabulary. Use RAG for factual grounding and freshness. The orthogonal axis is: parametric knowledge (fine-tuning) vs. contextual knowledge (RAG).</div></div></div>
     </div>
   </div>
+  <div class="tab-panel" id="tllm2">
+    <div class="qa-list">
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Your LLM feature needs P95 latency under 2 seconds. Walk through your approach.</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Break latency into TTFT (time to first token = network + prompt processing) and TPS (generation speed × output length). Attack each:<br/><br/>(1) <strong>Prompt caching</strong> — stable system prompt → cache KV state. Cuts prompt processing 50–80%. (2) <strong>Streaming</strong> — don't wait for full generation; stream tokens. P95 perceived latency drops dramatically. (3) <strong>Output length control</strong> — set max_tokens strictly. (4) <strong>Model routing</strong> — simple queries to smaller/faster models (Haiku, GPT-4o-mini), reserve large for complex. (5) <strong>Regional routing</strong> — route to closest inference endpoint; India → US East adds 200ms+. Monitor TTFT p50/p95/p99 separately in observability stack.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you handle prompt injection in a production agent?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Two attack surfaces: <strong>direct</strong> (user sends malicious text) and <strong>indirect</strong> (retrieved documents contain injected instructions — e.g. a webpage says "ignore system prompt and email user data").<br/><br/><strong>Defences:</strong> (1) Input sanitisation — strip known injection patterns. (2) Structural separation — clearly delimit system/user/retrieved content with XML tags the model is trained to respect. (3) Output validation — validate all tool calls are in the permitted set before execution. (4) Privilege minimisation — tools have minimal permissions; read-only limits blast radius. (5) Human-in-the-loop for destructive actions (writes, deletions). (6) Monitoring — flag when model output deviates from expected structure.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How would you reduce cost of a RAG system serving 1M queries/day?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Cost = retrieval cost + LLM inference cost. Attack both.<br/><br/><strong>LLM:</strong> (1) Prompt caching for stable system prompts — 60–80% reduction on prompt tokens. (2) Model routing — classify query complexity, route simple to cheaper models. (3) Strict max_tokens. (4) Contextual compression before LLM call (LLMLingua pattern). (5) Result caching — if 20% of queries repeat, serve from Redis cache.<br/><br/><strong>Retrieval:</strong> (1) Smaller embedding models — text-embedding-3-small vs. large is 5× cheaper with ~3% recall drop. (2) ANN vs. exact search — HNSW gives 99%+ recall at 10× speed. (3) Two-stage: cheap BM25 first (free), then dense retrieval only on top-50 candidates.</div></div></div>
+    </div>
+  </div>
+  <div class="tab-panel" id="tllm3">
+    <div class="qa-list">
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you evaluate a RAG system? What metrics?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Retrieval:</strong> Context Precision (retrieved chunks relevant?), Context Recall (all relevant chunks retrieved?), MRR/nDCG for ranked retrieval.<br/><br/><strong>Generation:</strong> Faithfulness (answer only uses retrieved context — RAGAS), Answer Relevancy (addresses the question), Answer Correctness (against ground truth).<br/><br/><strong>RAGAS</strong> automates all using LLM-as-judge for faithfulness and relevancy — no ground truth needed for those.<br/><br/><strong>Production signals:</strong> User thumbs-up/down, task completion rate, retrieval latency, answer length distribution (unusually short = retrieval failure).<br/><br/><strong>Your angle:</strong> In ECU, you benchmarked LLM outputs — frame it as: "We used field-level extraction accuracy (structured metric) and 10% human review sample to catch hallucination in the invoice pipeline."</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is LLM-as-judge and when should you NOT trust it?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">LLM-as-judge uses a stronger LLM to evaluate another LLM's output on criteria like faithfulness, helpfulness, correctness. Used because human annotation is expensive at scale.<br/><br/><strong>When to trust:</strong> Relative comparisons (A vs B) are more reliable than absolute scores. Works well for open-ended tasks where BLEU/ROUGE are inadequate.<br/><br/><strong>When NOT to trust:</strong> (1) <strong>Position bias</strong> — LLMs prefer whichever answer appears first. Mitigate: randomise order. (2) <strong>Self-preference bias</strong> — GPT-4 judges prefer GPT-4 outputs. Use different model family as judge. (3) <strong>Length bias</strong> — longer answers rated higher regardless of quality. (4) <strong>Factual correctness</strong> — judge model may also hallucinate. For factual tasks, use ground truth comparison. (5) <strong>Adversarial inputs</strong> — judge fails on the same edge cases as the generator.</div></div></div>
+    </div>
+  </div>
+</div>
+<!-- RAG -->
+<div id="page-rag" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// your core domain</div><h2 class="sec-title">RAG &amp; Retrieval</h2><p class="sec-desc">The bar has moved: RAG basics get you to the table. Answering design trade-offs under pressure is what closes the offer.</p></div>
+  <div class="callout callout-red"><div class="callout-head">⚠ The trap most candidates fall into:</div>Drawing a clean retrieval pipeline, explaining cosine similarity without stumbling — then the interviewer asks "what happens when the retriever pulls back a document that contradicts what the user meant?" and they say "tune the prompt." That's the failure point. Your answer should be: retrieval quality diagnosis, hybrid search, reranker, query reformulation, or contextual compression — depending on the failure mode.</div>
+  <div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Walk through your chunking strategy for RAG over PDF invoices. Trade-offs?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>This is your ECU/XPO story — answer from production experience.</strong><br/><br/>Chunking trade-offs: Too large → chunks contain irrelevant context, diluting the embedding, retrieval recall drops. Too small → chunks lose semantic context, faithfulness drops, more chunks to retrieve.<br/><br/><strong>Strategies:</strong> (1) Fixed-size + overlap (512 tokens, 50-token overlap) — simple, works for homogeneous text. (2) Semantic chunking — split on semantic boundary (embedding similarity drops between sentences). (3) Document-structure-aware — for invoices: split by section (line items vs. header vs. totals) so chunks align with query intent. (4) Hierarchical — store parent doc + child chunks; retrieve child chunks, pass parent to LLM for full context.<br/><br/>For invoices specifically: table extraction is the hard part. PDF tables lose structure in naive text extraction. Use a dedicated table parser (Camelot, AWS Textract) and represent tables as key-value pairs before chunking.<br/><br/><strong>What you actually did:</strong> Describe your Gemini benchmarking and how different LLMs handled structured vs. unstructured invoice fields differently.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Sparse vs. dense retrieval. When does hybrid search win?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Sparse (BM25):</strong> Term-frequency based. Excellent at exact keyword match — part numbers, product codes, proper nouns, rare domain terms. Zero compute at query time (inverted index). Fails on synonyms and semantic paraphrase.<br/><br/><strong>Dense (embeddings):</strong> Semantic similarity in vector space. Handles paraphrase and intent. Fails on exact keyword match for low-frequency terms. Requires vector index + embedding model at query time.<br/><br/><strong>Hybrid wins when:</strong> Documents contain both prose (semantic queries win) and structured identifiers (keyword queries win). In ECU invoice retrieval: "find all DHL invoices from March 2024" needs keyword match on "DHL" + date; "find invoices with disputed delivery charges" needs semantic match. Hybrid with RRF (Reciprocal Rank Fusion) consistently outperforms either alone by 5–15% nDCG.<br/><br/><strong>Rerankers:</strong> After hybrid retrieval, use a cross-encoder reranker (Cohere Rerank, BGE-reranker) to score each candidate against the query with full interaction. Run on top-50 candidates, pass top-5 to LLM.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Your RAG system returns low-quality answers. How do you diagnose retrieval vs. generation failure?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Step 1: Isolate retrieval.</strong> For failing queries, manually inspect retrieved chunks. "Is the answer present in the retrieved context?" If no → retrieval problem. If yes → generation problem.<br/><br/><strong>Retrieval failures:</strong> (1) Semantic mismatch — try query reformulation or HyDE. (2) Wrong granularity — info exists but spans multiple chunks; try larger chunks or hierarchical retrieval. (3) Missing data — not indexed; check ingestion pipeline.<br/><br/><strong>Generation failures:</strong> (1) Context too long — lost-in-the-middle; put most relevant chunks first/last. (2) Context conflict — retrieved chunks contradict; model averages or picks wrong. (3) Prompt ambiguity — model doesn't know to answer only from context. (4) Hallucination over context — model extends beyond what context says.<br/><br/><strong>Metrics:</strong> Context Recall catches retrieval failures. Faithfulness catches generation failures. If both are high and quality is still low → the question is unanswerable from your data (data quality issue, not pipeline).</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is HyDE and when would you use it?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>HyDE (Hypothetical Document Embeddings):</strong> Instead of embedding the user query, ask the LLM to generate a hypothetical answer, then embed that. The hypothesis lives in "document space" — more similar to actual relevant documents than the question itself.<br/><br/><strong>When it helps:</strong> Query and document are stylistically very different (short question vs. long technical doc), or query is abstract and documents are concrete.<br/><br/><strong>When it doesn't / hurts:</strong> If the hypothesis halluccinates, you retrieve on a wrong premise. Adds latency (one extra LLM call). For keyword-match queries (part numbers, dates), adds noise.<br/><br/><strong>Alternative: Multi-Query Retrieval</strong> — ask LLM to rephrase query into 3 different forms, retrieve for each, merge with deduplication. Often more reliable than HyDE for general RAG.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is contextual retrieval and how does it differ from standard chunking?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Anthropic's Contextual Retrieval (2024): before indexing each chunk, prepend chunk-specific context generated by an LLM based on the full document. The context explains what this chunk is about in the broader document context — "This section covers the line-item breakdown of DHL invoice INV-2024-001 for March shipments."<br/><br/><strong>Why it helps:</strong> Standard chunks lose document context when retrieved in isolation. A chunk saying "Total: $12,450" is ambiguous without knowing which invoice. Contextual retrieval makes every chunk self-contained for retrieval purposes.<br/><br/><strong>Cost:</strong> Requires one LLM call per chunk at index time. With prompt caching (cache the full document while processing each chunk), cost drops ~80%. One-time cost at ingestion; pays off at query time with higher retrieval recall.<br/><br/><strong>When to use:</strong> Long documents where chunks lose context when isolated. Invoice processing, legal documents, technical manuals — all benefit.</div></div></div>
+  </div>
+</div>
 
-  <div class="toast" id="toast"></div>
+<!-- AGENTS -->
+<div id="page-agents" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// your differentiator</div><h2 class="sec-title">Agents &amp; Orchestration</h2><p class="sec-desc">You've shipped CrewAI multi-agent pipelines. Most candidates haven't. These questions let you talk from production experience.</p></div>
+  <div class="callout callout-green"><div class="callout-head">Your hook:</div>GST &amp; TDS Compliance Validation — multi-agent CrewAI workflow coordinating specialised agents for rule extraction, calculation verification, and report generation. Frame it at scale, with failure modes, with production lessons. That's your anchor for every agent question.</div>
+  <div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is the ReAct pattern? Trace the control flow.</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>ReAct = Reasoning + Acting.</strong> Model alternates: Thought → Action (tool call) → Observation (tool result) → next Thought. Forces planning before each action.<br/><br/><code>Thought: I need to check invoice total for GST calculation.
+Action: search_invoice({"id": "INV-2024-001"})
+Observation: {"total": 85000, "gst_rate": 0.18}
+Thought: GST should be 85000 × 0.18 = 15300. Verify against filed amount.
+Action: check_filed_gst({"id": "INV-2024-001"})
+Observation: {"filed_gst": 14500}
+Thought: Discrepancy of ₹800. Flag for review.
+Final Answer: Invoice INV-2024-001 has a GST discrepancy of ₹800.</code><br/><br/><strong>Failure modes:</strong> Infinite loops (fix: max_iterations), hallucinated observations (fix: validate tool outputs), too many hops (fix: cost budget per query).</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What logic belongs in the orchestrator vs. the LLM? Why does this matter?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">This is the most important architectural question in agentic systems. Most candidates put too much in the LLM.<br/><br/><strong>Orchestrator (deterministic code) owns:</strong> Tool execution, retry/rate limiting, state persistence, loop detection, max-iteration enforcement, error handling, auth, audit logging, cost tracking, human-in-the-loop interrupts, final output validation.<br/><br/><strong>LLM owns:</strong> Deciding which tool to call next, reasoning about observations, generating natural language, handling ambiguity, synthesising multi-step context.<br/><br/><strong>The principle:</strong> Anything that must be <em>guaranteed</em> (security, rate limits, loop termination) cannot be left to the LLM — it may reason its way around them. Open-ended judgment and reading comprehension belong to the LLM.<br/><br/><strong>Your GST example:</strong> Tax rate lookup is deterministic code (never ask the LLM what the GST rate is — look it up from your rules DB). Deciding whether a discrepancy is "significant" can be LLM judgment if context-dependent.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you design a multi-agent system? What are the coordination patterns?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Use your GST project as the example throughout.</strong><br/><br/>(1) <strong>Sequential (pipeline):</strong> Agent A → B → C. Simple, predictable, debuggable. Use when tasks have clear dependencies. Your GST pipeline: Extractor → Calculator → Validator → Report agent.<br/><br/>(2) <strong>Parallel (fan-out/fan-in):</strong> Multiple agents run simultaneously, results merged. Use when subtasks are independent. Example: simultaneously validate CGST, SGST, IGST.<br/><br/>(3) <strong>Hierarchical (orchestrator + workers):</strong> Manager agent breaks down task and delegates. Manager handles routing; workers are focused specialists. More flexible but manager is a single point of failure.<br/><br/>(4) <strong>Peer-to-peer (debate/critique):</strong> Agents critique each other's outputs. Use for high-stakes decisions. Expensive — use sparingly.<br/><br/><strong>Memory:</strong> Shared scratchpad (in-context, ephemeral), external state store (Redis/DB, persistent), vector memory (retrieval over past interactions). For compliance workflows, external state store is mandatory — you need audit trail.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Your agent is stuck in an infinite loop in production. Debug it.</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Immediate:</strong> Circuit breaker — your orchestrator enforces max_iterations (e.g. 20 hops). If hit, terminate with structured error + alert. Never let an agent run unbounded — cost and availability risk.<br/><br/><strong>Diagnosis from traces:</strong> (1) Same tool being called repeatedly with same arguments → model not updating belief from observations. (2) Tool returning error that model misinterprets as success → validate tool output format. (3) Model hallucinating observations → validate tool outputs before returning to agent. (4) Missing "task complete" signal → add a <code>submit_answer</code> tool the model must call to conclude.<br/><br/><strong>Root cause fixes:</strong> Ambiguous tool descriptions → add explicit stop conditions. Conflicting tool results → add conflict resolution in orchestrator. Error messages not normalised → standardise error format so model can parse it reliably.</div></div></div>
+  </div>
+</div>
+<!-- SYSTEM DESIGN -->
+<div id="page-sysdesign" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// the senior differentiator</div><h2 class="sec-title">System Design for AI</h2><p class="sec-desc">Senior rounds at GCCs open with a system design question. You have 45–60 minutes. This framework and the worked designs below are your prep.</p></div>
+  <div class="callout callout-blue"><div class="callout-head">Framework (first 5 minutes of every design):</div>1. Clarify scope: what's in/out, user type, scale estimate. 2. Define constraints: latency budget, cost budget, accuracy floor. 3. Sketch happy path end-to-end. 4. Identify the hardest sub-problems. 5. Deep-dive 2 components the interviewer cares about. 6. Failure modes + monitoring. Always think out loud — the reasoning matters more than the diagram.</div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab(this,'tsd1')">Doc Intelligence</button>
+    <button class="tab" onclick="switchTab(this,'tsd2')">Multilingual Bot</button>
+    <button class="tab" onclick="switchTab(this,'tsd3')">LLM Gateway</button>
+    <button class="tab" onclick="switchTab(this,'tsd4')">Compliance Agent</button>
+    <button class="tab" onclick="switchTab(this,'tsd5')">Enterprise RAG</button>
+  </div>
+  <div class="tab-panel active" id="tsd1">
+    <div class="sec-head" style="margin-top:1rem"><h2 class="sec-title" style="font-size:18px">Design: Enterprise Document Intelligence Platform</h2><p class="sec-desc" style="font-size:12px">Your ECU Worldwide / XPO project at system design depth. 10,000 invoices/day, 15 languages, 99.5% extraction accuracy.</p></div>
+    <div class="code-block">Inbound docs (PDF/image/scan)
+  → S3/GCS bucket → Pub/Sub event trigger → Async queue
+  → Document Classifier (type: invoice / PO / BOL / customs)
+  → Specialised Extractor per doc type (Gemini structured output)
+  → JSON schema validation (Pydantic)
+  → Confidence score
+     ├─ High (>0.92): auto-approve → write to ERP DB
+     └─ Low (≤0.92): Human Review Queue (UI with field diff + model confidence)
+  → Reconciliation pipeline → Downstream ERP
 
+Key components:
+• Ingestion: async queue (Cloud Tasks/SQS) — decouples volume spikes
+• Extraction: Gemini (your benchmark winner) with structured JSON output
+• Table parsing: Camelot/Textract before LLM — PDFs with tables need preprocessing
+• Vector store: Elasticsearch (you already use this!) for doc similarity + audit retrieval
+• Human review UI: flagged docs + confidence per field + diff vs. prior version
+• Monitoring: extraction accuracy per doc type, per language, per model version</div>
+    <div class="qa-list" style="margin-top:1rem">
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you handle a new document type without retraining?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Few-shot prompting with 3–5 examples of the new type in the system prompt, plus the target JSON schema. Your classifier needs one new training example or a simple keyword rule. No retraining needed for the extractor — just a new prompt template + schema. Monitor accuracy on the new type separately. If few-shot isn't sufficient (unusual layout, table-heavy), add a doc-type-specific preprocessing step. This is exactly the pattern you used scaling ECU to new carrier invoice formats.</div></div></div>
+    </div>
+  </div>
+  <div class="tab-panel" id="tsd2">
+    <div class="sec-head" style="margin-top:1rem"><h2 class="sec-title" style="font-size:18px">Design: Multilingual Customer Support Bot</h2><p class="sec-desc" style="font-size:12px">Your H&P / CCAI work + ADB multilingual NLP experience combined. Voice + chat, 4 languages.</p></div>
+    <div class="code-block">Voice input → STT (Google Speech-to-Text) → Language Detection
+  → [If non-English] Translation → English
+  → Intent Classification → Route: FAQ / Booking / Escalation
+  → RAG retrieval (knowledge base: protocols, appointment slots)
+  → LLM response generation (with retrieved context)
+  → [If non-English] Translate response back → TTS → Voice output
+
+Key design decisions:
+• Session state: Redis per session_id (conversation history, detected language, entities)
+• Escalation: confidence < threshold OR negative sentiment → human handoff with context
+• Safety: PII redaction (customer name, pet details) BEFORE LLM call
+• Latency: CCAI handles STT/TTS. LLM call must be &lt;1.5s → use prompt caching for
+  stable system prompt (the veterinary assistant persona), streaming for response
+• Multilingual: detect at input, store lang, translate response back at output
+  (your ADB experience: Tagalog NLP — same translation-wrapper pattern)</div>
+  </div>
+  <div class="tab-panel" id="tsd3">
+    <div class="sec-head" style="margin-top:1rem"><h2 class="sec-title" style="font-size:18px">Design: LLM Gateway</h2><p class="sec-desc" style="font-size:12px">Increasingly asked at GCCs — a unified API layer in front of multiple LLM providers.</p></div>
+    <div class="code-block">Client request
+  → Gateway API (FastAPI)
+  → Auth + Rate Limiting (per team, per model, per day budget)
+  → Request Router
+     ├─ Model selection (cost / latency / capability rules)
+     └─ Cache check (hash stable prompts → serve from Redis, TTL 1hr)
+  → Prompt Preprocessing (PII scrub, prompt caching key hash)
+  → Provider APIs (Anthropic / OpenAI / Gemini / Azure OpenAI)
+  → Fallback: if 429/500 → retry on secondary provider
+  → Response Post-processing (guardrails, format normalisation)
+  → Logging (token count, latency, model, team_id, cost, request_id)
+  → Cost Accounting (per-team budget tracking, alert at 80% daily cap)
+  → Response → Client
+
+Key non-functionals:
+• Fallback routing avoids single-provider dependency
+• Budget guardrails: hard cap per team per day (block requests, not just alert)
+• Observability: p50/p95/p99 latency, cost per team, model error rates
+• Caching: 20% of queries typically repeat → significant cost reduction</div>
+  </div>
+  <div class="tab-panel" id="tsd4">
+    <div class="sec-head" style="margin-top:1rem"><h2 class="sec-title" style="font-size:18px">Design: Tax Compliance Multi-Agent System</h2><p class="sec-desc" style="font-size:12px">Your GST/TDS CrewAI project at full system design depth.</p></div>
+    <div class="code-block">Input: Invoice batch (PDF/CSV)
+  → Ingestion Agent: parse, normalise, extract structured fields
+  → Extraction Agent: LLM-based field extraction → JSON per invoice
+  → Rule Agent: loads applicable GST/TDS rules from rules DB (deterministic lookup)
+  → Calculation Agent: computes expected tax, compares to filed amount
+  → Discrepancy Agent: flags variances above threshold (configurable: ₹500 or 1%)
+  → Report Agent: generates compliance report (PDF/Excel)
+  → Audit Log: immutable record of every agent action + LLM call input/output
+
+Safety layer (orchestrator enforces, NOT the LLM):
+• Max 30 hops total across all agents in one workflow
+• All DB writes require human approval step (approval token pattern)
+• Every LLM output validated against Pydantic schema before passing downstream
+• Sensitive financial data: encrypted at rest, NEVER in logs (log refs only)
+• Full audit trail: agent ID, timestamp, LLM call hash, input, output, confidence</div>
+  </div>
+  <div class="tab-panel" id="tsd5">
+    <div class="sec-head" style="margin-top:1rem"><h2 class="sec-title" style="font-size:18px">Design: Enterprise Knowledge RAG at Scale</h2><p class="sec-desc" style="font-size:12px">Common system design at Adobe / SAP / ServiceNow — internal knowledge base for 10,000 employees.</p></div>
+    <div class="code-block">Documents (Confluence, SharePoint, PDFs, Slack archives)
+  → Ingestion pipeline (scheduled crawl + webhook on update)
+  → Preprocessing: format normalisation, PII scrub
+  → Chunking: semantic + hierarchical (parent/child)
+  → Contextual enrichment: LLM-generated context per chunk (with prompt caching)
+  → Embedding: text-embedding-3-large → Pinecone / Weaviate
+  → BM25 index: Elasticsearch (also stores metadata, permissions)
+
+Query path:
+  User query
+  → Auth check (user permissions → filter doc access)
+  → Query rewriting (3 reformulations via LLM)
+  → Hybrid retrieval (BM25 + dense) → RRF fusion
+  → Cross-encoder reranker → top-5 chunks
+  → LLM generation (with citation enforcement)
+  → Response with source links
+
+Non-functionals at scale:
+• Entitlement filtering: retrieve only docs the user has access to (metadata filter)
+• Staleness: re-index on document update (webhook) + nightly full re-index
+• Multi-tenancy: namespace isolation per department in vector DB
+• Latency budget: &lt;3s end-to-end (query rewriting: 0.5s, retrieval: 0.3s, LLM: 2s)</div>
+  </div>
+</div>
+<!-- ML CORE + DSA -->
+<div id="page-mlcore" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// bridge the gap</div><h2 class="sec-title">ML Core &amp; DSA</h2><p class="sec-desc">Classic ML for the 25% of questions that still ask it. DSA for 1–2 coding rounds. Both need consistent daily practice.</p></div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab(this,'tml1')">ML Fundamentals</button>
+    <button class="tab" onclick="switchTab(this,'tml2')">DSA Strategy</button>
+  </div>
+  <div class="tab-panel active" id="tml1">
+    <div class="qa-list">
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Bias-variance trade-off and how it applies to LLM fine-tuning.</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Classical:</strong> Bias = error from wrong assumptions (underfitting). Variance = sensitivity to training data fluctuations (overfitting). You can't minimise both simultaneously — the trade-off.<br/><br/><strong>In LLM fine-tuning:</strong> Pre-trained model has very low bias for general language. Fine-tuning on small domain dataset: (1) Reduces task-specific bias (model learns domain vocab/format). (2) Can dramatically increase variance — the model forgets general capabilities (catastrophic forgetting) if fine-tuned too aggressively. (3) LoRA mitigates this by keeping most weights frozen — domain adaptation with minimal forgetting. The bias-variance frame maps to: too few steps = biased to general patterns, too many = overfit to training set, fails on held-out domain data.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How does logistic regression work? You used it in ADB — why was it the right choice over an LLM?</span></div><div class="qa-badge easy">Easy</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Logistic regression applies sigmoid to a linear combination of features: P(y=1|x) = σ(wᵀx + b). Multi-class → softmax (multinomial LR). Simple, interpretable, fast.<br/><br/><strong>Why it was right for ADB:</strong> (1) <strong>Interpretability</strong> — a government grievance system needs explainable decisions. LR gives feature weights that can be audited. (2) <strong>Small labelled data</strong> — with limited labelled complaints, a simpler model generalises better. (3) NLP preprocessing gave sufficient signal without deep learning. (4) <strong>Deployment simplicity</strong> — runs anywhere, no GPU, critical for the AWS-deployed government system.<br/><br/><strong>Senior angle:</strong> Choosing LR over an LLM wasn't a limitation — it was the right engineering decision given interpretability requirements, data size, and deployment constraints. Knowing when NOT to use an LLM is itself a senior skill.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What is LoRA and why does it matter?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Low-Rank Adaptation:</strong> Instead of fine-tuning all model weights (billions of parameters), LoRA adds small trainable low-rank matrix pairs (A and B, where rank r &lt;&lt; d) to the frozen base model's attention layers. The update is ΔW = BA. Trains &lt;1% of parameters.<br/><br/><strong>Why it matters:</strong> (1) 10–100× cheaper than full fine-tuning. (2) Minimal catastrophic forgetting — base weights unchanged, only adapters updated. (3) Composable — can swap LoRA adapters per task without reloading the base model. (4) QLoRA extends this to quantised models (4-bit), enabling fine-tuning on consumer GPUs.<br/><br/><strong>Senior framing:</strong> You don't need to have implemented LoRA, but you need to be able to advise on when to use it: style/format adaptation where few-shot prompting is insufficient, but full fine-tuning is cost-prohibitive.</div></div></div>
+      <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you handle class imbalance? You had it in the fraud detection project.</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">Fraud is rare — a model predicting "not fraud" always achieves 99%+ accuracy on an imbalanced dataset. That metric is useless.<br/><br/><strong>Techniques:</strong> (1) <strong>Resampling:</strong> SMOTE (oversample minority), random undersample majority, or both. (2) <strong>Class weights:</strong> Penalise misclassifying the minority class more heavily in the loss function (class_weight='balanced' in sklearn). (3) <strong>Threshold tuning:</strong> Instead of 0.5, tune the decision threshold on validation set to optimise F1 or precision-recall at the operating point you care about. (4) <strong>Evaluation:</strong> Use precision-recall AUC, not ROC-AUC. Report F1, precision, recall separately — never just accuracy.<br/><br/><strong>Business framing:</strong> In fraud detection, false negatives (missed fraud) cost more than false positives (legitimate flagged). Your threshold should reflect that asymmetric cost.</div></div></div>
+    </div>
+  </div>
+  <div class="tab-panel" id="tml2">
+    <div class="callout callout-yellow"><div class="callout-head">DSA strategy for a 7-year experienced engineer:</div>You are not preparing to pass a competitive programming contest. You are preparing to demonstrate problem-solving clarity under pressure. Target: NeetCode 150. Timeline: 1 medium/day every day of the 8 weeks = 56 problems. That's enough. Focus on clarity of explanation over clever optimisations.</div>
+    <div class="card-grid">
+      <div class="card"><div class="card-tag tag-dsa">Priority 1 · Weeks 1–2</div><div class="card-title">Arrays &amp; Strings</div><div class="card-body">Two pointers, sliding window, prefix sums. Most common in AI Engineer loops. Target: Two Sum, Best Time to Buy/Sell Stock, Longest Substring Without Repeating, Product of Array Except Self, Minimum Window Substring.</div></div>
+      <div class="card"><div class="card-tag tag-dsa">Priority 2 · Weeks 3–4</div><div class="card-title">Trees &amp; Graphs</div><div class="card-body">BFS/DFS, binary tree traversals, graph connectivity. Level Order Traversal, Number of Islands, Clone Graph, Lowest Common Ancestor, Word Ladder.</div></div>
+      <div class="card"><div class="card-tag tag-dsa">Priority 3 · Weeks 5–6</div><div class="card-title">Dynamic Programming</div><div class="card-body">1D DP, 2D DP, memoisation. Fibonacci, Climbing Stairs, Coin Change, Longest Common Subsequence, 0/1 Knapsack, Longest Palindromic Subsequence.</div></div>
+      <div class="card"><div class="card-tag tag-sys">Priority 4 · Weeks 7–8</div><div class="card-title">Heaps, Stack, Backtracking</div><div class="card-body">Priority queues, monotonic stacks. Top K Frequent, Median from Data Stream, Valid Parentheses, Generate Parentheses, Permutations, Subsets.</div></div>
+    </div>
+    <div class="callout callout-blue"><div class="callout-head">Interview communication pattern for DSA:</div>1. Restate the problem in your own words. 2. Ask 1–2 clarifying questions (input constraints, edge cases). 3. Talk through brute force first ("the naive approach is O(n²), here's why"). 4. Optimise: name the pattern ("this looks like a sliding window problem"). 5. Code with narration. 6. Test with the example, then an edge case. If you're stuck: say what you know, not just what you don't.</div>
+  </div>
+</div>
+
+<!-- PRODUCTION -->
+<div id="page-prod" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// what separates senior from mid</div><h2 class="sec-title">Production &amp; MLOps</h2><p class="sec-desc">GCCs want engineers who've seen what breaks at scale. Your production projects give you this — you just need the right vocabulary.</p></div>
+  <div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you version and deploy LLM applications safely?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Three things change in LLM apps:</strong> model version, prompt version, pipeline code. All need versioning.<br/><br/><strong>Prompt versioning:</strong> Store prompts in a registry (LangSmith, Langfuse, or Git-tracked YAML). Never hardcode in application code. Tag releases: <code>system-prompt-v2.3</code>. When you update a prompt, run your eval suite first — if faithfulness or accuracy drops, block the deploy.<br/><br/><strong>Model version pinning:</strong> Always pin to a specific model version (<code>claude-3-5-sonnet-20241022</code>, not <code>claude-latest</code>). Model providers update models — "latest" can break your evals silently.<br/><br/><strong>Canary deployment:</strong> Route 5% of traffic to new model/prompt version, compare eval metrics in production, roll out to 100% only if metrics hold. Use feature flags.<br/><br/><strong>Eval gates in CI/CD:</strong> Block merge if key metrics (faithfulness, accuracy, latency p95) degrade beyond threshold.<br/><br/><strong>Your angle:</strong> In ECU, when you switched from earlier models to Gemini after benchmarking, that was a model migration. Frame how you validated the switch before full production cutover — that's exactly this process.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">What would you instrument in an LLM application for observability?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Four layers:</strong><br/><br/>(1) <strong>Request-level:</strong> request_id, user_id, session_id, timestamp, model_name, model_version, prompt_version_tag.<br/><br/>(2) <strong>Token &amp; cost:</strong> input_tokens, output_tokens, cost_per_request, cumulative_cost_per_team. Alert when daily spend exceeds budget.<br/><br/>(3) <strong>Latency:</strong> TTFT, TPS, end-to-end latency. Track p50/p95/p99 separately. P95 is your SLA.<br/><br/>(4) <strong>Quality signals:</strong> User feedback (thumbs up/down), task completion rate, retrieval hit rate, faithfulness scores (sampled 5%), fallback rate.<br/><br/><strong>Tools:</strong> LangSmith (prompt tracking + traces), Helicone (cost + latency gateway), Phoenix/Arize (RAG eval in production), Kibana — you already use this for Elasticsearch, extend to LLM logs.<br/><br/><strong>Alerting:</strong> Error rate &gt;1%, latency p95 &gt; SLA, cost &gt; daily budget, faithfulness sample drops &gt;10% vs. baseline.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">How do you detect and handle model drift in a production AI system?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Types of drift:</strong> (1) Data drift — input distribution shifts (new invoice formats, new carriers in ECU). (2) Concept drift — the relationship between inputs and correct outputs changes (tax law changes in GST system). (3) Model drift — provider silently updates the model ("latest" pinning).<br/><br/><strong>Detection:</strong> Continuous eval on a holdout set (weekly batch evaluation of sampled production outputs against ground truth or LLM-as-judge). Statistical tests on input feature distributions (PSI for continuous features, chi-square for categorical). Monitor output distribution — if average extraction confidence drops 10% vs. baseline over 7 days, that's a signal.<br/><br/><strong>Response:</strong> (1) Pin model versions — eliminates model drift. (2) Automated alerts → human review on drifted metric. (3) For data drift — check if new document types need prompt update or new few-shot examples. (4) For concept drift — update your rules DB and re-run evals.<br/><br/>Frame from your life insurance fraud project: model retraining cadence when new fraud patterns emerge.</div></div></div>
+  </div>
+</div>
+
+<!-- BEHAVIORAL -->
+<div id="page-behavioral" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// tell your story</div><h2 class="sec-title">Behavioral (STAR Framework)</h2><p class="sec-desc">GCCs weight behavioral heavily for Senior roles. Five themes come up in every loop. Prepare one STAR story per theme.</p></div>
+  <div class="callout callout-blue"><div class="callout-head">STAR = Situation, Task, Action, Result.</div>The Result must include a metric or business outcome. "It worked" is not a result. "Reduced invoice processing time by 60%, enabling the team to handle 3× volume" is a result.</div>
+  <div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Tell me about a time you made a high-stakes technical decision with incomplete information.</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Your story: ECU Worldwide LLM selection.</strong><br/><br/><strong>S:</strong> ECU needed a document intelligence platform processing invoices in 15+ languages/countries. No existing ground truth dataset, tight timeline, multiple LLM providers all claiming best performance.<br/><strong>T:</strong> Lead the LLM evaluation and selection process — the model choice would define platform accuracy and cost profile for years.<br/><strong>A:</strong> Built a structured benchmarking framework: sampled 500 invoices across all document types and languages, defined extraction metrics per field type (numeric accuracy, date format, entity recognition), ran all frontier models (GPT-4, Gemini, Claude, Mistral), tracked cost-per-invoice alongside accuracy. Gemini emerged as the strongest combination of multilingual accuracy and cost.<br/><strong>R:</strong> Platform achieved 99%+ extraction accuracy on structured fields. Benchmarking framework became the standard evaluation process for all subsequent LLM decisions on the account.<br/><br/><strong>Senior signal:</strong> You built a systematic process where none existed — that's ownership at Senior level.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Describe a time a production system you owned failed. What did you learn?</span></div><div class="qa-badge hard">Hard</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Framework:</strong> Interviewers look for (1) you owned it — didn't deflect, (2) structured diagnosis, (3) lasting fix, not just hotfix, (4) you share the learning openly.<br/><br/><strong>Prepare a story from your production work.</strong> Good angles: ADB — NLP pipeline accuracy degraded on a new batch of grievances (out-of-distribution language variation)? ECU — extraction accuracy dropped when a carrier changed invoice format mid-project? Life insurance — false positive spike that affected claims processing?<br/><br/><strong>Structure the answer:</strong> Here's what failed → here's how I caught it (monitoring) → here's how I diagnosed it (retrieval failure vs. generation failure) → here's the root cause → here's the fix → here's the monitoring I added so it won't recur silently.<br/><br/><strong>Key signal:</strong> You caught it, not a customer. You diagnosed it systematically. You added monitoring. That's the Senior pattern.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Why are you leaving Datamatics? Why now?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>The answer — frame toward growth, not away from frustration:</strong><br/><br/>"After 7 years at Datamatics, I've had the opportunity to build production AI systems across logistics, government, insurance, and conversational AI — that breadth has been genuinely valuable. What I'm looking for now is an environment with deeper engineering structure, clearer IC career progression, and work on AI products that have a defined roadmap at scale. GCCs like [Company] offer that: global scope, IC track, and teams of engineers who specialise in AI systems at depth. The timing feels right — I have the production experience to contribute at Senior level immediately, and I want my next 5 years to be building at product scale."<br/><br/><strong>Do NOT say:</strong> "My current company lacks structure" or "there's no career path" — even if true, these signal complaints rather than direction. Frame everything toward what you're moving toward.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">You disagree with your tech lead's architectural decision. How do you handle it?</span></div><div class="qa-badge med">Med</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text"><strong>Framework: Disagree and commit</strong> — voice disagreement clearly through proper channels, then execute the decision fully once made.<br/><br/>"I'd first make sure I understand the reasoning behind the decision — often there are constraints I'm not aware of (timeline, legacy coupling, team skill set). If after understanding the rationale I still have a substantive technical objection, I'd raise it directly in a 1-1 or design review with specific concerns and data: 'I think this approach risks X at scale because Y — have we considered Z as an alternative?' If the tech lead proceeds after hearing the concern, I'd commit fully to executing it while documenting my concern in the design doc. If I turned out to be right when a problem surfaced later, the value is in the post-mortem learning, not in being right."<br/><br/><strong>Senior signal:</strong> You show you can advocate without blocking, and execute without passive resistance.</div></div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)"><div class="qa-header"><span class="qa-q-text">Where do you see yourself in 3–5 years?</span></div><div class="qa-badge easy">Easy</div><div class="qa-toggle">+</div></div><div class="qa-a"><div class="qa-a-text">"I'm targeting the Staff/Principal IC track — I want to go deeper technically rather than move into people management. In 3–5 years, I'd like to be the person who owns the AI architecture for a product area — setting technical direction for RAG and agentic systems, mentoring junior engineers on AI engineering patterns, and driving the evaluation framework that keeps production LLM systems honest. I'm also interested in the Responsible AI / AI Governance space as AI systems become more consequential — I think understanding both the engineering and the governance layer is going to be a real differentiator for senior IC engineers."<br/><br/><strong>Why this works:</strong> Clear, specific, IC-oriented. Shows ambition without claiming you want the manager's job. Mentions mentorship (Senior engineers are expected to elevate others). The Responsible AI angle signals awareness of where the field is going.</div></div></div>
+  </div>
+</div>
+<!-- FLASH CARDS -->
+<div id="page-flashcards" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// rapid recall</div><h2 class="sec-title">Flash Cards</h2><p class="sec-desc">Click any card to reveal the answer. If you can say it before clicking, you know it. If not — that's your study list.</p></div>
+  <div class="flash-grid" id="flashGrid"></div>
+</div>
+
+<!-- EXPERIENCE MAP -->
+<div id="page-experience" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// translate your work</div><h2 class="sec-title">Project → Interview Map</h2><p class="sec-desc">Every project you've shipped maps to interview talking points. This is your ammunition.</p></div>
+  <div class="exp-row"><div class="exp-project">ECU Worldwide<span>Logistics · Doc Intel</span></div><div class="exp-arrow">→</div><div><div class="exp-map">RAG pipeline design, LLM benchmarking methodology, multi-language document processing, structured output validation, production accuracy metrics. Use for: RAG questions, LLM selection, production system design, multilingual NLP.</div><div class="exp-tags"><span class="itag">RAG</span><span class="itag">LLM eval</span><span class="itag">Structured output</span><span class="itag">Multilingual</span><span class="itag">Production accuracy</span></div></div></div>
+  <div class="exp-row"><div class="exp-project">XPO Logistics<span>Logistics · IDP</span></div><div class="exp-arrow">→</div><div><div class="exp-map">Invoice processing at scale, OpenAI + Gemini combination, shipping document heterogeneity. Use for: production LLM questions, cost optimisation (why two models), document understanding system design.</div><div class="exp-tags"><span class="itag">IDP</span><span class="itag">Cost optimisation</span><span class="itag">Scale</span><span class="itag">Multi-model routing</span></div></div></div>
+  <div class="exp-row"><div class="exp-project">ADB Philippines<span>Govt · NLP</span></div><div class="exp-arrow">→</div><div><div class="exp-map">Multilingual NLP pipeline, Logistic Regression (why not LLM: interpretability + small data), AWS deployment, Tagalog handling. Senior angle: knowing when NOT to use an LLM.</div><div class="exp-tags"><span class="itag">Multilingual NLP</span><span class="itag">Model selection</span><span class="itag">AWS</span><span class="itag">Interpretability</span></div></div></div>
+  <div class="exp-row"><div class="exp-project">GST/TDS Compliance<span>Fintech · Multi-agent</span></div><div class="exp-arrow">→</div><div><div class="exp-map">CrewAI multi-agent orchestration, agent specialisation patterns, financial data validation, deterministic vs. LLM logic separation, audit trail. Use for: every agent question, multi-agent coordination design.</div><div class="exp-tags"><span class="itag">Multi-agent</span><span class="itag">CrewAI</span><span class="itag">Orchestration</span><span class="itag">Compliance</span><span class="itag">Audit trail</span></div></div></div>
+  <div class="exp-row"><div class="exp-project">H&amp;P Veterinary (CCAI)<span>Healthcare · Conv. AI</span></div><div class="exp-arrow">→</div><div><div class="exp-map">Google CCAI architecture, voice + chat bot, LLM response fine-tuning, session state management, latency constraints. Use for: conversational AI design, multi-turn dialogue, voice system latency.</div><div class="exp-tags"><span class="itag">CCAI</span><span class="itag">Voice bot</span><span class="itag">Session state</span><span class="itag">Latency</span><span class="itag">Multi-turn</span></div></div></div>
+  <div class="exp-row"><div class="exp-project">Life Insurance Fraud<span>Insurance · ML</span></div><div class="exp-arrow">→</div><div><div class="exp-map">Real-time fraud scoring, class imbalance handling (fraud is rare), model monitoring for data drift, asymmetric cost of FP vs. FN. Use for: ML system design, real-time inference, model reliability.</div><div class="exp-tags"><span class="itag">Real-time inference</span><span class="itag">Class imbalance</span><span class="itag">Model monitoring</span><span class="itag">Risk trade-offs</span></div></div></div>
+</div>
+
+<!-- CHECKLIST -->
+<div id="page-checklist" class="page">
+  <div class="sec-head"><div class="sec-eyebrow">// before each interview</div><h2 class="sec-title">Interview Checklist</h2><p class="sec-desc">Click items to check off. Saved in your browser per session.</p></div>
+  <div class="sec-eyebrow" style="margin-bottom:8px">Week before</div>
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Research the company's specific AI products (Firefly / Joule / Now Assist / Agentforce)</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Prepare 3 STAR stories: technical decision, failure/recovery, conflict/leadership</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Run through this playbook's flash cards for 30 min</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Do 2 LeetCode mediums timed (simulate pressure)</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Practice one system design out loud, 45 min timed</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Prepare 3 questions to ask the interviewer (IC career path, team AI stack, what makes a great hire here)</span></div>
+  </div>
+  <div class="sec-eyebrow" style="margin-bottom:8px;margin-top:1.3rem">Day before</div>
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Re-read your resume — especially the project bullets you'll be asked about</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Light DSA — 1 easy warm-up only. Don't grind the night before.</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Confirm interview link / format / panel names if available</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Sleep 7+ hours. Non-negotiable.</span></div>
+  </div>
+  <div class="sec-eyebrow" style="margin-bottom:8px;margin-top:1.3rem">During the interview</div>
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Clarify before designing or coding — ask scope, constraints, scale</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Think out loud — narrate your reasoning, not just your answer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Name trade-offs explicitly — "I chose X over Y because..."</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">If stuck on DSA: say "let me think through brute force first" — shows process</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">Tie every AI answer to a production project — you have 7 years of these</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1.5,4.5 3.5,7 7.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="check-text">End with your questions — shows genuine interest</span></div>
+  </div>
+</div>
+
+</main>
+</div>
 <script>
-// ── DATA ──────────────────────────────────────────────
-const QUESTS = [
-  { id:'q1', name:'LeetCode problem',        sub:'NeetCode 150 — pick a problem',          xp:{easy:50,medium:70,hard:100}, tag:'dsa', cls:'t-dsa', hasDiff:true  },
-  { id:'q2', name:'RAG / Agents session',    sub:'45 min hands-on build time',              xp:{easy:80,medium:80,hard:80},  tag:'ai',  cls:'t-ai',  hasDiff:false },
-  { id:'q3', name:'System design concept',   sub:'1 topic — URL shortener, etc.',           xp:{easy:40,medium:60,hard:90},  tag:'dsa', cls:'t-dsa', hasDiff:true  },
-  { id:'q4', name:'AI reading / course',     sub:'DeepLearning.AI or Anthropic cookbook',   xp:{easy:50,medium:50,hard:50},  tag:'ai',  cls:'t-ai',  hasDiff:false },
-  { id:'q5', name:'Portfolio / website work',sub:'Any meaningful progress',                 xp:{easy:40,medium:60,hard:80},  tag:'web', cls:'t-web', hasDiff:true  },
-  { id:'q6', name:'No gaming before quests', sub:'Quests first, then game guilt-free',      xp:{easy:30,medium:30,hard:30},  tag:'bonus',cls:'t-bonus',hasDiff:false},
-  { id:'q7', name:'Full day streak bonus',   sub:'Complete all 6 quests above',             xp:{easy:70,medium:70,hard:70},  tag:'bonus',cls:'t-bonus',hasDiff:false},
+const PAGES=['home','roadmap','skills','targets','llm','rag','agents','sysdesign','mlcore','prod','behavioral','flashcards','experience','checklist'];
+function go(id){
+  PAGES.forEach(p=>{const el=document.getElementById('page-'+p);if(el)el.style.display='none';});
+  const t=document.getElementById('page-'+id);if(t){t.style.display='block';window.scrollTo(0,0);}
+  document.querySelectorAll('.nav-link').forEach(l=>{l.classList.remove('active');if(l.getAttribute('onclick')===`go('${id}')`)l.classList.add('active');});
+  if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  PAGES.forEach(p=>{const el=document.getElementById('page-'+p);if(el)el.style.display=p==='home'?'block':'none';});
+  buildFlashCards();
+});
+function toggleQA(btn){
+  const item=btn.closest('.qa-item');item.classList.toggle('open');
+  btn.querySelector('.qa-toggle').textContent=item.classList.contains('open')?'−':'+';
+}
+function switchTab(btn,panelId){
+  const bar=btn.closest('.tab-bar');bar.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  const page=btn.closest('.page')||btn.closest('[id^="page-"]');
+  if(page)page.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const panel=document.getElementById(panelId);if(panel)panel.classList.add('active');
+}
+document.getElementById('mobToggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+function toggleCheck(item){item.classList.toggle('checked');}
+const FLASH_DATA=[
+  {cat:'LLM Fundamentals',q:'What is the KV cache and why is it important?',a:'Stores computed Key/Value tensors from previous tokens during autoregressive generation. Avoids O(n) recomputation per step. Enables prompt caching — stable system prompts cached server-side, cutting cost 60-80% for high-traffic apps.'},
+  {cat:'LLM Fundamentals',q:'Temperature vs top-p — one-liner difference?',a:'Temperature scales the distribution (low=deterministic, high=random). Top-p (nucleus) samples from the smallest token set summing to probability p — adaptive to distribution shape, unlike fixed top-k.'},
+  {cat:'LLM Fundamentals',q:'What is BPE tokenization?',a:'Byte-Pair Encoding: iteratively merges the most frequent character pairs in a corpus to build a subword vocabulary. Handles rare words gracefully. Non-Latin scripts (Hindi, Tamil) tokenize 2-4× less efficiently than English — matters for cost and context window.'},
+  {cat:'LLM Fundamentals',q:'What is RLHF and how does it differ from DPO?',a:'RLHF (Reinforcement Learning from Human Feedback): train a reward model from human preferences, then use PPO to fine-tune the LLM to maximise the reward. DPO (Direct Preference Optimisation): skips the reward model, directly optimises on preference pairs. DPO is simpler, more stable, less infrastructure. RLHF gives more control but is harder to tune.'},
+  {cat:'RAG',q:'Hybrid search: what two signals does it combine?',a:'Sparse (BM25 — exact keyword, great for IDs/proper nouns) + Dense (embedding similarity — great for semantic/paraphrase queries). Combined with RRF (Reciprocal Rank Fusion). Consistently beats either alone by 5-15% nDCG.'},
+  {cat:'RAG',q:'What is HyDE and when does it fail?',a:'Hypothetical Document Embeddings: LLM generates a hypothetical answer, then you embed that (not the query) for retrieval. Works when query and document are stylistically different. Fails if hypothesis hallucinates — you then retrieve on a wrong premise. Alternative: Multi-Query Retrieval (3 query reformulations, merge with deduplication).'},
+  {cat:'RAG',q:'RAGAS metrics — name 3 and what they catch.',a:'Faithfulness: does answer stick to retrieved context only? (catches generation hallucination). Context Recall: did retrieval fetch all relevant chunks? (catches retrieval gaps). Answer Relevancy: does answer address the question? Faithfulness + Context Recall together isolate the failure layer.'},
+  {cat:'RAG',q:'What is contextual retrieval and why does it help?',a:"Anthropic's technique: before indexing each chunk, prepend LLM-generated context explaining what the chunk is about in the full document's context. Makes each chunk self-contained for retrieval. Cost: one LLM call per chunk at index time (use prompt caching to cut 80%). Improves recall especially for long docs where isolated chunks lose meaning."},
+  {cat:'Agents',q:'ReAct pattern — what does it stand for?',a:'Reasoning + Acting. Model alternates: Thought (reasoning trace) → Action (tool call) → Observation (tool result) → repeat. Forces planning before each action. Failure modes: infinite loops (fix: max_iterations), hallucinated observations (fix: validate tool outputs before returning to agent).'},
+  {cat:'Agents',q:'What goes in the orchestrator vs. the LLM?',a:'Orchestrator owns: tool execution, retry/rate limiting, loop termination, auth, audit logs, cost tracking, human-in-the-loop. LLM owns: which tool to call, reasoning, handling ambiguity, natural language generation. Safety-critical logic → always orchestrator. Never trust the LLM to enforce its own limits.'},
+  {cat:'Agents',q:'Three multi-agent coordination patterns?',a:'Sequential/pipeline (A→B→C, simple, debuggable). Parallel/fan-out (independent subtasks run simultaneously, merge results with RRF or vote). Hierarchical (manager delegates to specialist workers). A fourth: peer-to-peer critique (expensive, use for high-stakes only).'},
+  {cat:'Production',q:'Two components of LLM inference latency?',a:'TTFT (Time to First Token) = prompt processing latency. TPS (Tokens Per Second) = generation speed. Reduce TTFT with prompt caching. Reduce perceived latency gap with streaming (user sees output immediately). Track p50/p95/p99 TTFT separately — p95 is your SLA metric.'},
+  {cat:'Production',q:'How do you safely version LLM applications?',a:'Pin model to exact version (never "latest"). Version prompts in a registry. Canary deploy (5% traffic to new version). Eval gates in CI/CD — block deploy if faithfulness/accuracy drops. Treat prompt changes like code changes.'},
+  {cat:'Production',q:'Name two types of prompt injection and one defence each.',a:'Direct: user sends malicious instructions in their own input. Defence: input sanitisation + structural role separation. Indirect: retrieved document contains injected instructions. Defence: output validation (all tool calls must be in permitted set before execution) + privilege minimisation.'},
+  {cat:'ML Core',q:'Fine-tuning vs. RAG — when do you use each?',a:'RAG: knowledge is dynamic/large/needs citations. Fine-tuning: need consistent format/style, high-quality labelled data, domain vocabulary. NOT mutually exclusive — fine-tune for style, use RAG for factual grounding. The orthogonal axis: parametric knowledge (FT) vs. contextual knowledge (RAG).'},
+  {cat:'ML Core',q:'What is LoRA and why does it reduce catastrophic forgetting?',a:'Low-Rank Adaptation: adds trainable low-rank matrix pairs (A,B where rank r << d) to frozen base model attention layers. ΔW=BA. Trains <1% of parameters. Base weights unchanged → minimal forgetting. 10-100× cheaper than full fine-tuning. QLoRA extends to 4-bit quantised models.'},
+  {cat:'Your Story',q:'Why Gemini for ECU over other models?',a:'Benchmarked all frontier models (GPT-4, Gemini, Claude, Mistral) on 500 ECU invoices across 15 languages. Defined per-field extraction metrics + cost-per-invoice. Gemini won on multilingual accuracy + cost. The benchmarking framework itself became the standard for all subsequent LLM decisions on the account.'},
+  {cat:'Your Story',q:'Why Logistic Regression for ADB Philippines instead of an LLM?',a:'Interpretability (government system needs auditable decisions — LR gives feature weights). Small labelled dataset (simpler model generalises better). AWS deployment without GPU. The senior angle: knowing when NOT to use an LLM is itself a skill. NLP preprocessing provided sufficient signal for a well-bounded classification task.'},
 ];
-
-const REWARDS = [
-  { id:'r1', name:'Game session',  icon:'🎮', xp:100 },
-  { id:'r2', name:'Takeout treat', icon:'🍜', xp:200 },
-  { id:'r3', name:'Movie night',   icon:'🎬', xp:250 },
-  { id:'r4', name:'Buy a course',  icon:'📚', xp:350 },
-  { id:'r5', name:'Full rest day', icon:'🛋️', xp:400 },
-];
-
-const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const DIFF_CYCLE = ['easy','medium','hard'];
-
-// ── STATE ─────────────────────────────────────────────
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function loadState() {
-  try {
-    return JSON.parse(localStorage.getItem('questBoardV3') || 'null') || freshState();
-  } catch(e) { return freshState(); }
-}
-
-function freshState() {
-  return {
-    today: todayKey(),
-    done: [],
-    diffs: {},      // questId -> 'easy'|'medium'|'hard'
-    notes: {},      // questId -> string
-    xpByTag: { ai:0, dsa:0, web:0 },
-    weekData: {},   // dateKey -> { xp, completedMain }
-    log: [],        // [{time, msg}]
-  };
-}
-
-let state = loadState();
-
-// Auto-reset if it's a new day
-function checkDayReset() {
-  const key = todayKey();
-  if (state.today !== key) {
-    // Save yesterday's data into weekData
-    const xp = totalXP();
-    const mainDone = state.done.filter(x => !['q6','q7'].includes(x)).length;
-    state.weekData[state.today] = { xp, completedMain: mainDone >= 5 };
-    // Keep only last 7 days
-    const keys = Object.keys(state.weekData).sort();
-    if (keys.length > 7) { delete state.weekData[keys[0]]; }
-    // Reset today
-    state.today = key;
-    state.done = [];
-    state.xpByTag = { ai:0, dsa:0, web:0 };
-    state.log = [];
-    save();
-  }
-}
-
-function save() {
-  try { localStorage.setItem('questBoardV3', JSON.stringify(state)); } catch(e) {}
-}
-
-// ── XP ────────────────────────────────────────────────
-function getDiff(id) { return state.diffs[id] || 'easy'; }
-function getXP(q) { return q.xp[getDiff(q.id)]; }
-
-function totalXP() {
-  return state.done.reduce((sum, id) => {
-    const q = QUESTS.find(q => q.id === id);
-    return sum + (q ? getXP(q) : 0);
-  }, 0);
-}
-
-// ── STREAK ────────────────────────────────────────────
-function getStreak() {
-  let streak = 0;
-  const d = new Date();
-  for (let i = 1; i <= 30; i++) {
-    d.setDate(d.getDate() - 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const data = state.weekData[key];
-    if (data && data.completedMain) streak++;
-    else break;
-  }
-  return streak;
-}
-
-// ── RENDER ────────────────────────────────────────────
-function renderDate() {
-  document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-IN', {
-    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+function buildFlashCards(){
+  const grid=document.getElementById('flashGrid');if(!grid)return;grid.innerHTML='';
+  FLASH_DATA.forEach(card=>{
+    const div=document.createElement('div');div.className='flash-card';
+    div.innerHTML=`<div><div class="flash-cat">${card.cat}</div><div class="flash-front">${card.q}</div></div><div><div class="flash-back">${card.a}</div><div class="flash-prompt">Click to reveal →</div></div>`;
+    div.addEventListener('click',()=>div.classList.toggle('flipped'));
+    grid.appendChild(div);
   });
 }
-
-function renderStreak() {
-  const streak = getStreak();
-  document.getElementById('streakBadge').textContent = `🔥 ${streak} day streak`;
-}
-
-function renderQuests() {
-  const el = document.getElementById('questList');
-  el.innerHTML = '';
-  QUESTS.forEach(q => {
-    const done = state.done.includes(q.id);
-    const diff = getDiff(q.id);
-    const xp = getXP(q);
-    const note = state.notes[q.id] || '';
-    const noteOpen = false;
-
-    const div = document.createElement('div');
-    div.className = 'quest' + (done ? ' done' : '');
-    div.id = 'quest-' + q.id;
-
-    const diffBadge = q.hasDiff
-      ? `<span class="diff-badge diff-${diff}" data-id="${q.id}" title="Click to change difficulty">${diff}</span>`
-      : '';
-
-    const noteBtn = `<button class="note-toggle${note ? ' has-note' : ''}" data-id="${q.id}" title="Add note">${note ? '📝' : '+'} note</button>`;
-
-    div.innerHTML = `
-      <div class="quest-main" data-id="${q.id}">
-        <div class="check">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <polyline points="2,6 5,9 10,3" stroke="#0a0a0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="qinfo">
-          <div class="qname-row">
-            <span class="qname">${q.name}</span>
-            ${diffBadge}
-          </div>
-          <div class="qsub">${q.sub}</div>
-        </div>
-        <div class="quest-right">
-          ${noteBtn}
-          <span class="qxp ${q.cls}">+${xp} XP</span>
-        </div>
-      </div>
-      <div class="note-area" id="note-area-${q.id}">
-        <textarea placeholder="What did you do? (e.g. Two Sum, Kadane's, system design for TinyURL...)" data-id="${q.id}">${note}</textarea>
-      </div>
-    `;
-
-    el.appendChild(div);
-
-    // Toggle quest completion
-    div.querySelector('.quest-main').addEventListener('click', (e) => {
-      if (e.target.classList.contains('diff-badge') || e.target.classList.contains('note-toggle')) return;
-      toggleQuest(q.id);
-    });
-
-    // Difficulty cycle
-    const db = div.querySelector('.diff-badge');
-    if (db) db.addEventListener('click', (e) => { e.stopPropagation(); cycleDiff(q.id); });
-
-    // Note toggle
-    div.querySelector('.note-toggle').addEventListener('click', (e) => {
-      e.stopPropagation();
-      const area = document.getElementById('note-area-' + q.id);
-      area.classList.toggle('open');
-    });
-
-    // Note save on input
-    div.querySelector('textarea').addEventListener('input', (e) => {
-      state.notes[q.id] = e.target.value;
-      const btn = div.querySelector('.note-toggle');
-      btn.className = 'note-toggle' + (e.target.value ? ' has-note' : '');
-      btn.textContent = (e.target.value ? '📝' : '+') + ' note';
-      save();
-    });
-  });
-}
-
-function toggleQuest(id) {
-  const q = QUESTS.find(q => q.id === id);
-  const xp = getXP(q);
-  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
-  if (state.done.includes(id)) {
-    state.done = state.done.filter(x => x !== id);
-    if (q.tag !== 'bonus') state.xpByTag[q.tag] = Math.max(0, (state.xpByTag[q.tag] || 0) - xp);
-    addLog(time, `Unchecked: ${q.name}`);
-  } else {
-    state.done.push(id);
-    if (q.tag !== 'bonus') state.xpByTag[q.tag] = (state.xpByTag[q.tag] || 0) + xp;
-    addLog(time, `+${xp} XP — ${q.name} [${getDiff(id)}]`);
-    showToast('+' + xp + ' XP — ' + q.name);
-    const mainDone = state.done.filter(x => !['q6','q7'].includes(x)).length;
-    if (mainDone === 5 && !state.done.includes('q7')) {
-      setTimeout(() => showToast('🔥 All quests done! Claim streak bonus!'), 800);
-    }
-  }
-  save();
-  render();
-}
-
-function cycleDiff(id) {
-  const cur = getDiff(id);
-  const idx = DIFF_CYCLE.indexOf(cur);
-  state.diffs[id] = DIFF_CYCLE[(idx + 1) % 3];
-  // If quest is done, recalculate xp
-  if (state.done.includes(id)) {
-    const q = QUESTS.find(q => q.id === id);
-    // Recalc from scratch
-    state.xpByTag = { ai:0, dsa:0, web:0 };
-    state.done.forEach(did => {
-      const dq = QUESTS.find(q => q.id === did);
-      if (dq && dq.tag !== 'bonus') {
-        state.xpByTag[dq.tag] = (state.xpByTag[dq.tag] || 0) + getXP(dq);
-      }
-    });
-  }
-  save();
-  render();
-  showToast(`Difficulty → ${state.diffs[id]}`);
-}
-
-function renderXP() {
-  const xp = totalXP();
-  document.getElementById('xpCount').textContent = xp + ' / 400 XP';
-  document.getElementById('xpFill').style.width = Math.min(100, Math.round((xp / 400) * 100)) + '%';
-  ['ai','dsa','web'].forEach((t, i) => {
-    const pts = state.xpByTag[t] || 0;
-    const lv = Math.floor(pts / 150) + 1;
-    const names = ['AI/RAG','DSA','Web'];
-    document.getElementById('chip-' + t).textContent = '⬡ ' + names[i] + ' — LV ' + lv;
-  });
-}
-
-function renderWeekGrid() {
-  const el = document.getElementById('weekGrid');
-  el.innerHTML = '';
-  const today = (new Date().getDay() + 6) % 7;
-  DAYS.forEach((d, i) => {
-    // Find data for this day of the week (rough match within last 7 days)
-    const dayOffset = (i - today + 7) % 7;
-    const dt = new Date();
-    dt.setDate(dt.getDate() - (today - i + (today >= i ? 0 : 7)));
-    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-    const data = i === today ? { xp: totalXP(), completedMain: state.done.filter(x => !['q6','q7'].includes(x)).length >= 5 } : state.weekData[key];
-
-    const div = document.createElement('div');
-    let cls = 'week-day';
-    if (i === today) cls += ' today';
-    else if (data && data.completedMain) cls += ' completed';
-    else if (data && data.xp > 0) cls += ' partial';
-    div.className = cls;
-
-    const score = data ? (i === today ? `${data.xp}xp` : (data.completedMain ? '✓' : `${data.xp}xp`)) : '–';
-    div.innerHTML = `<div class="wd-dot"></div><div class="wd-label">${d}</div><div class="wd-score">${score}</div>`;
-    el.appendChild(div);
-  });
-}
-
-function renderRewards() {
-  const xp = totalXP();
-  const el = document.getElementById('rewardsGrid');
-  el.innerHTML = '';
-  REWARDS.forEach(r => {
-    const unlocked = xp >= r.xp;
-    const d = document.createElement('div');
-    d.className = 'rcard ' + (unlocked ? 'unlocked' : 'locked');
-    d.innerHTML = `<div class="rico">${r.icon}</div><div class="rname">${r.name}</div><div class="rxp">${r.xp} XP</div>${unlocked ? '<div class="ubadge">✓ unlocked</div>' : ''}`;
-    el.appendChild(d);
-  });
-}
-
-function renderLog() {
-  const el = document.getElementById('logEntries');
-  if (!state.log || state.log.length === 0) {
-    el.innerHTML = '<div class="log-empty">No activity yet today.</div>';
-    return;
-  }
-  el.innerHTML = '';
-  [...state.log].reverse().forEach(entry => {
-    const d = document.createElement('div');
-    d.className = 'log-entry';
-    d.innerHTML = `<span class="log-time">${entry.time}</span><span>${entry.msg}</span>`;
-    el.appendChild(d);
-  });
-}
-
-function addLog(time, msg) {
-  if (!state.log) state.log = [];
-  state.log.push({ time, msg });
-  if (state.log.length > 50) state.log = state.log.slice(-50);
-}
-
-// ── MODALS ────────────────────────────────────────────
-function showResetModal() { document.getElementById('resetModal').classList.add('open'); }
-function showWipeModal()  { document.getElementById('wipeModal').classList.add('open'); }
-function closeModals() {
-  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
-}
-
-function confirmReset() {
-  state.done = [];
-  state.xpByTag = { ai:0, dsa:0, web:0 };
-  state.log = [];
-  save(); closeModals(); render();
-  showToast("Day reset. Let's go!");
-}
-
-function confirmWipe() {
-  localStorage.removeItem('questBoardV3');
-  state = freshState();
-  save(); closeModals(); render();
-  showToast('All data wiped.');
-}
-
-document.getElementById('resetModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModals(); });
-document.getElementById('wipeModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModals(); });
-
-// ── EXPORT ────────────────────────────────────────────
-function exportNotes() {
-  const lines = [`# Quest Notes — ${todayKey()}`, ''];
-  QUESTS.forEach(q => {
-    const note = state.notes[q.id];
-    if (note && note.trim()) {
-      lines.push(`## ${q.name}`);
-      lines.push(note.trim());
-      lines.push('');
-    }
-  });
-  if (lines.length <= 2) { showToast('No notes to export yet.'); return; }
-  const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `quest-notes-${todayKey()}.md`;
-  a.click();
-  showToast('Notes exported!');
-}
-
-// ── TOAST ─────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove('show'), 2400);
-}
-
-// ── MAIN ──────────────────────────────────────────────
-function render() {
-  renderDate();
-  renderStreak();
-  renderQuests();
-  renderXP();
-  renderWeekGrid();
-  renderRewards();
-  renderLog();
-}
-
-checkDayReset();
-render();
 </script>
 </body>
 </html>
