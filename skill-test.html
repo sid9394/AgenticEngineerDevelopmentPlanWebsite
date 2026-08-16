@@ -269,129 +269,129 @@ textarea::placeholder{color:var(--muted2)}
 const QUESTIONS = [
   {
     id: 1,
-    skill: 'Production RAG Systems',
+    skill: 'LLM-based Document Extraction',
     skillKey: 'rag_prod',
     tag: 'sk-rag', diff: 'med',
-    question: 'Walk me through the chunking strategy you used in your ECU invoice pipeline — or would use in a production RAG system over PDFs. What are the trade-offs between chunk size choices?',
-    hint: 'Think about: what happens with too-large chunks? Too-small? How do you handle tables in PDFs? What\'s the strategy for invoice fields vs. free text?',
-    idealPoints: ['fixed-size vs semantic chunking', 'overlap rationale', 'PDF table extraction challenge', 'hierarchical/parent-child chunking', 'chunk size effect on retrieval recall vs faithfulness']
+    question: 'In your ECU Worldwide project, you used Gemini to extract structured data from invoices across 15 languages. Walk me through the extraction pipeline — how did you get structured JSON out of the LLM reliably, how did you handle low-confidence extractions, and what was the hardest problem you solved?',
+    hint: 'This is YOUR project — answer from what you actually built. Cover: structured output / JSON mode, validation, confidence handling, multilingual challenges, and one specific hard problem.',
+    idealPoints: ['structured output / JSON schema enforcement', 'validation layer (Pydantic or rule-based)', 'confidence scoring and human review threshold', 'handling multilingual PDFs', 'one concrete hard problem (table extraction, format variance, etc)', 'monitoring extraction accuracy']
   },
   {
     id: 2,
     skill: 'LLM API & Prompt Engineering',
     skillKey: 'llm_api',
     tag: 'sk-llm', diff: 'easy',
-    question: 'What is prompt caching, how does it work mechanically, and when would you use it in a production system? Give a concrete example from something you\'ve built.',
-    hint: 'Think about: what gets cached (KV tensors), when it pays off (stable system prompts), what the cost savings look like, and how you\'d apply it in your CCAI or ECU work.',
-    idealPoints: ['KV cache mechanism', 'stable prefix requirement', 'cost reduction % ballpark', 'latency benefit', 'concrete production use case']
+    question: 'When you were benchmarking LLMs for ECU — comparing Gemini, GPT-4, and others — what did your evaluation framework look like? How did you measure "better" for a document extraction task, and what made Gemini win?',
+    hint: 'This is YOUR decision — explain the methodology. Cover: what metrics you used, how you sampled test documents, what Gemini did better than the others, and how you documented the rationale.',
+    idealPoints: ['defined per-field extraction metrics', 'sampled across document types and languages', 'measured accuracy + cost per document', 'Gemini strength on multilingual content', 'documented rationale for the selection', 'eval framework became a repeatable process']
   },
   {
     id: 3,
     skill: 'Multi-agent / CrewAI',
     skillKey: 'agent_crew',
     tag: 'sk-agent', diff: 'med',
-    question: 'In your GST/TDS compliance multi-agent system, what logic did you put in the orchestrator vs. what did you let the LLM decide? Why does this distinction matter?',
-    hint: 'This is the core orchestrator vs. LLM boundary question. What must be deterministic? What can be left to LLM judgment? What breaks if you put safety-critical logic in the LLM?',
-    idealPoints: ['orchestrator owns: retry/rate limit/loop termination/auth/validation', 'LLM owns: tool selection/reasoning/ambiguity', 'safety-critical logic must not be in LLM', 'concrete example from their project', 'why this prevents infinite loops / security issues']
+    question: 'In your GST/TDS compliance system built with CrewAI, describe how you split the work across agents. Which agent did what, how did they pass information to each other, and what was the hardest coordination problem you ran into?',
+    hint: 'Walk through your actual architecture. How many agents? What were their roles? How did information flow? What broke first and how did you fix it?',
+    idealPoints: ['agents named with specific roles (extractor, calculator, validator, reporter)', 'inter-agent data handoff mechanism', 'sequential vs parallel coordination', 'a real failure mode encountered', 'how loop termination or error handling was managed', 'audit trail or logging approach']
   },
   {
     id: 4,
     skill: 'Conversational AI (CCAI)',
     skillKey: 'ccai',
     tag: 'sk-agent', diff: 'easy',
-    question: 'How does Google CCAI handle multi-turn conversation state? In your H&P veterinary bot, how did you manage session context across turns, and what were the latency constraints?',
-    hint: 'Think about: how session state is stored, how context window is managed across turns, and the latency budget for voice (CCAI STT → LLM → TTS chain).',
-    idealPoints: ['session state management', 'context window/history compression', 'CCAI STT/TTS integration', 'latency constraint for voice', 'PII handling in session']
+    question: 'In your H&P veterinary bot using Google CCAI, how does the system handle a multi-turn conversation — for example, a user asking about a pet\'s symptoms across 3 turns? Where is the conversation state stored, and how did you integrate the LLM response fine-tuning layer?',
+    hint: 'Walk through what actually happens technically: CCAI session handling, how context carries across turns, where your LLM layer sits in the pipeline, and any latency considerations for voice.',
+    idealPoints: ['CCAI session/context management', 'where conversation history is stored', 'LLM integration point in the pipeline', 'latency constraint for voice path', 'intent detection vs LLM generation split', 'how you handled out-of-scope queries']
   },
   {
     id: 5,
-    skill: 'NLP Pipeline (SpaCy/HF Transformers)',
+    skill: 'Classical NLP & ML (Pre-LLM)',
     skillKey: 'nlp',
     tag: 'sk-llm', diff: 'easy',
-    question: 'In ADB Philippines, you chose Logistic Regression over an LLM for multilingual grievance classification. Explain that decision — when is a classical NLP approach the right choice over a modern LLM?',
-    hint: 'Think about: interpretability requirements, data size, deployment constraints, latency, and the nature of the classification task itself.',
-    idealPoints: ['interpretability for government use case', 'small labelled dataset favours simpler model', 'no GPU deployment', 'classification is well-bounded task', 'NLP preprocessing gave sufficient signal', 'knowing when NOT to use LLM is senior skill']
+    question: 'ADB Philippines was built before ChatGPT changed everything. Walk me through the NLP pipeline you built for multilingual grievance classification — what models, what preprocessing, how you handled Tagalog/Filipino, and why that stack was the right choice at the time.',
+    hint: 'This is pre-LLM era work — own that context. Cover: the classification approach, NLP preprocessing, multilingual handling, AWS deployment, and why a classical ML approach was correct given the constraints of that time.',
+    idealPoints: ['Logistic Regression or classical ML choice explained', 'NLP preprocessing (tokenization, stopwords, TF-IDF etc)', 'multilingual handling for Tagalog/Filipino', 'AWS deployment without GPU', 'interpretability requirement for government', 'small labelled dataset favoured simpler model', 'pre-ChatGPT context acknowledged']
   },
   {
     id: 6,
     skill: 'LLM Internals (Attention, KV Cache)',
     skillKey: 'llm_internals',
     tag: 'sk-llm', diff: 'hard',
-    question: 'Explain how the attention mechanism works in a transformer. Why do we scale by √d_k? What is the computational cost, and why does that matter for long-context inference?',
-    hint: 'Cover: Q/K/V projections, the attention score formula, why the scaling factor matters, O(n²) cost, and how KV cache addresses the inference cost problem.',
-    idealPoints: ['Q/K/V mechanics', 'softmax(QKᵀ/√d_k)', 'scaling prevents vanishing gradients', 'O(n²) cost in sequence length', 'KV cache stores past K/V tensors', 'multi-head learns different relationship types']
+    question: 'Explain how the attention mechanism works in a transformer. Why do we scale by √d_k? What is the computational cost, and why does that matter for production inference on long documents like your ECU invoices?',
+    hint: 'Cover: Q/K/V projections, the attention score formula, why the scaling factor exists, O(n²) cost at long context, and how KV cache helps. Connect to your invoice work — long PDFs hit context limits.',
+    idealPoints: ['Q/K/V mechanics explained', 'softmax(QKᵀ/√d_k) formula', 'scaling prevents gradient issues in softmax', 'O(n²) cost in sequence length', 'KV cache stores past K/V tensors to avoid recompute', 'multi-head attention learns different relationship types', 'practical implication for long invoice documents']
   },
   {
     id: 7,
     skill: 'Vector DB & Embeddings',
     skillKey: 'vector_db',
     tag: 'sk-rag', diff: 'med',
-    question: 'Explain hybrid search: what two signals does it combine, when does it outperform either alone, and how would you implement it in an invoice retrieval system?',
-    hint: 'Cover: sparse (BM25) vs dense (embeddings), their respective strengths, RRF for combining, and a concrete example of when invoice queries need both.',
-    idealPoints: ['BM25 = sparse, exact keyword', 'dense = semantic/embedding similarity', 'BM25 wins on IDs/part numbers', 'dense wins on semantic queries', 'RRF/reciprocal rank fusion to combine', 'concrete invoice query example', '5-15% recall improvement over either alone']
+    question: 'You already use Elasticsearch heavily. Explain the difference between how Elasticsearch does keyword search (BM25) vs. how a vector database does semantic search. When would you add a dense vector index on top of your existing Elasticsearch setup, and what would that give you?',
+    hint: 'This connects to what you already know. BM25 = term frequency based. Dense = embedding similarity. Hybrid = both. When does semantic search beat BM25 for your document types?',
+    idealPoints: ['BM25 = term frequency, exact keyword match', 'dense = embedding similarity, semantic matching', 'ES already supports dense vector fields (kNN)', 'semantic search wins on paraphrase/intent queries', 'BM25 wins on exact IDs, invoice numbers, part codes', 'hybrid with RRF combines both strengths', 'practical use case for invoice or grievance search']
   },
   {
     id: 8,
     skill: 'ML System Design',
     skillKey: 'ml_sysdesign',
     tag: 'sk-sys', diff: 'hard',
-    question: 'Design a production document intelligence system that processes 10,000 invoices/day across 15 languages with 99%+ accuracy. Walk me through your architecture from ingestion to output.',
-    hint: 'Cover: ingestion queue, document classification, extraction model choice, validation, human review for low-confidence outputs, monitoring. Draw on your ECU experience.',
-    idealPoints: ['async queue for ingestion', 'document classifier', 'LLM extraction with structured output', 'confidence scoring + human review threshold', 'Pydantic/schema validation', 'monitoring per doc type/language', 'human review UI for low-confidence']
+    question: 'You\'ve now seen both ends — classical ML pipelines (ADB, Life Insurance) and modern LLM pipelines (ECU, GST). Design a production document intelligence system that needs to handle 10,000 documents/day at 99%+ accuracy. Walk through the architecture from ingestion to output.',
+    hint: 'Draw on your actual ECU experience. Cover: async ingestion, classification, extraction, validation, human review for low-confidence cases, monitoring. This is your strongest system design question.',
+    idealPoints: ['async queue for ingestion (not synchronous)', 'document classifier before extraction', 'LLM extraction with structured JSON output', 'confidence score + human review threshold', 'schema validation (Pydantic)', 'monitoring per document type, language, model version', 'human review UI for low-confidence outputs']
   },
   {
     id: 9,
     skill: 'LLM Evaluation / RAGAS',
     skillKey: 'llm_eval',
     tag: 'sk-prod', diff: 'med',
-    question: 'Name three RAGAS metrics, explain what each measures, and tell me which failure mode each one catches. When would you use LLM-as-judge and when would you NOT trust it?',
-    hint: 'Cover: faithfulness, context recall, answer relevancy. Then: position bias, self-preference bias, length bias in LLM-as-judge.',
-    idealPoints: ['faithfulness = answer sticks to context (catches generation hallucination)', 'context recall = all relevant chunks retrieved (catches retrieval gaps)', 'answer relevancy = addresses question', 'LLM-as-judge: position bias / self-preference / length bias risks', 'when to use ground truth instead']
+    question: 'In your ECU project, how did you know if the LLM extraction was working well? What metrics did you track, how did you sample and review outputs, and how would you set this up differently now if you were starting fresh with a proper eval framework?',
+    hint: 'Start with what you actually did — even if it was manual review. Then talk about what a modern eval framework (RAGAS, LLM-as-judge, golden dataset) would add on top.',
+    idealPoints: ['what was actually measured in production (accuracy per field, human review rate)', 'sampling strategy for quality monitoring', 'what a golden dataset would look like for invoice extraction', 'RAGAS or similar eval framework', 'faithfulness / extraction accuracy metrics', 'LLM-as-judge pattern for quality at scale', 'alert thresholds when accuracy drops']
   },
   {
     id: 10,
     skill: 'MLOps / Observability',
     skillKey: 'mlops',
     tag: 'sk-prod', diff: 'med',
-    question: 'What would you instrument in a production LLM application to have full observability? Be specific about metrics, layers, and alerting thresholds.',
-    hint: 'Think in 4 layers: request-level metadata, token/cost metrics, latency metrics (TTFT vs TPS), and quality signals. What do you alert on?',
-    idealPoints: ['request_id/user_id/model_version per request', 'input/output tokens + cost per request', 'TTFT and TPS tracked separately', 'p50/p95/p99 latency', 'quality: user feedback + faithfulness sample', 'alert: error rate >1%, cost > budget, latency > SLA', 'tool: LangSmith/Phoenix/Kibana']
+    question: 'You use Kibana and Elasticsearch in production. How would you extend your existing observability setup to monitor an LLM application — what specific metrics would you add, what would you alert on, and what tool would you use for LLM-specific tracing?',
+    hint: 'Start from what you already have (Kibana/ES). Add: token counts, cost per request, latency (TTFT vs TPS), model version, prompt version, quality signals. Connect to a tracing tool like LangSmith.',
+    idealPoints: ['token count and cost per request logged', 'TTFT and TPS as separate latency metrics', 'p95 latency as the SLA metric', 'model version and prompt version in every log', 'quality signal: user feedback or sampled faithfulness score', 'alert on: error rate, cost spike, latency breach', 'LangSmith or Phoenix for LLM-specific tracing on top of Kibana']
   },
   {
     id: 11,
-    skill: 'Fine-tuning (LoRA / QLoRA)',
+    skill: 'Fine-tuning vs Prompt Engineering',
     skillKey: 'finetune',
-    tag: 'sk-llm', diff: 'hard',
-    question: 'What is LoRA and how does it differ from full fine-tuning? More importantly: when would you recommend fine-tuning over RAG, and when would you use both together?',
-    hint: 'Cover the LoRA mechanism (low-rank matrices, why they reduce forgetting), then the decision axes: knowledge type, update frequency, data availability, interpretability needs.',
-    idealPoints: ['LoRA adds low-rank matrices ΔW=BA to frozen weights', 'trains <1% parameters', 'minimises catastrophic forgetting', 'RAG for dynamic/large/citable knowledge', 'fine-tuning for style/format/domain vocab', 'not mutually exclusive — use both', 'decision axes: knowledge type + update frequency + data quality']
+    tag: 'sk-llm', diff: 'med',
+    question: 'In your projects you\'ve used prompt engineering and prompt tuning rather than fine-tuning. When would you actually recommend fine-tuning a model instead of improving your prompts? What is LoRA and why does it make fine-tuning more practical?',
+    hint: 'The decision tree: prompt engineering first, RAG second, fine-tuning third. LoRA makes fine-tuning cheap — cover what it does mechanically and when that trade-off makes sense.',
+    idealPoints: ['prompt engineering is cheaper and faster to iterate', 'fine-tuning when: consistent format/style needed, domain vocab, insufficient with few-shot', 'RAG vs fine-tuning decision axes', 'LoRA: adds low-rank matrices to frozen weights', 'trains <1% of parameters, minimal catastrophic forgetting', 'QLoRA extends to quantised models', 'practical scenario where you would recommend it']
   },
   {
     id: 12,
     skill: 'DSA (LeetCode Medium)',
     skillKey: 'dsa',
     tag: 'sk-dsa', diff: 'med',
-    question: 'Solve this: Given an array of integers, find the length of the longest subarray with sum equal to k. Describe your approach, the data structure you\'d use, and the time/space complexity.',
-    hint: 'Think prefix sums + hash map. Walk through your approach step by step — don\'t just give the answer, explain your reasoning process as you would to an interviewer.',
-    idealPoints: ['prefix sum approach', 'hash map storing prefix_sum -> earliest_index', 'check if (prefix_sum - k) exists in map', 'O(n) time O(n) space', 'handles negatives correctly', 'walks through example', 'clear explanation of reasoning']
+    question: 'Given an array of integers, find the length of the longest subarray with sum equal to k. Walk me through your thought process — brute force first, then optimise. State the time and space complexity of your final approach.',
+    hint: 'Brute force = O(n²), then optimise with prefix sums + hash map = O(n). Walk through each step as you would to an interviewer — reasoning matters as much as the answer.',
+    idealPoints: ['brute force O(n²) identified first', 'prefix sum insight', 'hash map storing prefix_sum → earliest index', 'check if (prefix_sum - k) in map', 'O(n) time O(n) space final solution', 'handles negative numbers correctly', 'walks through a small example']
   },
   {
     id: 13,
     skill: 'Cloud Platforms (AWS/GCP/Azure)',
     skillKey: 'cloud',
     tag: 'sk-prod', diff: 'easy',
-    question: 'In your ADB Philippines project on AWS, what services did you use and why? If you were rebuilding that system today using GCP (for the CCAI integration), what would the architecture look like?',
-    hint: 'Cover: the original AWS services, what they provided, then map to GCP equivalents. Bonus: how would you handle the multilingual NLP pipeline on GCP vs AWS?',
-    idealPoints: ['original AWS services named (EC2/Lambda/S3/etc)', 'rationale for each service', 'GCP equivalents (Cloud Run/GCS/Pub-Sub/Vertex AI)', 'CCAI integration point', 'Vertex AI for NLP vs AWS SageMaker', 'reasonable migration rationale']
+    question: 'You\'ve worked across AWS (ADB), GCP (ECU with Gemini, H&P with CCAI), and Azure OpenAI (XPO). For a new document intelligence project similar to ECU, which cloud would you choose and why? What specific services would you use for ingestion, processing, storage, and monitoring?',
+    hint: 'This tests your ability to make and defend infrastructure choices. Pick one and justify it — don\'t just list services, explain WHY for each component.',
+    idealPoints: ['specific cloud chosen with rationale', 'ingestion: GCS/S3 + Pub-Sub/SQS for async', 'processing: Cloud Run/Lambda for extraction service', 'LLM: Vertex AI / Gemini API rationale', 'storage: BigQuery or PostgreSQL for structured output', 'monitoring: Cloud Monitoring + custom dashboards', 'why this cloud over the others for this use case']
   },
   {
     id: 14,
     skill: 'Python & FastAPI',
     skillKey: 'python',
     tag: 'sk-prod', diff: 'easy',
-    question: 'You\'re building a FastAPI endpoint that calls an LLM and streams the response back to the client. Walk through the implementation — async, streaming, error handling, and how you\'d add a timeout.',
-    hint: 'Cover: async def, StreamingResponse, how to use the Anthropic streaming API, error handling for rate limits and timeouts, and the generator pattern.',
-    idealPoints: ['async def endpoint', 'StreamingResponse or Server-Sent Events', 'Anthropic stream=True / with client.stream()', 'try/except for APIError/RateLimitError', 'asyncio.timeout() or httpx timeout', 'generator/yield pattern', 'correct FastAPI patterns']
+    question: 'Walk me through how you\'d build a FastAPI endpoint that receives a PDF, sends it to an LLM for extraction, and streams the structured result back to the client. Cover async handling, streaming, error handling for LLM API failures, and how you\'d add a timeout.',
+    hint: 'Cover: async def, handling the PDF bytes, calling the LLM API asynchronously, StreamingResponse for output, try/except for rate limits and timeouts, and the generator pattern.',
+    idealPoints: ['async def endpoint', 'reading PDF bytes from request', 'async LLM API call', 'StreamingResponse or Server-Sent Events', 'try/except for RateLimitError/APIError', 'asyncio.timeout() or httpx timeout', 'generator/yield pattern for streaming', 'correct FastAPI patterns (not sync)']
   }
 ];
 
