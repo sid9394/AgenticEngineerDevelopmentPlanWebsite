@@ -1,9 +1,15 @@
 # 🧠 Sid's Senior AI Engineer Prep Hub
 
+🌐 **[https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/](https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/)**
+
+---
+
 > A personal upskilling system built to go from AI/ML Engineer at a services firm to **Senior AI Engineer at a GCC** — systematically, without losing balance.
 
-🔗 **[Daily Quest Board →](https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/)**
+🔗 **[Daily Quest Board →](https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/quest-board.html)**
 🔗 **[Interview Playbook →](https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/playbook.html)**
+🔗 **[Learning Resources →](https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/resources.html)**
+🔗 **[Skills Assessment →](https://sid9394.github.io/AgenticEngineerDevelopmentPlanWebsite/skill-test.html)**
 
 ---
 
