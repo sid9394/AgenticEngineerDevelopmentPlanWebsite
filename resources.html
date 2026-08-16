@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Learning Resources — Sid's AI Engineer Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1016;--surface2:#14151e;--border:#1f2033;--border2:#2a2c48;
+  --fg:#ddddf0;--muted:#6b6d90;--muted2:#4a4c6a;
+  --accent:#5b8ef0;--accent2:#3ecf8e;--accent3:#f0c060;--accent4:#e05c8a;--accent5:#a78bfa;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:14px;line-height:1.7;min-height:100vh}
+.wrap{max-width:860px;margin:0 auto;padding:3rem 2rem 6rem}
+
+/* BACK NAV */
+.topnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem;flex-wrap:wrap;gap:1rem}
+.back-link{font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;transition:all .2s}
+.back-link:hover{color:var(--fg);border-color:var(--border2)}
+.page-links{display:flex;gap:8px;flex-wrap:wrap}
+.page-link{font-size:11px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all .2s}
+.page-link:hover{color:var(--fg);border-color:var(--border2)}
+.page-link.active{color:var(--accent);border-color:rgba(91,142,240,.4);background:rgba(91,142,240,.08)}
+
+/* HERO */
+.hero-eyebrow{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:.7rem}
+.hero-title{font-family:var(--serif);font-size:clamp(28px,3.5vw,42px);font-weight:700;line-height:1.1;margin-bottom:.9rem}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-desc{font-size:13px;color:var(--muted);max-width:580px;line-height:1.85;margin-bottom:2.5rem}
+
+/* WEEK ANCHORS */
+.week-jump{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2.5rem}
+.wj{font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid var(--border);color:var(--muted);text-decoration:none;transition:all .2s}
+.wj:hover{color:var(--fg);border-color:var(--border2)}
+.wj.w1{color:var(--accent);border-color:rgba(91,142,240,.4);background:rgba(91,142,240,.07)}
+.wj.w2{color:var(--accent2);border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.07)}
+.wj.w3{color:var(--accent3);border-color:rgba(240,192,96,.4);background:rgba(240,192,96,.07)}
+.wj.w4{color:var(--accent5);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.07)}
+
+/* SECTION */
+.week-block{margin-bottom:3.5rem}
+.week-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem}
+.wl-1{color:var(--accent)}.wl-2{color:var(--accent2)}.wl-3{color:var(--accent3)}.wl-4{color:var(--accent5)}.wl-dsa{color:var(--accent4)}.wl-misc{color:var(--muted)}
+.week-title{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--fg);margin-bottom:.5rem}
+.week-desc{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;max-width:640px}
+
+/* TOPIC BLOCK */
+.topic{margin-bottom:1.8rem}
+.topic-head{display:flex;align-items:center;gap:10px;margin-bottom:.8rem}
+.topic-icon{font-size:16px}
+.topic-name{font-size:13px;font-weight:500;color:var(--fg)}
+.topic-badge{font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid var(--border2);color:var(--muted)}
+.topic-summary{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:.9rem;max-width:640px}
+
+/* RESOURCE LIST */
+.res-list{display:flex;flex-direction:column;gap:7px}
+.res{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+  text-decoration:none;color:inherit;
+  transition:border-color .2s;
+}
+.res:hover{border-color:var(--border2)}
+.res-left{flex:1;min-width:0}
+.res-title{font-size:13px;font-weight:500;color:var(--fg);margin-bottom:3px;line-height:1.4}
+.res-desc{font-size:11px;color:var(--muted);line-height:1.65}
+.res-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.res-tag{font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.tag-free{color:var(--accent2);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.07)}
+.tag-video{color:var(--accent);border-color:rgba(91,142,240,.35);background:rgba(91,142,240,.07)}
+.tag-read{color:var(--accent3);border-color:rgba(240,192,96,.35);background:rgba(240,192,96,.07)}
+.tag-code{color:var(--accent5);border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.07)}
+.tag-course{color:var(--accent4);border-color:rgba(224,92,138,.35);background:rgba(224,92,138,.07)}
+.tag-ref{color:var(--muted);border-color:var(--border2);background:transparent}
+.res-time{font-size:10px;color:var(--muted2)}
+.res-must{border-color:rgba(91,142,240,.35)!important;background:rgba(91,142,240,.04)!important}
+.must-badge{font-size:10px;color:var(--accent);border-color:rgba(91,142,240,.35);background:rgba(91,142,240,.1);padding:2px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+
+/* CALLOUT */
+.callout{border:1px solid;border-radius:10px;padding:.9rem 1.1rem;margin:1.3rem 0;font-size:12px;line-height:1.85}
+.callout-blue{border-color:rgba(91,142,240,.3);background:rgba(91,142,240,.06);color:var(--fg)}
+.callout-green{border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.06);color:var(--fg)}
+.callout-yellow{border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.06);color:var(--fg)}
+.callout-head{font-weight:500;margin-bottom:3px}
+
+/* DIVIDER */
+hr{border:none;border-top:1px solid var(--border);margin:2.5rem 0}
+
+/* LEGEND */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:2rem}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+
+@media(max-width:640px){.wrap{padding:2rem 1rem 4rem}.res{flex-direction:column}.res-right{flex-direction:row;align-items:center}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- NAV -->
+<div class="topnav">
+  <a class="back-link" href="index.html">← Quest Board</a>
+  <div class="page-links">
+    <a class="page-link" href="index.html">Quest Board</a>
+    <a class="page-link" href="playbook.html">Interview Playbook</a>
+    <a class="page-link active" href="resources.html">Learning Resources</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero-eyebrow">// study materials · linked to your roadmap</div>
+<h1 class="hero-title">Learning Resources<br/><em>Zero to Interview-Ready</em></h1>
+<p class="hero-desc">Every concept in the 8-week roadmap, linked to the best free resource for that concept — ordered from "I know nothing about this" to "I can defend this in an interview." Start at the top of each week. Follow the order. Don't skip ahead.</p>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="leg-item"><span class="res-tag tag-video" style="position:static">Video</span> Watch</span>
+  <span class="leg-item"><span class="res-tag tag-read" style="position:static">Article</span> Read</span>
+  <span class="leg-item"><span class="res-tag tag-code" style="position:static">Code</span> Build</span>
+  <span class="leg-item"><span class="res-tag tag-course" style="position:static">Course</span> Structured</span>
+  <span class="leg-item"><span class="res-tag tag-free" style="position:static">Free</span> No cost</span>
+  <span class="leg-item"><span class="must-badge" style="position:static">★ Must-do</span> Non-negotiable</span>
+</div>
+
+<!-- WEEK JUMP -->
+<div class="week-jump">
+  <a class="wj w1" href="#w12">Weeks 1–2: LLM Internals + RAG</a>
+  <a class="wj w2" href="#w34">Weeks 3–4: Agents + System Design</a>
+  <a class="wj w3" href="#w5">Week 5: Production + Evals</a>
+  <a class="wj w4" href="#w6">Week 6: Fine-tuning + Vector DBs</a>
+  <a class="wj wl-dsa" href="#dsa">DSA: Daily Practice</a>
+  <a class="wj wl-misc" href="#misc">Misc: System Design + Behavioral</a>
+</div>
+
+<!-- ═══════════ WEEKS 1–2 ═══════════ -->
+<div class="week-block" id="w12">
+<div class="week-label wl-1">Weeks 1–2 · Foundation Depth</div>
+<h2 class="week-title">LLM Internals + RAG Pipeline Mastery</h2>
+<p class="week-desc">You've used these in production. Now you need to be able to explain the mechanics under pressure. This week is about building a mental model you can draw from memory on a whiteboard.</p>
+
+<div class="callout callout-blue">
+  <div class="callout-head">Suggested order for Week 1:</div>
+  Day 1–2: Transformer basics (3Blue1Brown + Illustrated Transformer) → Day 3: Build GPT from scratch (Karpathy) → Day 4: Tokenization deep dive → Day 5–7: RAG pipeline (DeepLearning.AI course + Anthropic cookbook). Run code alongside every video.
+</div>
+
+<!-- TOPIC 1: TRANSFORMERS -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🧠</span><span class="topic-name">Transformer Architecture & Self-Attention</span><span class="topic-badge">Week 1 · Day 1–2</span></div>
+<p class="topic-summary">Start here — everything else depends on understanding how transformers work. Q/K/V matrices, attention scores, why we scale by √d_k, what multi-head attention actually does. You need to be able to explain this with a diagram in an interview.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://www.youtube.com/watch?v=wjZofJX0v4M" target="_blank">
+    <div class="res-left"><div class="res-title">But what is a GPT? — 3Blue1Brown</div><div class="res-desc">The single best visual intro to transformers ever made. Covers embeddings, attention, and how GPT generates text — with beautiful animations. Watch this first, even if you think you know it.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">27 min</span></div>
+  </a>
+  <a class="res res-must" href="https://www.youtube.com/watch?v=eMlx5fFNoYc" target="_blank">
+    <div class="res-left"><div class="res-title">Attention in Transformers, visually explained — 3Blue1Brown</div><div class="res-desc">The follow-up: dives deep into Q/K/V mechanics, the scaling factor, and multi-head attention. Explains WHY you divide by √d_k. After watching, you can answer "explain attention" in any interview.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">26 min</span></div>
+  </a>
+  <a class="res" href="https://jalammar.github.io/illustrated-transformer/" target="_blank">
+    <div class="res-left"><div class="res-title">The Illustrated Transformer — Jay Alammar</div><div class="res-desc">The classic visual blog post. The best static reference to re-read after the 3Blue1Brown videos. Shows encoder/decoder, attention heads, and positional encoding with clear diagrams you can reproduce from memory.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">45 min read</span></div>
+  </a>
+  <a class="res" href="https://jalammar.github.io/illustrated-gpt2/" target="_blank">
+    <div class="res-left"><div class="res-title">The Illustrated GPT-2 — Jay Alammar</div><div class="res-desc">Goes deeper into GPT-style decoder-only architecture. Explains how GPT generates tokens autoregressively — which is the architecture behind every model you use (Claude, GPT-4, Gemini).</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">40 min read</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 2: BUILD FROM SCRATCH -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">⚙️</span><span class="topic-name">Build a GPT from Scratch (Karpathy)</span><span class="topic-badge">Week 1 · Day 3</span></div>
+<p class="topic-summary">The single most effective way to understand LLMs is to build one from scratch. Karpathy walks you through every line. You don't need to understand every tensor operation — but by the end you'll know exactly what happens inside a transformer, and you'll be able to explain it.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://www.youtube.com/watch?v=kCc8FmEb1nY" target="_blank">
+    <div class="res-left"><div class="res-title">Let's Build GPT: from scratch, in code, spelled out — Andrej Karpathy</div><div class="res-desc">A 2-hour masterclass. Karpathy builds a transformer language model step by step, explaining every architectural decision. Covers self-attention, multi-head attention, residual connections, layer norm, and decoder-only architecture. After this, you won't just know what a transformer is — you'll know why every part exists.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-video">Video</span><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">1h 56m</span></div>
+  </a>
+  <a class="res" href="https://karpathy.ai/zero-to-hero.html" target="_blank">
+    <div class="res-left"><div class="res-title">Neural Networks: Zero to Hero — Karpathy full series</div><div class="res-desc">The full course including backprop, tokenization, and the GPT video above. If you have time, start from Lecture 1. If not, jump straight to the GPT video and come back to earlier ones for depth.</div></div>
+    <div class="res-right"><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">Full series</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 3: TOKENIZATION -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🔤</span><span class="topic-name">Tokenization & BPE</span><span class="topic-badge">Week 1 · Day 4</span></div>
+<p class="topic-summary">Tokenization comes up in interviews because it explains context window limits, multilingual cost differences, and why structured output (JSON) can fail. You used multilingual text in ADB Philippines — that's your production anchor for this concept.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://www.youtube.com/watch?v=zduSFxRajkE" target="_blank">
+    <div class="res-left"><div class="res-title">Let's Build the GPT Tokenizer — Andrej Karpathy</div><div class="res-desc">Karpathy builds BPE tokenizer from scratch. Covers why tokens exist, why "SolidGoldMagikarp" is weird, why Python and English tokenize differently, and why you pay more for non-English text. Exactly what interviewers probe.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">2h 13m</span></div>
+  </a>
+  <a class="res" href="https://tiktokenizer.vercel.app/" target="_blank">
+    <div class="res-left"><div class="res-title">Tiktokenizer — Interactive Token Visualiser</div><div class="res-desc">Paste any text and see exactly how it tokenises. Try: English vs. Hindi vs. Tagalog. Try: JSON vs. prose. Try: "DHL-2024-INV-001" (your invoice IDs). 5 minutes here makes the concept stick permanently.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Interactive</span><span class="res-tag tag-free">Free</span><span class="res-time">5 min</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 4: KV CACHE -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">💾</span><span class="topic-name">KV Cache & Prompt Caching</span><span class="topic-badge">Week 1 · Day 4–5</span></div>
+<p class="topic-summary">KV cache is one of the most common Senior AI Engineer interview topics — it connects transformer internals (why it exists) to production economics (how much money it saves). Your CCAI project with a stable system prompt is your production anchor.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank">
+    <div class="res-left"><div class="res-title">Prompt Caching — Anthropic Official Docs</div><div class="res-desc">The authoritative guide on how prompt caching works, when to use it, cost savings (up to 90% on cache hits), and how to implement it. Read this because you'll implement it in production and it's an interview topic. The Anthropic implementation is the clearest explanation of the underlying mechanic.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Docs</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+  <a class="res" href="https://medium.com/@joaolucasluc/understanding-the-kv-cache-the-secret-engine-behind-fast-llm-inference-c9cc09e4a7c0" target="_blank">
+    <div class="res-left"><div class="res-title">Understanding the KV Cache — Medium explainer</div><div class="res-desc">Clear explanation of why KV cache exists and what it saves. Covers the O(n) recomputation problem and how caching solves it. Good to read before the Anthropic docs.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">10 min read</span></div>
+  </a>
+  <a class="res" href="https://github.com/anthropics/anthropic-cookbook/blob/main/misc/prompt_caching.ipynb" target="_blank">
+    <div class="res-left"><div class="res-title">Prompt Caching Cookbook — Anthropic (Jupyter)</div><div class="res-desc">The official runnable implementation. Clone it, run it, and see the cache_creation_input_tokens vs. cache_read_input_tokens in the response. Hands-on makes it stick.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">30 min</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 5: RAG -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">📚</span><span class="topic-name">RAG Pipeline — End to End</span><span class="topic-badge">Week 1–2 · Day 5–10</span></div>
+<p class="topic-summary">This is your core domain — ECU and XPO were RAG systems. But the courses below will give you the vocabulary to talk about chunking, embedding models, retrieval strategies, and reranking with interview precision. Do the DeepLearning.AI course first, then the Anthropic cookbook.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://learn.deeplearning.ai/courses/langchain-chat-with-your-data" target="_blank">
+    <div class="res-left"><div class="res-title">LangChain: Chat with Your Data — DeepLearning.AI (Andrew Ng)</div><div class="res-desc">Free short course taught by LangChain's creator Harrison Chase. Covers document loading, chunking strategies, embeddings, vector stores, retrieval, and Q&A. The canonical RAG intro — and it's built by the people who made the framework. Start here if you want to articulate RAG components in interviews.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+  <a class="res res-must" href="https://learn.deeplearning.ai/courses/building-evaluating-advanced-rag" target="_blank">
+    <div class="res-left"><div class="res-title">Building and Evaluating Advanced RAG — DeepLearning.AI</div><div class="res-desc">Goes beyond basics: sentence-window retrieval, auto-merging retrieval, and RAG evaluation with TruLens. This is where you learn how to diagnose RAG failures — a Senior-level skill. The "RAG triad" evaluation framework here maps directly to RAGAS.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+  <a class="res" href="https://github.com/anthropics/anthropic-cookbook/blob/main/third_party/LlamaIndex/Basic_RAG_With_LlamaIndex.ipynb" target="_blank">
+    <div class="res-left"><div class="res-title">Basic RAG with LlamaIndex — Anthropic Cookbook</div><div class="res-desc">Official Anthropic notebook: set up a RAG pipeline using Claude + LlamaIndex. Run this after the DeepLearning course — it's the bridge to using Claude specifically, which is what you'll use in your ECU portfolio project.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">1 hr</span></div>
+  </a>
+  <a class="res" href="https://docs.anthropic.com/en/docs/build-with-claude/retrieval-augmented-generation" target="_blank">
+    <div class="res-left"><div class="res-title">RAG Guide — Anthropic Official Docs</div><div class="res-desc">Anthropic's own opinionated guide on building RAG systems with Claude, including contextual retrieval. Read this for the production framing — it's how Anthropic themselves describe the best practices.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Docs</span><span class="res-tag tag-free">Free</span><span class="res-time">30 min read</span></div>
+  </a>
+  <a class="res" href="https://www.anthropic.com/news/contextual-retrieval" target="_blank">
+    <div class="res-left"><div class="res-title">Contextual Retrieval — Anthropic Blog</div><div class="res-desc">Anthropic's 2024 technique that improved retrieval recall by 67% over standard RAG. Prepends LLM-generated context to each chunk before indexing. Directly relevant to your ECU invoice pipeline — and a Senior-level interview topic.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+  <a class="res" href="https://towardsdatascience.com/advanced-rag-techniques-an-illustrated-overview-04d193d8fec6" target="_blank">
+    <div class="res-left"><div class="res-title">Advanced RAG Techniques: An Illustrated Overview — Towards Data Science</div><div class="res-desc">Visual overview of every advanced RAG technique: HyDE, RAG-Fusion, FLARE, step-back prompting, reranking, and more. Great reference map — read after the courses to know what exists before you need to pick.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">30 min read</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 6: EMBEDDINGS -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🔢</span><span class="topic-name">Embeddings & Vector Search</span><span class="topic-badge">Week 2</span></div>
+<p class="topic-summary">Embeddings are the mathematical foundation of RAG and semantic search. You need to be able to explain cosine similarity, why dense retrieval beats keyword search for semantic queries, and when it doesn't (exact IDs, part numbers).</p>
+<div class="res-list">
+  <a class="res res-must" href="https://jalammar.github.io/illustrated-word2vec/" target="_blank">
+    <div class="res-left"><div class="res-title">The Illustrated Word2Vec — Jay Alammar</div><div class="res-desc">The gentlest possible intro to word embeddings and vector space semantics. Explains why "king – man + woman = queen" works. Essential foundation before you learn about modern text embeddings.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">30 min read</span></div>
+  </a>
+  <a class="res" href="https://learn.deeplearning.ai/courses/google-cloud-vertex-ai" target="_blank">
+    <div class="res-left"><div class="res-title">Understanding and Applying Text Embeddings — DeepLearning.AI + Google</div><div class="res-desc">Short free course on text embeddings: what they are, how to create them, and how to use them for classification, clustering, outlier detection, and semantic search. Directly relevant to your Elasticsearch + dense retrieval work.</div></div>
+    <div class="res-right"><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~1.5 hrs</span></div>
+  </a>
+  <a class="res" href="https://www.pinecone.io/learn/series/faiss/hnsw/" target="_blank">
+    <div class="res-left"><div class="res-title">HNSW Explained — Pinecone Learning Centre</div><div class="res-desc">Explains Hierarchical Navigable Small Worlds (HNSW) — the ANN algorithm behind every production vector DB. You need to know this for system design: "why is vector search fast?" HNSW is the answer.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 7: HYBRID SEARCH -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🔍</span><span class="topic-name">Hybrid Search & Reranking</span><span class="topic-badge">Week 2</span></div>
+<p class="topic-summary">Hybrid search (BM25 + dense) is what you'd use in a production RAG system. You already use Elasticsearch — BM25 is its default ranking. This is connecting what you already know to the interview vocabulary.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://www.pinecone.io/learn/hybrid-search-intro/" target="_blank">
+    <div class="res-left"><div class="res-title">Introduction to Hybrid Search — Pinecone</div><div class="res-desc">Explains sparse (BM25) vs. dense (embedding) retrieval and how hybrid search combines them with Reciprocal Rank Fusion. Covers exactly what interviewers ask about. Your Elasticsearch background makes this immediately actionable.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+  <a class="res" href="https://cohere.com/blog/rerank" target="_blank">
+    <div class="res-left"><div class="res-title">Reranking Explained — Cohere Blog</div><div class="res-desc">Explains why a cross-encoder reranker (Cohere Rerank, BGE-reranker) outperforms bi-encoder retrieval for final document selection. Covers the speed/accuracy tradeoff and the two-stage retrieval pattern you'll describe in system design interviews.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">15 min read</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC 8: RAG EVAL -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">📊</span><span class="topic-name">RAG Evaluation with RAGAS</span><span class="topic-badge">Week 2 · Build</span></div>
+<p class="topic-summary">RAGAS is the standard RAG evaluation framework. Interviewers ask "how do you evaluate a RAG system?" and the answer requires knowing faithfulness, context recall, answer relevancy — the RAGAS metrics. Build this on your ECU data.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://docs.ragas.io/en/latest/getstarted/rag_eval.html" target="_blank">
+    <div class="res-left"><div class="res-title">RAGAS Getting Started — Official Docs</div><div class="res-desc">Run your first RAGAS evaluation in 30 minutes. Faithfulness, answer relevancy, context recall — the three metrics you need to name in any RAG evaluation interview answer. Do this hands-on, not just read it.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">30 min</span></div>
+  </a>
+  <a class="res" href="https://learn.deeplearning.ai/courses/building-evaluating-advanced-rag" target="_blank">
+    <div class="res-left"><div class="res-title">RAG Evaluation Deep Dive — DeepLearning.AI (same course as above, Eval section)</div><div class="res-desc">The evaluation section of the Advanced RAG course walks through the RAG Triad: Answer Relevance, Context Relevance, Groundedness. Maps directly to RAGAS metrics with runnable examples.</div></div>
+    <div class="res-right"><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">45 min</span></div>
+  </a>
+</div>
+</div>
+
+</div><!-- end w12 -->
+
+<hr/>
+
+<!-- ═══════════ WEEKS 3–4 ═══════════ -->
+<div class="week-block" id="w34">
+<div class="week-label wl-2">Weeks 3–4 · Agentic Systems + Design</div>
+<h2 class="week-title">Agents & System Design</h2>
+<p class="week-desc">Your CrewAI GST project is your hook. These resources give you the vocabulary to talk about it using interview-standard terms: ReAct, tool calling, orchestrator vs LLM, safety. Then system design practice — because Senior loops open with this.</p>
+
+<div class="callout callout-yellow">
+  <div class="callout-head">Your production anchor for every agent question:</div>
+  GST & TDS Compliance Validation — multi-agent CrewAI workflow. Before reading resources below, write down in plain English: how your agents coordinated, what each did, what failed, what you'd do differently. That's 80% of your interview answer already.
+</div>
+
+<!-- TOPIC: AGENTS INTRO -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🤖</span><span class="topic-name">AI Agents Fundamentals</span><span class="topic-badge">Week 3 · Day 1–2</span></div>
+<p class="topic-summary">If you can build with CrewAI, you already understand agents practically. These resources give you the theoretical vocabulary (ReAct, Reflexion, Plan-and-Execute) that interviewers use — so you can map your experience to their language.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://learn.deeplearning.ai/courses/ai-agents-in-langgraph" target="_blank">
+    <div class="res-left"><div class="res-title">AI Agents in LangGraph — DeepLearning.AI</div><div class="res-desc">The best structured intro to agentic architecture patterns: ReAct, state machines, tool use, human-in-the-loop. Taught using LangGraph — the dominant production agent framework in 2026. Covers exactly the orchestrator patterns you'll be asked about.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~3 hrs</span></div>
+  </a>
+  <a class="res res-must" href="https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai" target="_blank">
+    <div class="res-left"><div class="res-title">Multi AI Agent Systems with CrewAI — DeepLearning.AI</div><div class="res-desc">Taught by CrewAI's founder. Covers exactly your stack: roles, tasks, tools, and multi-agent coordination patterns. Validates and formalises your existing GST project knowledge. Run the notebooks alongside your own project.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+  <a class="res" href="https://www.anthropic.com/research/building-effective-agents" target="_blank">
+    <div class="res-left"><div class="res-title">Building Effective Agents — Anthropic Research Blog</div><div class="res-desc">Anthropic's own opinionated guide on when to use agents, orchestrator patterns, human-in-the-loop, and the key safety considerations. This is the thinking behind Claude's agentic capabilities — read it for the vocabulary and the mental model.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">30 min read</span></div>
+  </a>
+  <a class="res" href="https://huggingface.co/learn/agents-course/unit0/introduction" target="_blank">
+    <div class="res-left"><div class="res-title">Hugging Face Agents Course — Unit 0 to 4</div><div class="res-desc">Free structured course covering agent concepts, tool use, multi-agent systems, and agentic RAG. Broad coverage with exercises. Good complement to the DeepLearning.AI courses if you want more depth.</div></div>
+    <div class="res-right"><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">Self-paced</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC: TOOL USE -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🛠️</span><span class="topic-name">Tool Use & Function Calling</span><span class="topic-badge">Week 3 · Day 3–4</span></div>
+<p class="topic-summary">Tool calling is how LLMs take actions in the world. You've done this with CrewAI implicitly — these resources give you the low-level understanding of how tool schemas work, how the model decides which tool to call, and how to handle errors.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use" target="_blank">
+    <div class="res-left"><div class="res-title">Tool Use Guide — Anthropic Official Docs</div><div class="res-desc">The definitive reference for how Claude handles tool use: defining tools, the tool call/result cycle, parallel tool use, error handling, and best practices for tool descriptions. Essential reading — you'll use this pattern in every agentic system.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Docs</span><span class="res-tag tag-free">Free</span><span class="res-time">45 min read</span></div>
+  </a>
+  <a class="res" href="https://github.com/anthropics/anthropic-cookbook/tree/main/tool_use" target="_blank">
+    <div class="res-left"><div class="res-title">Tool Use Cookbook — Anthropic (multiple notebooks)</div><div class="res-desc">Runnable examples: customer service agent, SQL query generator, retrieval-augmented tool use. Run at least one of these to see the full tool call → result → next action loop in code.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">1–2 hrs</span></div>
+  </a>
+</div>
+</div>
+
+<!-- TOPIC: SYSTEM DESIGN -->
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🏗️</span><span class="topic-name">ML System Design</span><span class="topic-badge">Week 3–4 · Practice</span></div>
+<p class="topic-summary">System design is the Senior-differentiating round. You have 45–60 minutes. The resources below give you the framework and the vocabulary. Then practice out loud — draw the diagram, talk through trade-offs, time yourself.</p>
+<div class="res-list">
+  <a class="res res-must" href="https://github.com/donnemartin/system-design-primer" target="_blank">
+    <div class="res-left"><div class="res-title">System Design Primer — GitHub (donnemartin)</div><div class="res-desc">The most-starred system design resource on GitHub. Covers scalability, load balancing, databases, caching, queues, and distributed systems. Read the fundamentals sections — they form the vocabulary for AI system design interviews at GCCs.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Reference</span><span class="res-tag tag-free">Free</span><span class="res-time">2–4 hrs</span></div>
+  </a>
+  <a class="res" href="https://www.youtube.com/@ByteByteGo" target="_blank">
+    <div class="res-left"><div class="res-title">ByteByteGo — YouTube Channel</div><div class="res-desc">Animated system design explainers (5–10 min each). Watch: API design, message queues, databases, rate limiting, caching patterns. The visual format makes complex distributed systems click fast. Best supplement to the Primer above.</div></div>
+    <div class="res-right"><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">10 min/video</span></div>
+  </a>
+  <a class="res" href="https://github.com/chiphuyen/machine-learning-systems-design" target="_blank">
+    <div class="res-left"><div class="res-title">ML Systems Design — Chip Huyen (GitHub)</div><div class="res-desc">Chip Huyen's framework for designing ML systems: problem framing, feature engineering, model selection, training, deployment, monitoring. The interview framing for ML-specific system design questions at GCCs.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Reference</span><span class="res-tag tag-free">Free</span><span class="res-time">2 hrs</span></div>
+  </a>
+  <a class="res" href="https://huyenchip.com/2023/04/11/llm-engineering.html" target="_blank">
+    <div class="res-left"><div class="res-title">Building LLM Applications for Production — Chip Huyen</div><div class="res-desc">The canonical article on production LLM system design: prompt engineering, cost, latency, evaluation, and system architecture. Written by a practitioner for practitioners. The Senior AI Engineer interview reads directly from this mindset.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">45 min read</span></div>
+  </a>
+</div>
+</div>
+
+</div><!-- end w34 -->
+
+<hr/>
+
+<!-- ═══════════ WEEK 5 ═══════════ -->
+<div class="week-block" id="w5">
+<div class="week-label wl-3">Week 5 · Production + Evals</div>
+<h2 class="week-title">LLMOps, Observability & Cost Control</h2>
+<p class="week-desc">This is what separates Senior from Mid-level. Anyone can call an LLM API. Senior engineers know what to monitor, how to evaluate at scale, and how to control cost and latency in production systems.</p>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🔭</span><span class="topic-name">LLM Evaluation Frameworks</span><span class="topic-badge">Week 5 · Day 1–3</span></div>
+<div class="res-list">
+  <a class="res res-must" href="https://learn.deeplearning.ai/courses/evaluating-debugging-generative-ai" target="_blank">
+    <div class="res-left"><div class="res-title">Evaluating and Debugging Generative AI — DeepLearning.AI + W&B</div><div class="res-desc">Free course on LLM evaluation using Weights & Biases. Covers LLM tracing, evaluation pipelines, dataset management, and production debugging. Directly maps to the observability stack you'll instrument in your portfolio RAG project.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+  <a class="res" href="https://docs.smith.langchain.com/tutorials/Developers/rag" target="_blank">
+    <div class="res-left"><div class="res-title">LangSmith RAG Evaluation Tutorial — LangChain Docs</div><div class="res-desc">Step-by-step: instrument your RAG pipeline with LangSmith, trace every retrieval + generation call, and run automated evaluations. This is what "production observability for LLM apps" looks like in practice.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">1 hr</span></div>
+  </a>
+  <a class="res" href="https://docs.confident-ai.com/docs/getting-started" target="_blank">
+    <div class="res-left"><div class="res-title">DeepEval Getting Started — Confident AI</div><div class="res-desc">Open-source LLM evaluation framework — a strong RAGAS alternative. Covers G-Eval (LLM-as-judge), faithfulness, answer relevancy, and hallucination metrics. Used in production by many teams. Good to know alongside RAGAS.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Code</span><span class="res-tag tag-free">Free</span><span class="res-time">1 hr</span></div>
+  </a>
+</div>
+</div>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">💸</span><span class="topic-name">Cost & Latency Optimisation</span><span class="topic-badge">Week 5 · Day 4–5</span></div>
+<div class="res-list">
+  <a class="res res-must" href="https://www.anthropic.com/news/prompt-caching" target="_blank">
+    <div class="res-left"><div class="res-title">Prompt Caching Launch Post — Anthropic</div><div class="res-desc">Anthropic's announcement of prompt caching with real cost numbers (up to 90% savings, 85% latency reduction). The economics section is exactly what interviewers probe: "how do you reduce LLM cost at scale?"</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">15 min read</span></div>
+  </a>
+  <a class="res" href="https://learn.deeplearning.ai/courses/efficiently-serving-llms" target="_blank">
+    <div class="res-left"><div class="res-title">Efficiently Serving LLMs — DeepLearning.AI</div><div class="res-desc">Covers KV cache mechanics, batching, continuous batching, speculative decoding, and quantisation for inference. The production latency section maps directly to the TTFT vs. TPS distinction you need in interviews.</div></div>
+    <div class="res-right"><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+</div>
+</div>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🛡️</span><span class="topic-name">AI Safety, Guardrails & Prompt Injection</span><span class="topic-badge">Week 5 · Day 5–7</span></div>
+<div class="res-list">
+  <a class="res" href="https://learnprompting.org/docs/prompt_hacking/injection" target="_blank">
+    <div class="res-left"><div class="res-title">Prompt Injection — Learn Prompting Guide</div><div class="res-desc">Clear explanation of direct and indirect prompt injection with examples. Covers the exact attack vectors you'd be asked about in a Senior AI Engineer safety question.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+  <a class="res" href="https://github.com/NVIDIA/NeMo-Guardrails" target="_blank">
+    <div class="res-left"><div class="res-title">NeMo Guardrails — NVIDIA GitHub</div><div class="res-desc">Open-source toolkit for adding guardrails to LLM-based conversational systems. Worth knowing it exists and what it does — you may be asked "how would you add guardrails to your CCAI system?"</div></div>
+    <div class="res-right"><span class="res-tag tag-ref">Reference</span><span class="res-tag tag-free">Free</span><span class="res-time">Browse</span></div>
+  </a>
+</div>
+</div>
+</div><!-- end w5 -->
+
+<hr/>
+
+<!-- ═══════════ WEEK 6 ═══════════ -->
+<div class="week-block" id="w6">
+<div class="week-label wl-4">Week 6 · Specialisation</div>
+<h2 class="week-title">Fine-tuning, Multimodal & Vector DBs</h2>
+<p class="week-desc">You don't need to implement LoRA from scratch — you need to advise on when to use it. The goal here is decision-tree knowledge, not implementation depth.</p>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🎛️</span><span class="topic-name">Fine-tuning: LoRA & When to Use It</span><span class="topic-badge">Week 6 · Day 1–3</span></div>
+<div class="res-list">
+  <a class="res res-must" href="https://learn.deeplearning.ai/courses/finetuning-large-language-models" target="_blank">
+    <div class="res-left"><div class="res-title">Finetuning Large Language Models — DeepLearning.AI</div><div class="res-desc">Sharon Zhou's course on when and how to fine-tune. Covers the RAG vs. fine-tuning decision, full fine-tuning, instruction fine-tuning, and RLHF overview. The decision-tree section is exactly what Senior interviews test.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+  <a class="res" href="https://huggingface.co/docs/peft/conceptual_guides/lora" target="_blank">
+    <div class="res-left"><div class="res-title">LoRA Conceptual Guide — HuggingFace PEFT Docs</div><div class="res-desc">The authoritative conceptual explanation of LoRA: what the low-rank matrices are, why they work, and how PEFT uses them. Read this to be able to explain LoRA in 2 minutes without hand-waving.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Docs</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+</div>
+</div>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🗄️</span><span class="topic-name">Vector Databases in Depth</span><span class="topic-badge">Week 6 · Day 4–5</span></div>
+<div class="res-list">
+  <a class="res res-must" href="https://www.pinecone.io/learn/vector-database/" target="_blank">
+    <div class="res-left"><div class="res-title">What is a Vector Database? — Pinecone Learning Centre</div><div class="res-desc">The most comprehensive free guide to vector databases: how they work, HNSW indexing, approximate nearest neighbours, and when to use which database. Read this to be able to answer "compare vector databases" in a system design round.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">45 min read</span></div>
+  </a>
+  <a class="res" href="https://learn.deeplearning.ai/courses/vector-databases-embeddings-applications" target="_blank">
+    <div class="res-left"><div class="res-title">Vector Databases: Embeddings to Applications — DeepLearning.AI + Weaviate</div><div class="res-desc">Hands-on course building with Weaviate. Covers multi-modal retrieval, hybrid search, sparse+dense combinations, and production deployment. Complements your existing Elasticsearch knowledge with modern vector DB patterns.</div></div>
+    <div class="res-right"><span class="res-tag tag-course">Course</span><span class="res-tag tag-free">Free</span><span class="res-time">~2 hrs</span></div>
+  </a>
+</div>
+</div>
+</div><!-- end w6 -->
+
+<hr/>
+
+<!-- ═══════════ DSA ═══════════ -->
+<div class="week-block" id="dsa">
+<div class="week-label wl-dsa">All 8 Weeks · Daily</div>
+<h2 class="week-title">DSA: Daily Practice</h2>
+<p class="week-desc">One NeetCode 150 medium per day, every day. This is the non-negotiable daily quest. These resources are your complete DSA toolkit — from learning the patterns to timed practice.</p>
+
+<div class="callout callout-green">
+  <div class="callout-head">Strategy: Pattern recognition over memorisation</div>
+  Don't try to memorise solutions. Learn the pattern (sliding window, two pointers, BFS, DP). Once you recognise a pattern, you can solve any variation. NeetCode's roadmap is ordered by pattern — follow that order.
+</div>
+
+<div class="res-list">
+  <a class="res res-must" href="https://neetcode.io/roadmap" target="_blank">
+    <div class="res-left"><div class="res-title">NeetCode 150 Roadmap — neetcode.io</div><div class="res-desc">The 150 most important LeetCode problems, ordered by pattern and difficulty. The standard preparation resource for GCC and FAANG DSA rounds in 2026. Follow the order exactly — it's designed to build pattern recognition progressively.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-code">Practice</span><span class="res-tag tag-free">Free</span><span class="res-time">1 problem/day</span></div>
+  </a>
+  <a class="res res-must" href="https://www.youtube.com/@NeetCode" target="_blank">
+    <div class="res-left"><div class="res-title">NeetCode YouTube Channel</div><div class="res-desc">Video solutions for every NeetCode 150 problem. When you're stuck for 30 minutes, watch the video. The explanations focus on pattern recognition, not trick solutions. Subscribe and watch alongside your daily problem.</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">Per problem</span></div>
+  </a>
+  <a class="res" href="https://leetcode.com/discuss/general-discussion/460599/blind-75-leetcode-questions" target="_blank">
+    <div class="res-left"><div class="res-title">Blind 75 — LeetCode Discussion</div><div class="res-desc">The 75 most frequently asked interview problems. A subset of NeetCode 150. If you're short on time in Week 7–8, focus exclusively on these 75. Cover at least these before any interview.</div></div>
+    <div class="res-right"><span class="res-tag tag-ref">Reference</span><span class="res-tag tag-free">Free</span><span class="res-time">75 problems</span></div>
+  </a>
+  <a class="res" href="https://www.pramp.com/" target="_blank">
+    <div class="res-left"><div class="res-title">Pramp — Peer Mock Interviews</div><div class="res-desc">Free peer-to-peer mock interviews with real coding challenges. Practice with the pressure of a real interview: timed, someone watching, and you have to explain your thinking out loud. Do at least 2 full mocks in Week 7.</div></div>
+    <div class="res-right"><span class="res-tag tag-code">Practice</span><span class="res-tag tag-free">Free</span><span class="res-time">Week 7</span></div>
+  </a>
+</div>
+</div><!-- end dsa -->
+
+<hr/>
+
+<!-- ═══════════ MISC ═══════════ -->
+<div class="week-block" id="misc">
+<div class="week-label wl-misc">Reference · Use When Needed</div>
+<h2 class="week-title">Misc: Behavioral, ML Core & Reference</h2>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">🎭</span><span class="topic-name">Behavioral Interview Prep</span><span class="topic-badge">Week 7</span></div>
+<div class="res-list">
+  <a class="res res-must" href="https://www.youtube.com/watch?v=PJKYqLP6MRo" target="_blank">
+    <div class="res-left"><div class="res-title">STAR Method Explained — Life Before 30 (YouTube)</div><div class="res-desc">Clean, practical 10-minute breakdown of the STAR method with real examples. Watch this once, then never use bullet points in behavioral answers again. The format that works: Situation (1 sentence), Task (1 sentence), Action (3–4 sentences), Result (1–2 sentences with a metric).</div></div>
+    <div class="res-right"><span class="must-badge">★ Must-do</span><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">10 min</span></div>
+  </a>
+  <a class="res" href="https://www.levels.fyi/blog/amazon-leadership-principles.html" target="_blank">
+    <div class="res-left"><div class="res-title">Amazon Leadership Principles Breakdown</div><div class="res-desc">Most GCCs (including Microsoft, Adobe) use LP-inspired behavioral frameworks. "Ownership", "Bias for action", "Deliver results", "Disagree and commit" — understand these even if you're not targeting Amazon. They show up everywhere.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Article</span><span class="res-tag tag-free">Free</span><span class="res-time">20 min read</span></div>
+  </a>
+</div>
+</div>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">📐</span><span class="topic-name">ML Fundamentals Reference</span><span class="topic-badge">As Needed</span></div>
+<div class="res-list">
+  <a class="res" href="https://www.youtube.com/playlist?list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF" target="_blank">
+    <div class="res-left"><div class="res-title">StatQuest with Josh Starmer — ML Fundamentals Playlist</div><div class="res-desc">The clearest visual explanations of ML fundamentals on the internet: logistic regression, gradient descent, bias-variance, random forests, neural networks. Watch the relevant video when an interview question touches on classic ML. Your ADB logistic regression work maps directly here.</div></div>
+    <div class="res-right"><span class="res-tag tag-video">Video</span><span class="res-tag tag-free">Free</span><span class="res-time">Per topic</span></div>
+  </a>
+  <a class="res" href="https://mlu-explain.github.io/" target="_blank">
+    <div class="res-left"><div class="res-title">MLU-Explain — Amazon Interactive ML Explainers</div><div class="res-desc">Interactive visual explanations of ML concepts from Amazon. Bias-variance tradeoff, cross-validation, precision-recall, ROC — all interactive. Great for concepts you know but can't visualise clearly enough to explain.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Interactive</span><span class="res-tag tag-free">Free</span><span class="res-time">Per topic</span></div>
+  </a>
+</div>
+</div>
+
+<div class="topic">
+<div class="topic-head"><span class="topic-icon">📖</span><span class="topic-name">Ongoing: Newsletters & Staying Current</span><span class="topic-badge">All 8 Weeks</span></div>
+<div class="res-list">
+  <a class="res" href="https://substack.com/@jalammar" target="_blank">
+    <div class="res-left"><div class="res-title">Jay Alammar's Substack — Language Models & Co</div><div class="res-desc">Weekly illustrated explainers on new AI models, techniques, and architectures. The same visual style as The Illustrated Transformer but covering 2024–2026 developments. Subscribe and read one post per week alongside your prep.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Newsletter</span><span class="res-tag tag-free">Free</span><span class="res-time">Weekly</span></div>
+  </a>
+  <a class="res" href="https://www.deeplearning.ai/the-batch/" target="_blank">
+    <div class="res-left"><div class="res-title">The Batch — DeepLearning.AI Newsletter</div><div class="res-desc">Andrew Ng's weekly AI newsletter. Keeps you current on major developments without the noise of social media. Interviewers sometimes ask "what AI development has caught your attention recently?" — this gives you an honest answer.</div></div>
+    <div class="res-right"><span class="res-tag tag-read">Newsletter</span><span class="res-tag tag-free">Free</span><span class="res-time">Weekly</span></div>
+  </a>
+</div>
+</div>
+
+</div><!-- end misc -->
+
+<!-- FOOTER -->
+<div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);font-size:11px;color:var(--muted2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+  <span>Sid's AI Engineer Prep Hub · Resources page</span>
+  <div style="display:flex;gap:1rem"><a href="index.html" style="color:var(--muted2);text-decoration:none">Quest Board</a><a href="playbook.html" style="color:var(--muted2);text-decoration:none">Interview Playbook</a></div>
+</div>
+
+</div><!-- end wrap -->
+</body>
+</html>

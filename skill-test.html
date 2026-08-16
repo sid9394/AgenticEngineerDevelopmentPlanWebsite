@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Skills Assessment · Sid's AI Engineer Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1016;--surface2:#14151e;--surface3:#1c1d2a;
+  --border:#1f2033;--border2:#2e3050;
+  --fg:#ddddf0;--muted:#6b6d90;--muted2:#44465e;
+  --accent:#5b8ef0;--accent2:#3ecf8e;--accent3:#f0c060;--accent4:#e05c8a;--accent5:#a78bfa;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;
+  --radius:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:14px;line-height:1.7;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 6rem}
+
+/* SHELL */
+.shell{width:100%;max-width:720px}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:.8rem}
+.hdr-left h1{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--fg)}
+.hdr-left p{font-size:11px;color:var(--muted);margin-top:3px}
+.back{font-size:11px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:all .2s}
+.back:hover{color:var(--fg);border-color:var(--border2)}
+
+/* PROGRESS BAR */
+.prog-wrap{margin-bottom:2rem}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.prog-label{font-size:11px;color:var(--muted);letter-spacing:1px}
+.prog-count{font-size:11px;color:var(--accent)}
+.prog-track{height:4px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.section-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.s-chip{font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid var(--border2);color:var(--muted2);transition:all .3s}
+.s-chip.done{color:var(--accent2);border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.07)}
+.s-chip.active{color:var(--accent);border-color:rgba(91,142,240,.4);background:rgba(91,142,240,.07)}
+
+/* QUESTION CARD */
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem;margin-bottom:1.2rem;transition:border-color .3s}
+.q-card.active-card{border-color:var(--border2)}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.q-skill{font-size:10px;padding:2px 9px;border-radius:99px;border:1px solid;letter-spacing:.5px}
+.sk-llm   {color:#9d8fff;border-color:rgba(157,143,255,.35);background:rgba(157,143,255,.08)}
+.sk-rag   {color:#5b8ef0;border-color:rgba(91,142,240,.35);background:rgba(91,142,240,.08)}
+.sk-agent {color:#3ecf8e;border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.08)}
+.sk-sys   {color:#f0c060;border-color:rgba(240,192,96,.35);background:rgba(240,192,96,.08)}
+.sk-ml    {color:#e05c8a;border-color:rgba(224,92,138,.35);background:rgba(224,92,138,.08)}
+.sk-prod  {color:#a78bfa;border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.08)}
+.sk-dsa   {color:#f0c060;border-color:rgba(240,192,96,.35);background:rgba(240,192,96,.08)}
+.q-diff{font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid}
+.d-easy{color:#3ecf8e;border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.07)}
+.d-med {color:#f0c060;border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.07)}
+.d-hard{color:#e05c8a;border-color:rgba(224,92,138,.3);background:rgba(224,92,138,.07)}
+.q-num{font-size:10px;color:var(--muted2);margin-left:auto}
+
+.q-text{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--fg);line-height:1.45;margin-bottom:.6rem}
+.q-hint{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:1.3rem;font-style:italic}
+
+/* TEXTAREA */
+.ans-wrap{position:relative}
+textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:13px;
+  padding:12px 14px;resize:vertical;outline:none;
+  transition:border-color .2s;min-height:130px;line-height:1.75;
+}
+textarea:focus{border-color:var(--accent)}
+textarea::placeholder{color:var(--muted2)}
+.char-count{font-size:10px;color:var(--muted2);margin-top:5px;text-align:right}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;margin-top:1.2rem;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:12px;padding:8px 18px;border-radius:7px;cursor:pointer;border:1px solid;transition:all .2s;outline:none}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:#4a7de0;border-color:#4a7de0}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-skip{background:none;border-color:var(--border2);color:var(--muted)}
+.btn-skip:hover{color:var(--fg);border-color:var(--muted)}
+
+/* FEEDBACK PANEL */
+.feedback{
+  margin-top:1.2rem;border-radius:10px;padding:1.1rem 1.3rem;
+  border:1px solid;animation:fadeIn .3s ease;display:none;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.feedback.show{display:block}
+.feedback-score{display:flex;align-items:center;gap:10px;margin-bottom:.8rem}
+.score-badge{font-size:13px;font-weight:700;padding:4px 12px;border-radius:99px}
+.fb-green{border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.06)}
+.fb-yellow{border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.06)}
+.fb-red{border-color:rgba(224,92,138,.3);background:rgba(224,92,138,.06)}
+.sb-green{background:rgba(62,207,142,.2);color:#3ecf8e}
+.sb-yellow{background:rgba(240,192,96,.2);color:#f0c060}
+.sb-red{background:rgba(224,92,138,.2);color:#e05c8a}
+.fb-label{font-size:11px;font-weight:500}
+.fb-text{font-size:12px;color:var(--muted);line-height:1.8}
+.fb-text strong{color:var(--fg);font-weight:500}
+.fb-ideal{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border)}
+.fb-ideal-label{font-size:10px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.fb-ideal-text{font-size:12px;color:var(--muted);line-height:1.8}
+
+/* LOADING */
+.loading{display:none;align-items:center;gap:10px;padding:.9rem 1.1rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-top:1.2rem;font-size:12px;color:var(--muted)}
+.loading.show{display:flex}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--muted)}
+
+/* RESULTS PAGE */
+.results{display:none}
+.results.show{display:block}
+.results-hero{text-align:center;padding:2.5rem 1rem 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.results-hero h2{font-family:var(--serif);font-size:32px;font-weight:700;margin-bottom:.5rem}
+.results-hero p{font-size:12px;color:var(--muted);max-width:480px;margin:0 auto}
+.overall-score{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--serif);font-size:48px;font-weight:700;color:var(--accent);margin:.8rem 0;line-height:1}
+.overall-label{font-size:12px;color:var(--muted);margin-bottom:1.5rem}
+
+/* MATRIX */
+.matrix-title{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.matrix-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.matrix-table{width:100%;border-collapse:collapse;margin-bottom:2rem;font-size:12px}
+.matrix-table th{text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);padding:6px 10px;border-bottom:1px solid var(--border)}
+.matrix-table td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.matrix-table tr:last-child td{border-bottom:none}
+.matrix-table td:first-child{color:var(--fg);font-weight:500}
+.bar-wrap{width:130px;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.b-strong{background:var(--accent2)}.b-good{background:var(--accent)}.b-build{background:var(--accent3)}.b-gap{background:var(--accent4)}
+.lbl{font-size:10px;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.lbl-strong{color:var(--accent2);background:rgba(62,207,142,.1)}
+.lbl-good{color:var(--accent);background:rgba(91,142,240,.1)}
+.lbl-build{color:var(--accent3);background:rgba(240,192,96,.1)}
+.lbl-gap{color:var(--accent4);background:rgba(224,92,138,.1)}
+.priority-badge{font-size:10px;color:var(--muted2);background:var(--surface2);padding:2px 7px;border-radius:4px;font-family:var(--mono)}
+
+/* CALLOUT */
+.callout{border:1px solid;border-radius:10px;padding:.9rem 1.1rem;margin-bottom:1.3rem;font-size:12px;line-height:1.85}
+.c-blue{border-color:rgba(91,142,240,.3);background:rgba(91,142,240,.06)}
+.c-green{border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.06)}
+.c-yellow{border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.06)}
+.c-head{font-weight:500;margin-bottom:3px;color:var(--fg)}
+
+/* NEXT STEPS */
+.next-list{display:flex;flex-direction:column;gap:7px;margin-bottom:2rem}
+.next-item{padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
+.next-item strong{color:var(--fg)}
+.next-num{font-size:11px;color:var(--accent);flex-shrink:0;margin-top:1px}
+
+/* ACTION BUTTONS */
+.action-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:2rem}
+.action-btn{font-family:var(--mono);font-size:12px;padding:9px 20px;border-radius:8px;cursor:pointer;border:1px solid;text-decoration:none;display:inline-block;text-align:center;transition:all .2s}
+.ab-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ab-primary:hover{background:#4a7de0}
+.ab-sec{background:none;border-color:var(--border2);color:var(--muted)}
+.ab-sec:hover{color:var(--fg);border-color:var(--muted)}
+
+/* INTRO */
+.intro-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2rem}
+.intro-card h2{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:.7rem}
+.intro-card p{font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:1rem}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:.9rem 0 1.3rem}
+.intro-stat{background:var(--surface2);border-radius:8px;padding:.8rem 1rem}
+.intro-stat-num{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--accent)}
+.intro-stat-label{font-size:11px;color:var(--muted);margin-top:2px}
+
+@media(max-width:540px){.intro-grid{grid-template-columns:1fr}.q-text{font-size:15px}.overall-score{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>Skills Assessment</h1>
+    <p>// Claude judges your answers in real time</p>
+  </div>
+  <a class="back" href="index.html">← Hub</a>
+</div>
+
+<!-- INTRO -->
+<div id="introSection">
+  <div class="intro-card">
+    <h2>Let's find your real skill level.</h2>
+    <p>Answer 14 questions — one per skill area from your gap matrix. Type your answer as you would in an actual interview: out loud, in plain English. No need to be perfect. Claude will score each answer 1–5 and give you immediate feedback, then generate your personalised skill matrix at the end.</p>
+    <div class="intro-grid">
+      <div class="intro-stat"><div class="intro-stat-num">14</div><div class="intro-stat-label">Questions across all skill areas</div></div>
+      <div class="intro-stat"><div class="intro-stat-num">~20</div><div class="intro-stat-label">Minutes to complete</div></div>
+      <div class="intro-stat"><div class="intro-stat-num">AI</div><div class="intro-stat-label">Claude judges each answer live</div></div>
+      <div class="intro-stat"><div class="intro-stat-num">1:1</div><div class="intro-stat-label">Custom matrix generated for you</div></div>
+    </div>
+    <div class="callout c-blue" style="margin-bottom:1rem">
+      <div class="c-head">How to answer</div>
+      Write like you're talking to an interviewer. Full sentences. Cover the concept, then connect it to something you've actually built if you can. Don't Google — the point is to find what you actually know vs. what you need to study.
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()" style="width:100%;padding:12px">Start Assessment →</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizSection" style="display:none">
+  <div class="prog-wrap">
+    <div class="prog-top">
+      <span class="prog-label">PROGRESS</span>
+      <span class="prog-count" id="progCount">0 / 14</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="section-chips" id="sectionChips"></div>
+  </div>
+  <div id="questionArea"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="resultsSection"></div>
+
+</div><!-- end shell -->
+
+<script>
+// ═══════════════════════════════════════════════════
+// QUESTION BANK — 14 questions, 1 per skill area
+// ═══════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    id: 1,
+    skill: 'Production RAG Systems',
+    skillKey: 'rag_prod',
+    tag: 'sk-rag', diff: 'med',
+    question: 'Walk me through the chunking strategy you used in your ECU invoice pipeline — or would use in a production RAG system over PDFs. What are the trade-offs between chunk size choices?',
+    hint: 'Think about: what happens with too-large chunks? Too-small? How do you handle tables in PDFs? What\'s the strategy for invoice fields vs. free text?',
+    idealPoints: ['fixed-size vs semantic chunking', 'overlap rationale', 'PDF table extraction challenge', 'hierarchical/parent-child chunking', 'chunk size effect on retrieval recall vs faithfulness']
+  },
+  {
+    id: 2,
+    skill: 'LLM API & Prompt Engineering',
+    skillKey: 'llm_api',
+    tag: 'sk-llm', diff: 'easy',
+    question: 'What is prompt caching, how does it work mechanically, and when would you use it in a production system? Give a concrete example from something you\'ve built.',
+    hint: 'Think about: what gets cached (KV tensors), when it pays off (stable system prompts), what the cost savings look like, and how you\'d apply it in your CCAI or ECU work.',
+    idealPoints: ['KV cache mechanism', 'stable prefix requirement', 'cost reduction % ballpark', 'latency benefit', 'concrete production use case']
+  },
+  {
+    id: 3,
+    skill: 'Multi-agent / CrewAI',
+    skillKey: 'agent_crew',
+    tag: 'sk-agent', diff: 'med',
+    question: 'In your GST/TDS compliance multi-agent system, what logic did you put in the orchestrator vs. what did you let the LLM decide? Why does this distinction matter?',
+    hint: 'This is the core orchestrator vs. LLM boundary question. What must be deterministic? What can be left to LLM judgment? What breaks if you put safety-critical logic in the LLM?',
+    idealPoints: ['orchestrator owns: retry/rate limit/loop termination/auth/validation', 'LLM owns: tool selection/reasoning/ambiguity', 'safety-critical logic must not be in LLM', 'concrete example from their project', 'why this prevents infinite loops / security issues']
+  },
+  {
+    id: 4,
+    skill: 'Conversational AI (CCAI)',
+    skillKey: 'ccai',
+    tag: 'sk-agent', diff: 'easy',
+    question: 'How does Google CCAI handle multi-turn conversation state? In your H&P veterinary bot, how did you manage session context across turns, and what were the latency constraints?',
+    hint: 'Think about: how session state is stored, how context window is managed across turns, and the latency budget for voice (CCAI STT → LLM → TTS chain).',
+    idealPoints: ['session state management', 'context window/history compression', 'CCAI STT/TTS integration', 'latency constraint for voice', 'PII handling in session']
+  },
+  {
+    id: 5,
+    skill: 'NLP Pipeline (SpaCy/HF Transformers)',
+    skillKey: 'nlp',
+    tag: 'sk-llm', diff: 'easy',
+    question: 'In ADB Philippines, you chose Logistic Regression over an LLM for multilingual grievance classification. Explain that decision — when is a classical NLP approach the right choice over a modern LLM?',
+    hint: 'Think about: interpretability requirements, data size, deployment constraints, latency, and the nature of the classification task itself.',
+    idealPoints: ['interpretability for government use case', 'small labelled dataset favours simpler model', 'no GPU deployment', 'classification is well-bounded task', 'NLP preprocessing gave sufficient signal', 'knowing when NOT to use LLM is senior skill']
+  },
+  {
+    id: 6,
+    skill: 'LLM Internals (Attention, KV Cache)',
+    skillKey: 'llm_internals',
+    tag: 'sk-llm', diff: 'hard',
+    question: 'Explain how the attention mechanism works in a transformer. Why do we scale by √d_k? What is the computational cost, and why does that matter for long-context inference?',
+    hint: 'Cover: Q/K/V projections, the attention score formula, why the scaling factor matters, O(n²) cost, and how KV cache addresses the inference cost problem.',
+    idealPoints: ['Q/K/V mechanics', 'softmax(QKᵀ/√d_k)', 'scaling prevents vanishing gradients', 'O(n²) cost in sequence length', 'KV cache stores past K/V tensors', 'multi-head learns different relationship types']
+  },
+  {
+    id: 7,
+    skill: 'Vector DB & Embeddings',
+    skillKey: 'vector_db',
+    tag: 'sk-rag', diff: 'med',
+    question: 'Explain hybrid search: what two signals does it combine, when does it outperform either alone, and how would you implement it in an invoice retrieval system?',
+    hint: 'Cover: sparse (BM25) vs dense (embeddings), their respective strengths, RRF for combining, and a concrete example of when invoice queries need both.',
+    idealPoints: ['BM25 = sparse, exact keyword', 'dense = semantic/embedding similarity', 'BM25 wins on IDs/part numbers', 'dense wins on semantic queries', 'RRF/reciprocal rank fusion to combine', 'concrete invoice query example', '5-15% recall improvement over either alone']
+  },
+  {
+    id: 8,
+    skill: 'ML System Design',
+    skillKey: 'ml_sysdesign',
+    tag: 'sk-sys', diff: 'hard',
+    question: 'Design a production document intelligence system that processes 10,000 invoices/day across 15 languages with 99%+ accuracy. Walk me through your architecture from ingestion to output.',
+    hint: 'Cover: ingestion queue, document classification, extraction model choice, validation, human review for low-confidence outputs, monitoring. Draw on your ECU experience.',
+    idealPoints: ['async queue for ingestion', 'document classifier', 'LLM extraction with structured output', 'confidence scoring + human review threshold', 'Pydantic/schema validation', 'monitoring per doc type/language', 'human review UI for low-confidence']
+  },
+  {
+    id: 9,
+    skill: 'LLM Evaluation / RAGAS',
+    skillKey: 'llm_eval',
+    tag: 'sk-prod', diff: 'med',
+    question: 'Name three RAGAS metrics, explain what each measures, and tell me which failure mode each one catches. When would you use LLM-as-judge and when would you NOT trust it?',
+    hint: 'Cover: faithfulness, context recall, answer relevancy. Then: position bias, self-preference bias, length bias in LLM-as-judge.',
+    idealPoints: ['faithfulness = answer sticks to context (catches generation hallucination)', 'context recall = all relevant chunks retrieved (catches retrieval gaps)', 'answer relevancy = addresses question', 'LLM-as-judge: position bias / self-preference / length bias risks', 'when to use ground truth instead']
+  },
+  {
+    id: 10,
+    skill: 'MLOps / Observability',
+    skillKey: 'mlops',
+    tag: 'sk-prod', diff: 'med',
+    question: 'What would you instrument in a production LLM application to have full observability? Be specific about metrics, layers, and alerting thresholds.',
+    hint: 'Think in 4 layers: request-level metadata, token/cost metrics, latency metrics (TTFT vs TPS), and quality signals. What do you alert on?',
+    idealPoints: ['request_id/user_id/model_version per request', 'input/output tokens + cost per request', 'TTFT and TPS tracked separately', 'p50/p95/p99 latency', 'quality: user feedback + faithfulness sample', 'alert: error rate >1%, cost > budget, latency > SLA', 'tool: LangSmith/Phoenix/Kibana']
+  },
+  {
+    id: 11,
+    skill: 'Fine-tuning (LoRA / QLoRA)',
+    skillKey: 'finetune',
+    tag: 'sk-llm', diff: 'hard',
+    question: 'What is LoRA and how does it differ from full fine-tuning? More importantly: when would you recommend fine-tuning over RAG, and when would you use both together?',
+    hint: 'Cover the LoRA mechanism (low-rank matrices, why they reduce forgetting), then the decision axes: knowledge type, update frequency, data availability, interpretability needs.',
+    idealPoints: ['LoRA adds low-rank matrices ΔW=BA to frozen weights', 'trains <1% parameters', 'minimises catastrophic forgetting', 'RAG for dynamic/large/citable knowledge', 'fine-tuning for style/format/domain vocab', 'not mutually exclusive — use both', 'decision axes: knowledge type + update frequency + data quality']
+  },
+  {
+    id: 12,
+    skill: 'DSA (LeetCode Medium)',
+    skillKey: 'dsa',
+    tag: 'sk-dsa', diff: 'med',
+    question: 'Solve this: Given an array of integers, find the length of the longest subarray with sum equal to k. Describe your approach, the data structure you\'d use, and the time/space complexity.',
+    hint: 'Think prefix sums + hash map. Walk through your approach step by step — don\'t just give the answer, explain your reasoning process as you would to an interviewer.',
+    idealPoints: ['prefix sum approach', 'hash map storing prefix_sum -> earliest_index', 'check if (prefix_sum - k) exists in map', 'O(n) time O(n) space', 'handles negatives correctly', 'walks through example', 'clear explanation of reasoning']
+  },
+  {
+    id: 13,
+    skill: 'Cloud Platforms (AWS/GCP/Azure)',
+    skillKey: 'cloud',
+    tag: 'sk-prod', diff: 'easy',
+    question: 'In your ADB Philippines project on AWS, what services did you use and why? If you were rebuilding that system today using GCP (for the CCAI integration), what would the architecture look like?',
+    hint: 'Cover: the original AWS services, what they provided, then map to GCP equivalents. Bonus: how would you handle the multilingual NLP pipeline on GCP vs AWS?',
+    idealPoints: ['original AWS services named (EC2/Lambda/S3/etc)', 'rationale for each service', 'GCP equivalents (Cloud Run/GCS/Pub-Sub/Vertex AI)', 'CCAI integration point', 'Vertex AI for NLP vs AWS SageMaker', 'reasonable migration rationale']
+  },
+  {
+    id: 14,
+    skill: 'Python & FastAPI',
+    skillKey: 'python',
+    tag: 'sk-prod', diff: 'easy',
+    question: 'You\'re building a FastAPI endpoint that calls an LLM and streams the response back to the client. Walk through the implementation — async, streaming, error handling, and how you\'d add a timeout.',
+    hint: 'Cover: async def, StreamingResponse, how to use the Anthropic streaming API, error handling for rate limits and timeouts, and the generator pattern.',
+    idealPoints: ['async def endpoint', 'StreamingResponse or Server-Sent Events', 'Anthropic stream=True / with client.stream()', 'try/except for APIError/RateLimitError', 'asyncio.timeout() or httpx timeout', 'generator/yield pattern', 'correct FastAPI patterns']
+  }
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let currentQ = 0;
+let answers = [];
+let scores = [];
+let feedbacks = [];
+
+// ═══════════════════════════════════════════════════
+// SKILL AREA CONFIG (for matrix generation)
+// ═══════════════════════════════════════════════════
+const SKILL_CONFIG = {
+  rag_prod:      { label: 'Production RAG Systems',        weight: 1.2 },
+  llm_api:       { label: 'LLM API / Prompt Engineering',   weight: 1.0 },
+  agent_crew:    { label: 'Multi-agent / CrewAI',           weight: 1.1 },
+  ccai:          { label: 'Conversational AI (CCAI)',        weight: 1.0 },
+  nlp:           { label: 'NLP Pipeline (SpaCy/HF)',         weight: 1.0 },
+  llm_internals: { label: 'LLM Internals (Attention, KV)',  weight: 1.0 },
+  vector_db:     { label: 'Vector DB / Embeddings',          weight: 1.0 },
+  ml_sysdesign:  { label: 'ML System Design',               weight: 1.1 },
+  llm_eval:      { label: 'LLM Evaluation / RAGAS',          weight: 1.0 },
+  mlops:         { label: 'MLOps / Observability',           weight: 1.0 },
+  finetune:      { label: 'Fine-tuning (LoRA/QLoRA)',        weight: 0.9 },
+  dsa:           { label: 'DSA (LeetCode Medium)',           weight: 1.0 },
+  cloud:         { label: 'Cloud (AWS/GCP/Azure)',           weight: 0.9 },
+  python:        { label: 'Python & FastAPI',               weight: 1.0 }
+};
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+function startQuiz() {
+  document.getElementById('introSection').style.display = 'none';
+  document.getElementById('quizSection').style.display = 'block';
+  renderSectionChips();
+  renderQuestion(0);
+}
+
+function renderSectionChips() {
+  const el = document.getElementById('sectionChips');
+  el.innerHTML = QUESTIONS.map((q, i) =>
+    `<span class="s-chip" id="chip-${i}">${q.skill.split(' ')[0]}</span>`
+  ).join('');
+}
+
+function updateProgress(idx) {
+  const pct = Math.round((idx / QUESTIONS.length) * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progCount').textContent = `${idx} / ${QUESTIONS.length}`;
+  QUESTIONS.forEach((_, i) => {
+    const chip = document.getElementById('chip-' + i);
+    if (!chip) return;
+    chip.className = 's-chip' + (i < idx ? ' done' : i === idx ? ' active' : '');
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER QUESTION
+// ═══════════════════════════════════════════════════
+function renderQuestion(idx) {
+  if (idx >= QUESTIONS.length) { showResults(); return; }
+  updateProgress(idx);
+  const q = QUESTIONS[idx];
+  const el = document.getElementById('questionArea');
+
+  el.innerHTML = `
+    <div class="q-card active-card" id="qcard-${idx}">
+      <div class="q-meta">
+        <span class="q-skill ${q.tag}">${q.skill}</span>
+        <span class="q-diff d-${q.diff}">${q.diff}</span>
+        <span class="q-num">${idx + 1} of ${QUESTIONS.length}</span>
+      </div>
+      <div class="q-text">${q.question}</div>
+      <div class="q-hint">💡 ${q.hint}</div>
+      <div class="ans-wrap">
+        <textarea id="ans-${idx}" placeholder="Type your answer here as you would explain it in an interview..." rows="6" oninput="updateCharCount(${idx})"></textarea>
+        <div class="char-count" id="cc-${idx}">0 characters</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="submitBtn-${idx}" onclick="submitAnswer(${idx})">Submit Answer →</button>
+        <button class="btn btn-skip" onclick="skipQuestion(${idx})">Skip (mark as gap)</button>
+      </div>
+      <div class="loading" id="loading-${idx}">
+        <div class="spinner"></div>
+        <span class="loading-text">Claude is evaluating your answer…</span>
+      </div>
+      <div class="feedback" id="feedback-${idx}"></div>
+    </div>
+  `;
+  document.getElementById('ans-' + idx).focus();
+}
+
+function updateCharCount(idx) {
+  const val = document.getElementById('ans-' + idx)?.value || '';
+  const el = document.getElementById('cc-' + idx);
+  if (el) el.textContent = val.length + ' characters';
+}
+
+// ═══════════════════════════════════════════════════
+// SUBMIT & JUDGE
+// ═══════════════════════════════════════════════════
+async function submitAnswer(idx) {
+  const q = QUESTIONS[idx];
+  const ans = document.getElementById('ans-' + idx)?.value?.trim();
+  if (!ans || ans.length < 20) {
+    alert('Please write at least a sentence or two — even a rough answer helps calibrate the matrix.');
+    return;
+  }
+
+  document.getElementById('submitBtn-' + idx).disabled = true;
+  document.getElementById('loading-' + idx).classList.add('show');
+
+  const prompt = `You are evaluating an interview answer from Sidharth Menon, a Senior AI/ML Engineer with 7+ years of production experience (ECU Worldwide document intelligence, XPO Logistics invoice processing, ADB Philippines multilingual NLP, Google CCAI conversational bots, GST/TDS multi-agent CrewAI system).
+
+SKILL BEING TESTED: ${q.skill}
+DIFFICULTY: ${q.diff}
+
+QUESTION ASKED:
+"${q.question}"
+
+CANDIDATE'S ANSWER:
+"${ans}"
+
+IDEAL ANSWER SHOULD COVER (at least some of):
+${q.idealPoints.map((p, i) => `${i+1}. ${p}`).join('\n')}
+
+Score the answer 1–5 where:
+5 = Excellent — covers core concepts with depth, shows production awareness, could say this in an interview confidently
+4 = Good — covers main points, maybe missing 1-2 depth signals, slight interview polish needed
+3 = Adequate — gets the idea but lacks precision or depth that a Senior role requires
+2 = Partial — only basic understanding, significant gaps, would raise interviewer concerns
+1 = Insufficient — missing key concepts, would not pass a Senior AI Engineer screen
+
+Respond ONLY with this exact JSON (no markdown, no extra text):
+{"score": <1-5>, "label": "<one of: Excellent|Good|Adequate|Partial|Insufficient>", "what_you_got_right": "<1-2 sentences on strengths, be specific>", "main_gap": "<1-2 sentences on the most important thing missing or imprecise, be specific and actionable>", "ideal_key_point": "<The single most important thing to add or fix — the 'if you said this, the interviewer would nod' moment>"}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '{}';
+    let result;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      result = JSON.parse(clean);
+    } catch (e) {
+      result = { score: 3, label: 'Adequate', what_you_got_right: 'Answer received.', main_gap: 'Could not parse evaluation.', ideal_key_point: 'Review the ideal points above.' };
+    }
+    showFeedback(idx, q, result, ans);
+  } catch (err) {
+    showFeedback(idx, q, { score: 3, label: 'Adequate', what_you_got_right: 'Answer saved.', main_gap: 'Evaluation unavailable (API error).', ideal_key_point: 'Continue to next question.' }, ans);
+  }
+}
+
+function skipQuestion(idx) {
+  answers[idx] = '';
+  scores[idx] = 1;
+  feedbacks[idx] = { score: 1, label: 'Insufficient', what_you_got_right: 'Skipped.', main_gap: 'Marked as gap.', ideal_key_point: '' };
+  currentQ = idx + 1;
+  renderQuestion(currentQ);
+}
+
+function showFeedback(idx, q, result, ans) {
+  document.getElementById('loading-' + idx).classList.remove('show');
+
+  answers[idx] = ans;
+  scores[idx] = result.score;
+  feedbacks[idx] = result;
+
+  const scoreClass = result.score >= 4 ? 'fb-green' : result.score >= 3 ? 'fb-yellow' : 'fb-red';
+  const badgeClass = result.score >= 4 ? 'sb-green' : result.score >= 3 ? 'sb-yellow' : 'sb-red';
+  const scoreBar = '█'.repeat(result.score) + '░'.repeat(5 - result.score);
+
+  const fb = document.getElementById('feedback-' + idx);
+  fb.className = `feedback ${scoreClass} show`;
+  fb.innerHTML = `
+    <div class="feedback-score">
+      <span class="score-badge ${badgeClass}">${result.score}/5 — ${result.label}</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px">${scoreBar}</span>
+    </div>
+    <div class="fb-text">
+      <strong>What you got right:</strong> ${result.what_you_got_right}<br/>
+      <strong>Main gap:</strong> ${result.main_gap}
+    </div>
+    <div class="fb-ideal">
+      <div class="fb-ideal-label">Key point to add next time</div>
+      <div class="fb-ideal-text">${result.ideal_key_point}</div>
+    </div>
+  `;
+
+  // Next button
+  const btnRow = fb.closest('.q-card').querySelector('.btn-row');
+  btnRow.innerHTML = `
+    <button class="btn btn-primary" onclick="nextQuestion(${idx})">
+      ${idx + 1 < QUESTIONS.length ? 'Next Question →' : 'See My Results →'}
+    </button>
+  `;
+
+  fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function nextQuestion(idx) {
+  currentQ = idx + 1;
+  renderQuestion(currentQ);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════════
+function showResults() {
+  document.getElementById('quizSection').style.display = 'none';
+  updateProgress(QUESTIONS.length);
+
+  const totalScore = scores.reduce((s, v) => s + (v || 1), 0);
+  const maxScore = QUESTIONS.length * 5;
+  const pct = Math.round((totalScore / maxScore) * 100);
+
+  // Build skill map: skillKey -> score
+  const skillScores = {};
+  QUESTIONS.forEach((q, i) => { skillScores[q.skillKey] = scores[i] || 1; });
+
+  // Generate matrix rows
+  const matrixRows = QUESTIONS.map((q, i) => {
+    const score = scores[i] || 1;
+    const pctBar = Math.round((score / 5) * 100);
+    let barClass, lblClass, lblText, action;
+    if (score >= 4)      { barClass='b-strong'; lblClass='lbl-strong'; lblText='Strong';       action='Articulate with metrics'; }
+    else if (score >= 3) { barClass='b-good';   lblClass='lbl-good';   lblText='Good';         action='Add interview-depth polish'; }
+    else if (score >= 2) { barClass='b-build';  lblClass='lbl-build';  lblText='Build';        action='Focused study needed'; }
+    else                 { barClass='b-gap';    lblClass='lbl-gap';    lblText='Gap';          action='Priority: start this week'; }
+    return `<tr>
+      <td>${q.skill}</td>
+      <td><div class="bar-wrap"><div class="bar-fill ${barClass}" style="width:${pctBar}%"></div></div></td>
+      <td><span class="lbl ${lblClass}">${lblText}</span></td>
+      <td>${score}/5</td>
+      <td><span class="priority-badge">${action}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Top 3 gaps
+  const sorted = QUESTIONS.map((q, i) => ({ q, score: scores[i] || 1 })).sort((a, b) => a.score - b.score);
+  const top3gaps = sorted.slice(0, 3);
+  const top3strengths = sorted.slice(-3).reverse();
+
+  // Overall verdict
+  let verdictClass, verdictText, verdictDesc;
+  if (pct >= 75)      { verdictClass='c-green';  verdictText='Interview Ready';    verdictDesc='Your fundamentals are strong. Focus on polishing depth signals and system design articulation.'; }
+  else if (pct >= 55) { verdictClass='c-blue';   verdictText='On Track';           verdictDesc='Solid foundation with clear gaps. 4–6 weeks of targeted study on the red/amber areas will move you to ready.'; }
+  else if (pct >= 40) { verdictClass='c-yellow'; verdictText='Needs Work';         verdictDesc='Good production instincts but interview vocabulary needs development. 6–8 weeks of structured prep required.'; }
+  else                { verdictClass='c-yellow'; verdictText='Foundation Building'; verdictDesc='Start with the Week 1–2 resources. Your production experience is your asset — the goal is translating it to interview language.'; }
+
+  const nextSteps = top3gaps.map((item, i) => `
+    <div class="next-item">
+      <span class="next-num">${i+1}</span>
+      <div><strong>${item.q.skill}</strong> — Scored ${item.score}/5. ${feedbacks[QUESTIONS.indexOf(item.q)]?.main_gap || 'Review the ideal answer points and study the Week ' + (i < 2 ? '1–2' : '3–4') + ' resources.'}</div>
+    </div>
+  `).join('');
+
+  const resultsEl = document.getElementById('resultsSection');
+  resultsEl.className = 'results show';
+  resultsEl.innerHTML = `
+    <div class="results-hero">
+      <p style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem">// assessment complete</p>
+      <h2>Your Skills Matrix</h2>
+      <p>Based on your live answers, judged by Claude in real time.</p>
+      <div class="overall-score">${pct}<span style="font-size:24px;color:var(--muted)">%</span></div>
+      <div class="overall-label">${totalScore} / ${maxScore} points across 14 skill areas</div>
+    </div>
+
+    <div class="callout ${verdictClass}" style="margin-bottom:1.5rem">
+      <div class="c-head">${verdictText}</div>
+      ${verdictDesc}
+    </div>
+
+    <div class="matrix-title">Your Personalised Skills Matrix</div>
+    <table class="matrix-table">
+      <thead><tr><th>Skill Area</th><th>Level</th><th>Status</th><th>Score</th><th>Action</th></tr></thead>
+      <tbody>${matrixRows}</tbody>
+    </table>
+
+    <div class="matrix-title">Top Strengths</div>
+    <div class="next-list">
+      ${top3strengths.map(item => `
+        <div class="next-item">
+          <span class="next-num" style="color:var(--accent2)">✓</span>
+          <div><strong>${item.q.skill}</strong> — ${item.score}/5. ${feedbacks[QUESTIONS.indexOf(item.q)]?.what_you_got_right || 'Strong performance.'}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="matrix-title">Priority Focus Areas</div>
+    <div class="next-list">${nextSteps}</div>
+
+    <div class="callout c-blue">
+      <div class="c-head">What to do with this</div>
+      Copy these results into your playbook to replace the placeholder skill matrix. Then open the 8-week roadmap and adjust your Week 1–2 focus to your lowest-scoring areas. The resources page has the exact study materials for each gap.
+    </div>
+
+    <div class="action-row">
+      <a class="action-btn ab-primary" href="playbook.html">Interview Playbook →</a>
+      <a class="action-btn ab-sec" href="resources.html">Study Resources →</a>
+      <button class="action-btn ab-sec" onclick="retakeQuiz()">Retake Assessment</button>
+    </div>
+  `;
+
+  // Animate bars after a tick
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(b => {
+      const w = b.style.width; b.style.width = '0'; setTimeout(() => b.style.width = w, 50);
+    });
+  }, 100);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function retakeQuiz() {
+  currentQ = 0; answers = []; scores = []; feedbacks = [];
+  document.getElementById('resultsSection').className = 'results';
+  document.getElementById('quizSection').style.display = 'block';
+  renderSectionChips();
+  renderQuestion(0);
+}
+</script>
+</body>
+</html>
