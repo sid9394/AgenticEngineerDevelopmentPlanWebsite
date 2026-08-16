@@ -161,6 +161,23 @@ textarea::placeholder{color:var(--muted2)}
 .ab-sec{background:none;border-color:var(--border2);color:var(--muted)}
 .ab-sec:hover{color:var(--fg);border-color:var(--muted)}
 
+/* API KEY SETUP */
+.key-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2rem}
+.key-card h2{font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:.6rem}
+.key-card p{font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:1rem}
+.key-input-wrap{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.key-input{flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s}
+.key-input:focus{border-color:var(--accent)}
+.key-note{font-size:11px;color:var(--muted2);line-height:1.6;margin-top:6px}
+.key-note a{color:var(--accent);text-decoration:none}
+.key-note a:hover{text-decoration:underline}
+.key-status{font-size:11px;padding:4px 10px;border-radius:6px;display:none;margin-top:8px}
+.key-status.ok{display:block;color:var(--accent2);background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3)}
+.key-status.err{display:block;color:var(--accent4);background:rgba(224,92,138,.1);border:1px solid rgba(224,92,138,.3)}
+.key-saved-row{display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding:8px 12px;background:rgba(62,207,142,.07);border:1px solid rgba(62,207,142,.3);border-radius:8px;font-size:12px;color:var(--accent2)}
+.key-clear{font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:2px 8px;cursor:pointer;transition:all .2s;margin-left:auto}
+.key-clear:hover{color:var(--accent4);border-color:var(--accent4)}
+
 /* INTRO */
 .intro-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2rem}
 .intro-card h2{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:.7rem}
@@ -185,8 +202,31 @@ textarea::placeholder{color:var(--muted2)}
   <a class="back" href="index.html">← Hub</a>
 </div>
 
+<!-- API KEY SETUP -->
+<div id="keySection" style="display:none">
+  <div class="key-card">
+    <h2>One-time setup</h2>
+    <p>This assessment uses the Anthropic API to judge your answers in real time. You need your own API key — it's stored only in your browser's localStorage and is never sent anywhere except directly to Anthropic.</p>
+    <div id="keySavedRow" class="key-saved-row" style="display:none">
+      <span>✓ API key saved</span>
+      <span id="keyPreview" style="font-family:var(--mono);color:var(--muted)"></span>
+      <button class="key-clear" onclick="clearKey()">Remove key</button>
+    </div>
+    <div id="keyInputRow">
+      <div class="key-input-wrap">
+        <input class="key-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false"/>
+        <button class="btn btn-primary" onclick="saveKey()">Save &amp; continue →</button>
+      </div>
+      <div class="key-note">
+        Get your key at <a href="https://console.anthropic.com/account/keys" target="_blank">console.anthropic.com/account/keys</a>. The key starts with <code style="font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px;color:var(--accent2)">sk-ant-</code>. It's stored in <code style="font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px;color:var(--accent2)">localStorage</code> on this device only — never in GitHub, never sent to anyone except Anthropic's API.
+      </div>
+      <div class="key-status" id="keyStatus"></div>
+    </div>
+  </div>
+</div>
+
 <!-- INTRO -->
-<div id="introSection">
+<div id="introSection" style="display:none">
   <div class="intro-card">
     <h2>Let's find your real skill level.</h2>
     <p>Answer 14 questions — one per skill area from your gap matrix. Type your answer as you would in an actual interview: out loud, in plain English. No need to be perfect. Claude will score each answer 1–5 and give you immediate feedback, then generate your personalised skill matrix at the end.</p>
@@ -384,6 +424,62 @@ const SKILL_CONFIG = {
 };
 
 // ═══════════════════════════════════════════════════
+// API KEY MANAGEMENT
+// ═══════════════════════════════════════════════════
+const KEY_STORE = 'sid_anthropic_key';
+
+function getKey() {
+  return localStorage.getItem(KEY_STORE) || '';
+}
+
+function saveKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  const status = document.getElementById('keyStatus');
+  if (!val.startsWith('sk-ant-') && !val.startsWith('sk-')) {
+    status.textContent = '✗ That doesn\'t look like an Anthropic key. It should start with sk-ant-';
+    status.className = 'key-status err';
+    return;
+  }
+  if (val.length < 20) {
+    status.textContent = '✗ Key looks too short — paste the full key from the Anthropic console.';
+    status.className = 'key-status err';
+    return;
+  }
+  localStorage.setItem(KEY_STORE, val);
+  status.textContent = '✓ Key saved to localStorage. Never uploaded to GitHub.';
+  status.className = 'key-status ok';
+  setTimeout(() => showIntro(), 800);
+}
+
+function clearKey() {
+  localStorage.removeItem(KEY_STORE);
+  document.getElementById('keySavedRow').style.display = 'none';
+  document.getElementById('keyInputRow').style.display = 'block';
+  document.getElementById('apiKeyInput').value = '';
+  document.getElementById('keyStatus').className = 'key-status';
+}
+
+function showKeySetup() {
+  document.getElementById('keySection').style.display = 'block';
+  const key = getKey();
+  if (key) {
+    document.getElementById('keySavedRow').style.display = 'flex';
+    document.getElementById('keyPreview').textContent = key.slice(0,10) + '…' + key.slice(-4);
+    document.getElementById('keyInputRow').style.display = 'none';
+    // Key already saved — go straight to intro
+    showIntro();
+  } else {
+    document.getElementById('keySavedRow').style.display = 'none';
+    document.getElementById('keyInputRow').style.display = 'block';
+  }
+}
+
+function showIntro() {
+  document.getElementById('keySection').style.display = 'none';
+  document.getElementById('introSection').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
 function startQuiz() {
@@ -491,16 +587,45 @@ Score the answer 1–5 where:
 Respond ONLY with this exact JSON (no markdown, no extra text):
 {"score": <1-5>, "label": "<one of: Excellent|Good|Adequate|Partial|Insufficient>", "what_you_got_right": "<1-2 sentences on strengths, be specific>", "main_gap": "<1-2 sentences on the most important thing missing or imprecise, be specific and actionable>", "ideal_key_point": "<The single most important thing to add or fix — the 'if you said this, the interviewer would nod' moment>"}`;
 
+  const apiKey = getKey();
+  if (!apiKey) {
+    document.getElementById('loading-' + idx).classList.remove('show');
+    document.getElementById('submitBtn-' + idx).disabled = false;
+    alert('No API key found. Please refresh the page and add your Anthropic API key first.');
+    return;
+  }
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMsg = errData?.error?.message || `HTTP ${res.status}`;
+      // Surface key errors clearly
+      if (res.status === 401) {
+        document.getElementById('loading-' + idx).classList.remove('show');
+        document.getElementById('submitBtn-' + idx).disabled = false;
+        const fix = confirm(`API key rejected (401 Unauthorized).\n\nError: ${errMsg}\n\nThis usually means the key is wrong or expired. Click OK to update your key, or Cancel to skip this question.`);
+        if (fix) { clearKey(); location.reload(); }
+        else { skipQuestion(idx); }
+        return;
+      }
+      throw new Error(errMsg);
+    }
+
     const data = await res.json();
     const raw = data.content?.[0]?.text || '{}';
     let result;
@@ -508,11 +633,21 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
       const clean = raw.replace(/```json|```/g, '').trim();
       result = JSON.parse(clean);
     } catch (e) {
-      result = { score: 3, label: 'Adequate', what_you_got_right: 'Answer received.', main_gap: 'Could not parse evaluation.', ideal_key_point: 'Review the ideal points above.' };
+      result = { score: 3, label: 'Adequate', what_you_got_right: 'Answer received.', main_gap: 'Could not parse evaluation — try again or skip.', ideal_key_point: 'Review the ideal points above.' };
     }
     showFeedback(idx, q, result, ans);
   } catch (err) {
-    showFeedback(idx, q, { score: 3, label: 'Adequate', what_you_got_right: 'Answer saved.', main_gap: 'Evaluation unavailable (API error).', ideal_key_point: 'Continue to next question.' }, ans);
+    console.error('API error:', err);
+    // Show error inline rather than silently failing
+    document.getElementById('loading-' + idx).classList.remove('show');
+    document.getElementById('submitBtn-' + idx).disabled = false;
+    const fb = document.getElementById('feedback-' + idx);
+    fb.className = 'feedback fb-red show';
+    fb.innerHTML = `<div class="fb-text"><strong>API error:</strong> ${err.message || 'Network error'}. Check your key is valid and has credits, then try again.</div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn btn-primary" onclick="submitAnswer(${idx})">Retry</button>
+      <button class="btn btn-skip" onclick="skipQuestion(${idx})">Skip this question</button>
+    </div>`;
   }
 }
 
@@ -680,10 +815,12 @@ function showResults() {
 function retakeQuiz() {
   currentQ = 0; answers = []; scores = []; feedbacks = [];
   document.getElementById('resultsSection').className = 'results';
-  document.getElementById('quizSection').style.display = 'block';
-  renderSectionChips();
-  renderQuestion(0);
+  document.getElementById('quizSection').style.display = 'none';
+  showIntro();
 }
+
+// Boot
+showKeySetup();
 </script>
 </body>
 </html>
