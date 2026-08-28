@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Daily Quest Board · Sid's AI Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#0f1016;--surface2:#14151e;--border:#1f2033;--border2:#2a2c48;
+  --fg:#ddddf0;--muted:#6b6d90;--muted2:#44465e;
+  --accent:#5b8ef0;--accent2:#3ecf8e;--accent3:#f0c060;--accent4:#e05c8a;--accent5:#a78bfa;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:13px;line-height:1.7;min-height:100vh}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(8,9,13,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.nav-logo{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--fg);text-decoration:none}
+.nav-links{display:flex;gap:4px;flex-wrap:wrap}
+.nav-link{font-size:11px;color:var(--muted);text-decoration:none;padding:3px 10px;border-radius:6px;border:1px solid transparent;transition:all .2s}
+.nav-link:hover{color:var(--fg);border-color:var(--border2)}
+.nav-link.current{color:var(--accent);border-color:rgba(91,142,240,.35);background:rgba(91,142,240,.07)}
+
+/* LAYOUT */
+.wrap{max-width:780px;margin:0 auto;padding:1.5rem 1.5rem 5rem}
+
+/* WEEK BANNER */
+.week-banner{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.wb-left{}
+.wb-phase{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.wb-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--fg);margin-bottom:3px}
+.wb-desc{font-size:11px;color:var(--muted);line-height:1.6;max-width:480px}
+.wb-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.date-badge{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 10px}
+.week-picker{display:flex;gap:5px;align-items:center}
+.week-picker label{font-size:10px;color:var(--muted2)}
+.week-picker select{background:var(--surface2);border:1px solid var(--border2);color:var(--fg);font-family:var(--mono);font-size:11px;border-radius:5px;padding:2px 6px;cursor:pointer;outline:none}
+
+/* XP BAR */
+.xp-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:1.25rem}
+.xp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.xp-label{font-size:10px;color:var(--muted);letter-spacing:1.5px}
+.xp-num{font-size:13px;font-weight:700;color:var(--accent)}
+.xp-track{height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:9px}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .6s cubic-bezier(.4,2,.6,1)}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:10px;padding:2px 9px;border-radius:99px;border:1px solid}
+.lv-ai{color:#9d8fff;border-color:#7c6af740;background:#7c6af710}
+.lv-dsa{color:#3ecf8e;border-color:#3ecf8e40;background:#3ecf8e10}
+.lv-web{color:#f0c060;border-color:#f0c06040;background:#f0c06010}
+
+/* TODAY'S FOCUS */
+.focus-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:1.25rem;overflow:hidden}
+.focus-header{padding:.7rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.focus-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.focus-tag{font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid;color:var(--accent3);border-color:rgba(240,192,96,.35);background:rgba(240,192,96,.08)}
+.focus-body{padding:.9rem 1rem}
+.focus-topic{font-size:14px;font-weight:500;color:var(--fg);margin-bottom:5px}
+.focus-why{font-size:11px;color:var(--muted);line-height:1.65;margin-bottom:.9rem}
+.res-links{display:flex;flex-direction:column;gap:5px}
+.res-link{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;text-decoration:none;transition:border-color .2s}
+.res-link:hover{border-color:var(--border2)}
+.res-link-icon{font-size:13px;flex-shrink:0}
+.res-link-text{flex:1}
+.res-link-title{font-size:12px;color:var(--fg);font-weight:500}
+.res-link-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.res-link-badge{font-size:10px;padding:1px 6px;border-radius:99px;flex-shrink:0}
+.rb-must{color:var(--accent);border:1px solid rgba(91,142,240,.35);background:rgba(91,142,240,.08)}
+.rb-free{color:var(--accent2);border:1px solid rgba(62,207,142,.3);background:rgba(62,207,142,.07)}
+
+/* TRAP SESSION OVERLAY */
+.trap-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;overflow:hidden}
+.trap-overlay.open{display:flex}
+.trap-nav{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;gap:.5rem}
+.trap-nav-left{display:flex;align-items:center;gap:10px}
+.trap-title{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--fg)}
+.trap-topic-pill{font-size:10px;padding:2px 9px;border-radius:99px;color:var(--accent3);border:1px solid rgba(240,192,96,.35);background:rgba(240,192,96,.08)}
+.trap-close{font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;transition:all .2s}
+.trap-close:hover{color:var(--fg);border-color:var(--border2)}
+.trap-pillars{display:flex;gap:4px;padding:.6rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.pillar{font-size:10px;padding:3px 10px;border-radius:99px;border:1px solid var(--border2);color:var(--muted2);transition:all .3s;cursor:default}
+.pillar.active{font-weight:700}
+.pillar.done{opacity:.5}
+.pillar.t-active{color:var(--accent4);border-color:rgba(224,92,138,.4);background:rgba(224,92,138,.08)}
+.pillar.r-active{color:var(--accent2);border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.08)}
+.pillar.a-active{color:var(--accent5);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.08)}
+.pillar.p-active{color:var(--accent3);border-color:rgba(240,192,96,.4);background:rgba(240,192,96,.08)}
+.trap-body{flex:1;display:flex;flex-direction:column;overflow:hidden;max-width:700px;margin:0 auto;width:100%;padding:0 1.25rem}
+.trap-messages{flex:1;overflow-y:auto;padding:1rem 0;display:flex;flex-direction:column;gap:1rem}
+.trap-messages::-webkit-scrollbar{width:3px}
+.trap-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .25s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-avatar{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:1px}
+.msg.claude .msg-avatar{background:rgba(91,142,240,.15);border:1px solid rgba(91,142,240,.3)}
+.msg.user .msg-avatar{background:rgba(62,207,142,.15);border:1px solid rgba(62,207,142,.3)}
+.msg.user{flex-direction:row-reverse}
+.msg-bubble{max-width:85%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-size:12px;line-height:1.8;color:var(--fg)}
+.msg.user .msg-bubble{background:var(--surface2);text-align:right}
+.msg-bubble strong{color:var(--fg);font-weight:600}
+.msg-bubble em{color:var(--accent3);font-style:normal;font-weight:500}
+.msg-bubble code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--accent2)}
+.msg-bubble .pillar-label{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;margin-bottom:6px}
+.pl-t{color:var(--accent4);background:rgba(224,92,138,.12)}
+.pl-r{color:var(--accent2);background:rgba(62,207,142,.12)}
+.pl-a{color:var(--accent5);background:rgba(167,139,250,.12)}
+.pl-p{color:var(--accent3);background:rgba(240,192,96,.12)}
+.typing{display:flex;gap:4px;align-items:center;padding:.5rem 0}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);animation:blink 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.trap-input-area{padding:.75rem 0 1rem;flex-shrink:0;border-top:1px solid var(--border);margin-top:.5rem}
+.trap-input-row{display:flex;gap:8px}
+.trap-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--fg);font-family:var(--mono);font-size:12px;padding:9px 12px;resize:none;outline:none;transition:border-color .2s;min-height:48px;max-height:140px}
+.trap-input:focus{border-color:var(--accent)}
+.trap-input::placeholder{color:var(--muted2)}
+.trap-send{background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-size:12px;padding:9px 16px;cursor:pointer;transition:background .2s;flex-shrink:0;align-self:flex-end}
+.trap-send:hover{background:#4a7de0}
+.trap-send:disabled{opacity:.4;cursor:not-allowed}
+.trap-actions{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.trap-action-btn{font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .2s}
+.trap-action-btn:hover{color:var(--fg);border-color:var(--border2)}
+.trap-action-btn.primary{color:var(--accent2);border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.07)}
+.trap-complete{text-align:center;padding:1.5rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:.5rem 0}
+.trap-complete h3{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:.5rem}
+.trap-complete p{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:1rem}
+.trap-score{font-family:var(--serif);font-size:36px;font-weight:700;color:var(--accent2);display:block;margin:.5rem 0}
+.sr-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.sr-chip{font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid var(--border2);color:var(--muted)}
+
+/* TRAP START BUTTON in focus block */
+.trap-start-btn{display:flex;align-items:center;gap:8px;width:100%;margin-top:.9rem;padding:10px 14px;background:rgba(224,92,138,.07);border:1px solid rgba(224,92,138,.3);border-radius:8px;color:var(--accent4);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .2s;text-align:left}
+.trap-start-btn:hover{background:rgba(224,92,138,.12);border-color:rgba(224,92,138,.5)}
+.trap-start-btn .tsb-icon{font-size:16px;flex-shrink:0}
+.trap-start-btn .tsb-text{flex:1}
+.trap-start-btn .tsb-title{font-weight:500;color:var(--fg)}
+.trap-start-btn .tsb-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.trap-start-btn .tsb-arrow{flex-shrink:0;color:var(--muted2)}
+.sec-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.quests{display:flex;flex-direction:column;gap:6px;margin-bottom:1.5rem}
+.quest{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s}
+.quest:hover{border-color:var(--border2)}
+.quest.done{opacity:.5}
+.quest.done .qname{text-decoration:line-through;color:var(--muted)}
+.quest-main{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
+.check{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.quest.done .check{background:var(--accent2);border-color:var(--accent2)}
+.check svg{display:none}
+.quest.done .check svg{display:block}
+.qinfo{flex:1;min-width:0}
+.qname-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.qname{font-size:13px;font-weight:500}
+.diff-badge{font-size:10px;padding:1px 6px;border-radius:99px;border:1px solid;cursor:pointer;transition:all .2s;flex-shrink:0}
+.diff-easy{color:#3ecf8e;border-color:#3ecf8e50;background:#3ecf8e10}
+.diff-medium{color:#f0c060;border-color:#f0c06050;background:#f0c06010}
+.diff-hard{color:#e05c8a;border-color:#e05c8a50;background:#e05c8a10}
+.qsub{font-size:11px;color:var(--muted);margin-top:2px}
+.quest-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.qxp{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}
+.t-ai{color:#9d8fff;background:#7c6af715}
+.t-dsa{color:#3ecf8e;background:#3ecf8e15}
+.t-web{color:#f0c060;background:#f0c06015}
+.t-bonus{color:#e05c8a;background:#e05c8a15}
+.note-btn{font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.note-btn:hover{color:var(--fg);border-color:var(--border2)}
+.note-btn.has-note{color:var(--accent2);border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.08)}
+.note-area{display:none;padding:0 12px 10px 42px}
+.note-area.open{display:block}
+.note-area textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--fg);font-family:var(--mono);font-size:11px;padding:8px 10px;resize:none;outline:none;transition:border-color .2s;min-height:60px}
+.note-area textarea:focus{border-color:var(--accent)}
+.note-area textarea::placeholder{color:var(--muted2)}
+
+/* WEEKLY GRID */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:1.5rem}
+.wd{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 3px}
+.wd.today{border-color:#5b8ef050;background:#5b8ef010}
+.wd.complete{border-color:#3ecf8e50;background:#3ecf8e10}
+.wd.partial{border-color:#f0c06040;background:#f0c06008}
+.wd-dot{width:7px;height:7px;border-radius:50%;background:var(--border);margin:0 auto 4px;transition:background .3s}
+.wd.today .wd-dot{background:var(--accent)}
+.wd.complete .wd-dot{background:var(--accent2)}
+.wd.partial .wd-dot{background:var(--accent3)}
+.wd-label{font-size:10px;color:var(--muted)}
+.wd.today .wd-label{color:var(--accent)}
+.wd-score{font-size:10px;color:var(--muted2);margin-top:2px}
+.wd.complete .wd-score{color:var(--accent2)}
+.wd.partial .wd-score{color:var(--accent3)}
+
+/* REWARDS */
+.rewards{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1.5rem}
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;transition:all .3s}
+.rcard.unlocked{border-color:#3ecf8e50;background:#3ecf8e06}
+.rcard.locked{opacity:.4}
+.rico{font-size:20px;margin-bottom:6px}
+.rname{font-size:11px;font-weight:500;margin-bottom:3px}
+.rxp{font-size:10px;color:var(--muted)}
+.rcard.unlocked .rxp{color:var(--accent2)}
+.ubadge{display:inline-block;margin-top:4px;font-size:10px;padding:1px 7px;border-radius:99px;background:#3ecf8e18;color:var(--accent2);border:1px solid #3ecf8e40}
+
+/* LOG */
+.log-entries{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;margin-bottom:1.5rem}
+.log-entry{font-size:11px;color:var(--muted);padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;gap:8px}
+.log-time{color:var(--accent);flex-shrink:0}
+.log-empty{font-size:11px;color:var(--muted2);font-style:italic}
+
+/* FOOTER BTNS */
+.footer-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:1.5rem}
+.btn{font-family:var(--mono);font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .2s}
+.btn:hover{color:var(--fg);border-color:var(--border2)}
+.btn.danger:hover{color:#e05c8a;border-color:#e05c8a50}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:#0a0a0fcc;display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;padding:1rem}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.4rem;width:100%;max-width:400px;transform:translateY(8px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:5px}
+.modal p{font-size:12px;color:var(--muted);margin-bottom:1.1rem;line-height:1.7}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 14px;font-size:12px;color:var(--accent2);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999;max-width:260px}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* STREAK BADGE */
+.streak-badge{font-size:11px;color:var(--accent3);background:#f0c06012;border:1px solid #f0c06030;border-radius:6px;padding:3px 10px}
+
+@media(max-width:600px){.wrap{padding:1rem 1rem 4rem}.week-grid{grid-template-columns:repeat(7,1fr)}.rewards{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">Sid's AI Prep Hub</a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Home</a>
+    <a class="nav-link current" href="quest-board.html">Quest Board</a>
+    <a class="nav-link" href="playbook.html">Playbook</a>
+    <a class="nav-link" href="resources.html">Resources</a>
+    <a class="nav-link" href="skill-test.html">Skills Test</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- WEEK BANNER -->
+  <div class="week-banner">
+    <div class="wb-left">
+      <div class="wb-phase" id="wbPhase"></div>
+      <div class="wb-title" id="wbTitle"></div>
+      <div class="wb-desc" id="wbDesc"></div>
+    </div>
+    <div class="wb-right">
+      <div class="date-badge" id="dateBadge"></div>
+      <div class="streak-badge" id="streakBadge">🔥 0 day streak</div>
+      <div class="week-picker">
+        <label>Week</label>
+        <select id="weekSelect" onchange="setWeek(this.value)"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- XP BAR -->
+  <div class="xp-wrap">
+    <div class="xp-top"><span class="xp-label">DAILY XP</span><span class="xp-num" id="xpCount">0 / 400 XP</span></div>
+    <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="chip-row">
+      <span class="chip lv-ai" id="chip-ai">AI/RAG — LV 1</span>
+      <span class="chip lv-dsa" id="chip-dsa">DSA — LV 1</span>
+      <span class="chip lv-web" id="chip-web">Web — LV 1</span>
+    </div>
+  </div>
+
+  <!-- TODAY'S FOCUS -->
+  <div class="focus-block">
+    <div class="focus-header">
+      <span class="focus-label">Today's study focus</span>
+      <span class="focus-tag" id="focusTag"></span>
+    </div>
+    <div class="focus-body">
+      <div class="focus-topic" id="focusTopic"></div>
+      <div class="focus-why" id="focusWhy"></div>
+      <div class="res-links" id="focusLinks"></div>
+      <button class="trap-start-btn" onclick="openTRAP()">
+        <span class="tsb-icon">🧠</span>
+        <span class="tsb-text">
+          <span class="tsb-title">Start TRAP Session</span>
+          <span class="tsb-sub">After studying — Test · Retain · Associate · Perform</span>
+        </span>
+        <span class="tsb-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- QUESTS -->
+  <div class="sec-label">Today's quests</div>
+  <div class="quests" id="questList"></div>
+
+  <!-- WEEKLY STREAK -->
+  <div class="sec-label">Weekly streak</div>
+  <div class="week-grid" id="weekGrid"></div>
+
+  <!-- REWARDS -->
+  <div class="sec-label">Rewards</div>
+  <div class="rewards" id="rewardsGrid"></div>
+
+  <!-- LOG -->
+  <div class="sec-label">Activity log</div>
+  <div class="log-entries" id="logEntries"></div>
+
+  <div class="footer-row">
+    <button class="btn" onclick="exportNotes()">↓ export notes</button>
+    <button class="btn danger" onclick="showResetModal()">↺ reset today</button>
+    <button class="btn danger" onclick="showWipeModal()">⊗ wipe all data</button>
+  </div>
+</div>
+
+<!-- TRAP SESSION OVERLAY -->
+<div class="trap-overlay" id="trapOverlay">
+  <div class="trap-nav">
+    <div class="trap-nav-left">
+      <span class="trap-title">TRAP Session</span>
+      <span class="trap-topic-pill" id="trapTopicPill"></span>
+    </div>
+    <button class="trap-close" onclick="closeTRAP()">✕ Close</button>
+  </div>
+  <div class="trap-pillars">
+    <span class="pillar" id="pillar-t">T · Test</span>
+    <span class="pillar" id="pillar-r">R · Retain</span>
+    <span class="pillar" id="pillar-a">A · Associate</span>
+    <span class="pillar" id="pillar-p">P · Perform</span>
+  </div>
+  <div class="trap-body">
+    <div class="trap-messages" id="trapMessages"></div>
+    <div class="trap-input-area">
+      <div class="trap-input-row">
+        <textarea class="trap-input" id="trapInput" placeholder="Type your answer here..." rows="2" onkeydown="trapKeydown(event)"></textarea>
+        <button class="trap-send" id="trapSend" onclick="sendTRAP()">Send →</button>
+      </div>
+      <div class="trap-actions" id="trapActions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal">
+    <h3>Reset today?</h3>
+    <p>Quest completions cleared. Notes and weekly data preserved.</p>
+    <div class="modal-btns"><button class="btn" onclick="closeModals()">Cancel</button><button class="btn danger" onclick="confirmReset()">Reset</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="wipeModal">
+  <div class="modal">
+    <h3>Wipe all data?</h3>
+    <p>Deletes all XP, streaks, notes, logs, and week setting. Cannot be undone.</p>
+    <div class="modal-btns"><button class="btn" onclick="closeModals()">Cancel</button><button class="btn danger" onclick="confirmWipe()">Wipe everything</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── WEEK CONTENT ──────────────────────────────────────────────────────────
+const WEEKS = [
+  {
+    num:1, label:'Week 1–2', phase:'Foundation Depth',
+    title:'LLM Internals + RAG Concepts',
+    desc:'You use LLMs in production. Now learn to explain HOW they work under the hood — attention, KV cache, tokenisation. Then learn RAG as a pattern (different from your ECU extraction work).',
+    dailyFocus:[
+      { topic:'Transformers & Attention', why:'The single most common interview question. Q/K/V, why we scale by √d_k, O(n²) cost. You need to draw this on a whiteboard.', tag:'LLM Internals',
+        links:[
+          { icon:'▶', title:'But what is a GPT? — 3Blue1Brown', meta:'27 min · Visual, start here', url:'https://www.youtube.com/watch?v=wjZofJX0v4M', must:true },
+          { icon:'▶', title:'Attention in Transformers — 3Blue1Brown', meta:'26 min · Q/K/V deep dive', url:'https://www.youtube.com/watch?v=eMlx5fFNoYc', must:true },
+          { icon:'📖', title:'The Illustrated Transformer — Jay Alammar', meta:'45 min read · Reference', url:'https://jalammar.github.io/illustrated-transformer/', must:false }
+        ]
+      },
+      { topic:'KV Cache & Tokenisation', why:'KV cache = why prompt caching saves 60-80% cost. Tokenisation = why you paid more for multilingual ECU invoices. Both are interview topics.', tag:'LLM Internals',
+        links:[
+          { icon:'▶', title:"Let's Build the GPT Tokenizer — Karpathy", meta:'2h 13m · Build it to understand it', url:'https://www.youtube.com/watch?v=zduSFxRajkE', must:true },
+          { icon:'🛠', title:'Tiktokenizer — Interactive Tool', meta:'5 min · Paste your own invoice text', url:'https://tiktokenizer.vercel.app/', must:false },
+          { icon:'📖', title:'Prompt Caching Docs — Anthropic', meta:'20 min · How caching works in production', url:'https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching', must:true }
+        ]
+      },
+      { topic:'Build a GPT From Scratch', why:'Nothing makes LLM internals click faster than building one. Every line of code is an interview answer about how transformers work.', tag:'LLM Internals',
+        links:[
+          { icon:'▶', title:"Let's Build GPT — Andrej Karpathy", meta:'1h 56m · The essential video', url:'https://www.youtube.com/watch?v=kCc8FmEb1nY', must:true }
+        ]
+      },
+      { topic:'RAG Pipeline — End to End', why:'ECU was LLM extraction (prompt → structured JSON). RAG is different: retrieve relevant chunks THEN generate. Interviewers will ask about both — you need both.', tag:'RAG Concepts',
+        links:[
+          { icon:'🎓', title:'LangChain: Chat with Your Data — DeepLearning.AI', meta:'~2 hrs · Free course, Harrison Chase teaches it', url:'https://learn.deeplearning.ai/courses/langchain-chat-with-your-data', must:true },
+          { icon:'📖', title:'Contextual Retrieval — Anthropic Blog', meta:'20 min · Advanced RAG technique', url:'https://www.anthropic.com/news/contextual-retrieval', must:false }
+        ]
+      },
+      { topic:'Hybrid Search & Reranking', why:'You already use Elasticsearch (BM25). Hybrid search = BM25 + dense embeddings combined. This connects your existing skills to the modern RAG stack.', tag:'RAG Concepts',
+        links:[
+          { icon:'📖', title:'Introduction to Hybrid Search — Pinecone', meta:'20 min · Connects to your ES knowledge', url:'https://www.pinecone.io/learn/hybrid-search-intro/', must:true },
+          { icon:'📖', title:'Reranking Explained — Cohere', meta:'15 min · Cross-encoder rerankers', url:'https://cohere.com/blog/rerank', must:false }
+        ]
+      },
+      { topic:'RAG Evaluation with RAGAS', why:'How do you know your RAG works? RAGAS gives you faithfulness, context recall, answer relevancy. Build this on a small dataset today.', tag:'RAG Concepts',
+        links:[
+          { icon:'🛠', title:'RAGAS Getting Started — Official Docs', meta:'30 min · Run your first eval', url:'https://docs.ragas.io/en/latest/getstarted/rag_eval.html', must:true },
+          { icon:'🎓', title:'Building + Evaluating Advanced RAG — DeepLearning.AI', meta:'~2 hrs · Free course', url:'https://learn.deeplearning.ai/courses/building-evaluating-advanced-rag', must:false }
+        ]
+      },
+      { topic:'Embeddings & Vector Search', why:'The foundation of RAG retrieval. Understand cosine similarity, why dense retrieval handles semantic queries better than BM25, and where Elasticsearch fits.', tag:'RAG Concepts',
+        links:[
+          { icon:'📖', title:'The Illustrated Word2Vec — Jay Alammar', meta:'30 min · Embeddings from first principles', url:'https://jalammar.github.io/illustrated-word2vec/', must:true },
+          { icon:'📖', title:'HNSW Explained — Pinecone', meta:'20 min · Why vector search is fast', url:'https://www.pinecone.io/learn/series/faiss/hnsw/', must:false }
+        ]
+      }
+    ]
+  },
+  {
+    num:2, label:'Week 3–4', phase:'Agentic Systems + System Design',
+    title:'Agents, Orchestration & System Design',
+    desc:'Your CrewAI GST project is your hook. These weeks give you the interview vocabulary to talk about it — ReAct, tool calling, orchestrator vs LLM. Plus system design practice.',
+    dailyFocus:[
+      { topic:'AI Agents — Fundamentals & Patterns', why:'You built agents with CrewAI. Now learn the vocabulary interviewers use: ReAct, Reflexion, Plan-and-Execute, tool calling schemas.', tag:'Agents',
+        links:[
+          { icon:'🎓', title:'AI Agents in LangGraph — DeepLearning.AI', meta:'~3 hrs · Best structured intro to agent patterns', url:'https://learn.deeplearning.ai/courses/ai-agents-in-langgraph', must:true },
+          { icon:'🎓', title:'Multi AI Agent Systems with CrewAI — DeepLearning.AI', meta:'~2 hrs · Your exact stack, taught by CrewAI founder', url:'https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai', must:true }
+        ]
+      },
+      { topic:'Orchestrator vs LLM Boundary', why:'The most important architectural question in agentic systems. What must be deterministic code vs what can be LLM judgment? Critical for your GST project story.', tag:'Agents',
+        links:[
+          { icon:'📖', title:'Building Effective Agents — Anthropic Research', meta:'30 min · The thinking behind Claude\'s agent design', url:'https://www.anthropic.com/research/building-effective-agents', must:true }
+        ]
+      },
+      { topic:'Tool Use & Function Calling', why:'How LLMs take actions in the world. You did this implicitly with CrewAI — now understand the low-level mechanics: tool schemas, validation, error handling.', tag:'Agents',
+        links:[
+          { icon:'📖', title:'Tool Use Guide — Anthropic Docs', meta:'45 min · Definitive reference', url:'https://docs.anthropic.com/en/docs/build-with-claude/tool-use', must:true },
+          { icon:'🛠', title:'Tool Use Cookbook — Anthropic (Notebooks)', meta:'1–2 hrs · Runnable examples', url:'https://github.com/anthropics/anthropic-cookbook/tree/main/tool_use', must:false }
+        ]
+      },
+      { topic:'ML System Design — Framework', why:'Senior rounds at GCCs open with system design. Learn the framework: clarify scope → constraints → happy path → hard sub-problems → failure modes. Practice out loud.', tag:'System Design',
+        links:[
+          { icon:'📖', title:'System Design Primer — GitHub', meta:'2–4 hrs · Most-starred resource', url:'https://github.com/donnemartin/system-design-primer', must:true },
+          { icon:'📖', title:'Building LLM Apps for Production — Chip Huyen', meta:'45 min · The essential production article', url:'https://huyenchip.com/2023/04/11/llm-engineering.html', must:true }
+        ]
+      },
+      { topic:'Practice: Design Your ECU System', why:'Your best system design answer is about ECU. Practice describing it in design terms: async ingestion → classifier → extractor → validator → human review → monitoring.', tag:'System Design',
+        links:[
+          { icon:'▶', title:'ByteByteGo — System Design Videos', meta:'10 min each · Queues, caching, databases', url:'https://www.youtube.com/@ByteByteGo', must:false },
+          { icon:'📖', title:'ML Systems Design — Chip Huyen (GitHub)', meta:'2 hrs · ML-specific system design', url:'https://github.com/chiphuyen/machine-learning-systems-design', must:false }
+        ]
+      }
+    ]
+  },
+  {
+    num:3, label:'Week 5', phase:'Production Layer',
+    title:'LLMOps, Evals & Cost Control',
+    desc:'The production layer separates Senior from Mid. Cost per query, latency budgets, eval pipelines, prompt versioning — GCCs care about this deeply. Your Kibana experience is your bridge.',
+    dailyFocus:[
+      { topic:'LLM Observability — Extending Your Kibana Setup', why:'You already use Kibana + Elasticsearch. Today: what LLM-specific metrics do you add on top? Token counts, cost, TTFT vs TPS, model version, quality signals.', tag:'Production',
+        links:[
+          { icon:'🎓', title:'Evaluating & Debugging GenAI — DeepLearning.AI + W&B', meta:'~2 hrs · LLM tracing and eval pipelines', url:'https://learn.deeplearning.ai/courses/evaluating-debugging-generative-ai', must:true },
+          { icon:'📖', title:'LangSmith RAG Evaluation Tutorial', meta:'1 hr · Instrument your RAG pipeline', url:'https://docs.smith.langchain.com/tutorials/Developers/rag', must:false }
+        ]
+      },
+      { topic:'Cost & Latency Optimisation', why:'Senior interview question: "How do you reduce LLM cost at scale?" Answer: prompt caching, model routing, output length limits, two-stage retrieval.', tag:'Production',
+        links:[
+          { icon:'📖', title:'Prompt Caching Launch Post — Anthropic', meta:'15 min · Real cost numbers', url:'https://www.anthropic.com/news/prompt-caching', must:true },
+          { icon:'🎓', title:'Efficiently Serving LLMs — DeepLearning.AI', meta:'~2 hrs · KV cache, batching, speculative decoding', url:'https://learn.deeplearning.ai/courses/efficiently-serving-llms', must:false }
+        ]
+      },
+      { topic:'Prompt Injection & Safety', why:'How agents get attacked. Direct injection (user input) and indirect injection (retrieved documents). Defences: output validation, privilege minimisation, human-in-the-loop.', tag:'Production',
+        links:[
+          { icon:'📖', title:'Prompt Injection — Learn Prompting Guide', meta:'20 min · Attack vectors and defences', url:'https://learnprompting.org/docs/prompt_hacking/injection', must:true }
+        ]
+      }
+    ]
+  },
+  {
+    num:4, label:'Week 6', phase:'Specialisation',
+    title:'Fine-tuning, Vector DBs & Multimodal',
+    desc:'Decision-tree knowledge, not implementation depth. When to fine-tune vs RAG vs prompt engineer. How vector DBs differ from your Elasticsearch setup.',
+    dailyFocus:[
+      { topic:'Fine-tuning Decision Tree', why:'You need to advise on when to fine-tune, not implement it. The decision tree: prompt engineering → RAG → fine-tuning. When each wins.', tag:'Fine-tuning',
+        links:[
+          { icon:'🎓', title:'Finetuning Large Language Models — DeepLearning.AI', meta:'~2 hrs · When and how to fine-tune', url:'https://learn.deeplearning.ai/courses/finetuning-large-language-models', must:true },
+          { icon:'📖', title:'LoRA Conceptual Guide — HuggingFace', meta:'20 min · What LoRA does mechanically', url:'https://huggingface.co/docs/peft/conceptual_guides/lora', must:true }
+        ]
+      },
+      { topic:'Vector DBs — Beyond Elasticsearch', why:'You know Elasticsearch well. Now map it to the modern vector DB landscape. ES supports dense vector fields (kNN). When do you need Pinecone, Weaviate, or ChromaDB instead?', tag:'Vector DBs',
+        links:[
+          { icon:'📖', title:'What is a Vector Database? — Pinecone', meta:'45 min · Comprehensive guide', url:'https://www.pinecone.io/learn/vector-database/', must:true },
+          { icon:'🎓', title:'Vector Databases: Embeddings to Apps — DeepLearning.AI', meta:'~2 hrs · Hands-on with Weaviate', url:'https://learn.deeplearning.ai/courses/vector-databases-embeddings-applications', must:false }
+        ]
+      }
+    ]
+  },
+  {
+    num:5, label:'Week 7', phase:'Mock Interviews',
+    title:'Full Loop Simulations',
+    desc:'Stop studying new content. Simulate the actual interview loop: technical screen → system design → behavioral. Record yourself. The gap between knowing and saying it out loud is your real study list.',
+    dailyFocus:[
+      { topic:'System Design Mock — ECU Platform', why:'Do this out loud, timed at 45 min. Draw on paper. Talk through every component. Record yourself on your phone.', tag:'Mock',
+        links:[
+          { icon:'🛠', title:'Pramp — Free Peer Mock Interviews', meta:'Book a session this week', url:'https://www.pramp.com/', must:true }
+        ]
+      },
+      { topic:'DSA Timed Mock — 2 Mediums / 45 min', why:'Simulate the actual coding round. Set a timer. Pick two NeetCode 150 mediums. Speak your reasoning out loud while you solve.', tag:'Mock',
+        links:[
+          { icon:'🛠', title:'NeetCode 150 — Problem Set', meta:'Pick from your current pattern', url:'https://neetcode.io/roadmap', must:true }
+        ]
+      },
+      { topic:'Behavioral — 3 STAR Stories Timed', why:'Each story: Situation (1 sentence) → Task (1 sentence) → Action (3-4 sentences) → Result (metric). Time yourself at 2 min per story.', tag:'Mock',
+        links:[
+          { icon:'▶', title:'STAR Method Explained — YouTube', meta:'10 min · Watch once, apply always', url:'https://www.youtube.com/watch?v=PJKYqLP6MRo', must:true }
+        ]
+      }
+    ]
+  },
+  {
+    num:6, label:'Week 8', phase:'Active Applications',
+    title:'Apply, Referrals & Portfolio Polish',
+    desc:'Applications go in now. Pipeline takes 2-4 weeks to warm up — start this week even if you feel not ready. Keep up 1 DSA/day throughout.',
+    dailyFocus:[
+      { topic:'Apply to Target Companies', why:'Adobe, SAP Labs, ServiceNow, Salesforce India, Microsoft IDC. Apply to all. Referrals are 3× more effective — reach out to any connections first.', tag:'Applications',
+        links:[
+          { icon:'🔗', title:'LinkedIn — Update headline to "Senior AI Engineer | RAG · Agents · LLM"', meta:'Do this today', url:'https://linkedin.com', must:true }
+        ]
+      },
+      { topic:'GitHub Portfolio — 3 Pinned Repos', why:'Recruiters look at your GitHub. Pin: (1) RAG pipeline project, (2) multi-agent demo, (3) this prep site. Each needs a clear README explaining what it does and why.', tag:'Portfolio',
+        links:[
+          { icon:'🔗', title:'Your GitHub Repo', meta:'Pin your 3 best projects', url:'https://github.com/sid9394', must:true }
+        ]
+      }
+    ]
+  }
+];
+
+const QUESTS = [
+  { id:'q1', name:'LeetCode problem', sub:'NeetCode 150 — next in sequence', xp:{easy:50,medium:70,hard:100}, tag:'dsa', cls:'t-dsa', hasDiff:true },
+  { id:'q2', name:"Today's study topic", sub:'See focus block above — 45-60 min', xp:{easy:80,medium:80,hard:80}, tag:'ai', cls:'t-ai', hasDiff:false },
+  { id:'q3', name:'Write your answer out loud', sub:'Pick 1 question from Playbook, answer without looking', xp:{easy:60,medium:60,hard:60}, tag:'ai', cls:'t-ai', hasDiff:false },
+  { id:'q4', name:'System design or portfolio', sub:'Alternate: draw 1 component OR push to GitHub', xp:{easy:40,medium:60,hard:80}, tag:'web', cls:'t-web', hasDiff:true },
+  { id:'q5', name:'No gaming before quests', sub:'Quests first, then game guilt-free', xp:{easy:30,medium:30,hard:30}, tag:'bonus', cls:'t-bonus', hasDiff:false },
+  { id:'q6', name:'Full day streak bonus', sub:'Complete all 5 quests above', xp:{easy:70,medium:70,hard:70}, tag:'bonus', cls:'t-bonus', hasDiff:false }
+];
+
+const REWARDS = [
+  { id:'r1', name:'Game session', icon:'🎮', xp:100 },
+  { id:'r2', name:'Takeout treat', icon:'🍜', xp:200 },
+  { id:'r3', name:'Movie night', icon:'🎬', xp:250 },
+  { id:'r4', name:'Buy a course', icon:'📚', xp:350 },
+  { id:'r5', name:'Full rest day', icon:'🛋️', xp:400 }
+];
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DIFF_CYCLE = ['easy','medium','hard'];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('questBoardV4') || 'null') || freshState(); }
+  catch(e) { return freshState(); }
+}
+
+function freshState() {
+  return { today:todayKey(), done:[], diffs:{}, notes:{}, xpByTag:{ai:0,dsa:0,web:0}, weekData:{}, log:[], currentWeek:1, focusDayOffset:0 };
+}
+
+let state = loadState();
+
+function checkDayReset() {
+  const key = todayKey();
+  if (state.today !== key) {
+    const xp = totalXP();
+    const mainDone = state.done.filter(x => !['q5','q6'].includes(x)).length;
+    state.weekData[state.today] = { xp, completedMain: mainDone >= 4 };
+    const keys = Object.keys(state.weekData).sort();
+    if (keys.length > 7) delete state.weekData[keys[0]];
+    state.today = key;
+    state.done = [];
+    state.xpByTag = {ai:0,dsa:0,web:0};
+    state.log = [];
+    // Rotate focus day
+    state.focusDayOffset = (state.focusDayOffset + 1) % getCurrentWeekFoci().length;
+    save();
+  }
+}
+
+function save() { try { localStorage.setItem('questBoardV4', JSON.stringify(state)); } catch(e){} }
+
+function getCurrentWeek() {
+  return WEEKS.find(w => w.num === (state.currentWeek || 1)) || WEEKS[0];
+}
+
+function getCurrentWeekFoci() {
+  return getCurrentWeek().dailyFocus;
+}
+
+function getTodayFocus() {
+  const foci = getCurrentWeekFoci();
+  const idx = (state.focusDayOffset || 0) % foci.length;
+  return foci[idx];
+}
+
+// ── WEEK SELECTOR ─────────────────────────────────────────────────────────
+function buildWeekSelector() {
+  const sel = document.getElementById('weekSelect');
+  sel.innerHTML = '';
+  WEEKS.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w.num;
+    opt.textContent = w.label;
+    if (w.num === (state.currentWeek || 1)) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function setWeek(num) {
+  state.currentWeek = parseInt(num);
+  state.focusDayOffset = 0;
+  save();
+  render();
+}
+
+// ── XP ────────────────────────────────────────────────────────────────────
+function getDiff(id) { return state.diffs[id] || 'easy'; }
+function getXP(q) { return q.xp[getDiff(q.id)]; }
+function totalXP() {
+  return state.done.reduce((s,id) => {
+    const q = QUESTS.find(q => q.id === id); return s + (q ? getXP(q) : 0);
+  }, 0);
+}
+
+function getStreak() {
+  let streak = 0;
+  const d = new Date();
+  for (let i = 1; i <= 30; i++) {
+    d.setDate(d.getDate() - 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const data = state.weekData[key];
+    if (data && data.completedMain) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function renderWeekBanner() {
+  const w = getCurrentWeek();
+  document.getElementById('wbPhase').textContent = '// ' + w.phase;
+  document.getElementById('wbTitle').textContent = w.title;
+  document.getElementById('wbDesc').textContent = w.desc;
+  document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('streakBadge').textContent = `🔥 ${getStreak()} day streak`;
+}
+
+function renderFocus() {
+  const f = getTodayFocus();
+  if (!f) return;
+  document.getElementById('focusTag').textContent = f.tag;
+  document.getElementById('focusTopic').textContent = f.topic;
+  document.getElementById('focusWhy').textContent = f.why;
+  const linksEl = document.getElementById('focusLinks');
+  linksEl.innerHTML = f.links.map(l => `
+    <a class="res-link" href="${l.url}" target="_blank">
+      <span class="res-link-icon">${l.icon}</span>
+      <div class="res-link-text">
+        <div class="res-link-title">${l.title}</div>
+        <div class="res-link-meta">${l.meta}</div>
+      </div>
+      ${l.must ? '<span class="res-link-badge rb-must">★ Must-do</span>' : '<span class="res-link-badge rb-free">Free</span>'}
+    </a>
+  `).join('');
+}
+
+function renderQuests() {
+  const el = document.getElementById('questList');
+  el.innerHTML = '';
+  // Update quest sub text for q2 to match current focus
+  const focus = getTodayFocus();
+  QUESTS.forEach(q => {
+    const done = state.done.includes(q.id);
+    const diff = getDiff(q.id);
+    const xp = getXP(q);
+    const note = state.notes[q.id] || '';
+    const sub = (q.id === 'q2' && focus) ? `Study: ${focus.topic}` : q.sub;
+    const div = document.createElement('div');
+    div.className = 'quest' + (done ? ' done' : '');
+    div.id = 'quest-' + q.id;
+    const diffBadge = q.hasDiff ? `<span class="diff-badge diff-${diff}" data-id="${q.id}">${diff}</span>` : '';
+    const noteBtn = `<button class="note-btn${note ? ' has-note' : ''}" data-id="${q.id}">${note ? '📝' : '+'}</button>`;
+    div.innerHTML = `
+      <div class="quest-main" data-id="${q.id}">
+        <div class="check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="qinfo">
+          <div class="qname-row"><span class="qname">${q.name}</span>${diffBadge}</div>
+          <div class="qsub">${sub}</div>
+        </div>
+        <div class="quest-right">${noteBtn}<span class="qxp ${q.cls}">+${xp} XP</span></div>
+      </div>
+      <div class="note-area" id="note-area-${q.id}">
+        <textarea placeholder="Log what you did — problem name, topic studied, what you pushed..." data-id="${q.id}">${note}</textarea>
+      </div>`;
+    el.appendChild(div);
+    div.querySelector('.quest-main').addEventListener('click', e => {
+      if (e.target.classList.contains('diff-badge') || e.target.classList.contains('note-btn')) return;
+      toggleQuest(q.id);
+    });
+    const db = div.querySelector('.diff-badge');
+    if (db) db.addEventListener('click', e => { e.stopPropagation(); cycleDiff(q.id); });
+    div.querySelector('.note-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      document.getElementById('note-area-' + q.id).classList.toggle('open');
+    });
+    div.querySelector('textarea').addEventListener('input', e => {
+      state.notes[q.id] = e.target.value;
+      const btn = div.querySelector('.note-btn');
+      btn.className = 'note-btn' + (e.target.value ? ' has-note' : '');
+      btn.textContent = e.target.value ? '📝' : '+';
+      save();
+    });
+  });
+}
+
+function toggleQuest(id) {
+  const q = QUESTS.find(q => q.id === id);
+  const xp = getXP(q);
+  const time = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  if (state.done.includes(id)) {
+    state.done = state.done.filter(x => x !== id);
+    if (q.tag !== 'bonus') state.xpByTag[q.tag] = Math.max(0,(state.xpByTag[q.tag]||0)-xp);
+    addLog(time, `Unchecked: ${q.name}`);
+  } else {
+    state.done.push(id);
+    if (q.tag !== 'bonus') state.xpByTag[q.tag] = (state.xpByTag[q.tag]||0)+xp;
+    addLog(time, `+${xp} XP — ${q.name} [${getDiff(id)}]`);
+    showToast('+' + xp + ' XP — ' + q.name);
+    const mainDone = state.done.filter(x => !['q5','q6'].includes(x)).length;
+    if (mainDone === 4 && !state.done.includes('q6')) setTimeout(() => showToast('🔥 All quests done! Claim streak bonus!'), 800);
+  }
+  save(); render();
+}
+
+function cycleDiff(id) {
+  const cur = getDiff(id);
+  state.diffs[id] = DIFF_CYCLE[(DIFF_CYCLE.indexOf(cur)+1)%3];
+  if (state.done.includes(id)) {
+    state.xpByTag = {ai:0,dsa:0,web:0};
+    state.done.forEach(did => {
+      const dq = QUESTS.find(q => q.id === did);
+      if (dq && dq.tag !== 'bonus') state.xpByTag[dq.tag] = (state.xpByTag[dq.tag]||0)+getXP(dq);
+    });
+  }
+  save(); render();
+  showToast(`Difficulty → ${state.diffs[id]}`);
+}
+
+function renderXP() {
+  const xp = totalXP();
+  document.getElementById('xpCount').textContent = xp + ' / 400 XP';
+  document.getElementById('xpFill').style.width = Math.min(100,Math.round((xp/400)*100))+'%';
+  ['ai','dsa','web'].forEach((t,i) => {
+    const pts = state.xpByTag[t]||0, lv = Math.floor(pts/150)+1;
+    document.getElementById('chip-'+t).textContent = ['AI/RAG','DSA','Web'][i]+' — LV '+lv;
+  });
+}
+
+function renderWeekGrid() {
+  const el = document.getElementById('weekGrid'); el.innerHTML = '';
+  const today = (new Date().getDay()+6)%7;
+  DAYS.forEach((d,i) => {
+    const dt = new Date();
+    dt.setDate(dt.getDate()-(today-i+(today>=i?0:7)));
+    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    const data = i===today ? {xp:totalXP(),completedMain:state.done.filter(x=>!['q5','q6'].includes(x)).length>=4} : state.weekData[key];
+    const div = document.createElement('div');
+    let cls='wd';
+    if(i===today) cls+=' today';
+    else if(data&&data.completedMain) cls+=' complete';
+    else if(data&&data.xp>0) cls+=' partial';
+    div.className=cls;
+    const score = data?(i===today?`${data.xp}xp`:(data.completedMain?'✓':`${data.xp}xp`)):'–';
+    div.innerHTML=`<div class="wd-dot"></div><div class="wd-label">${d}</div><div class="wd-score">${score}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderRewards() {
+  const xp=totalXP(), el=document.getElementById('rewardsGrid'); el.innerHTML='';
+  REWARDS.forEach(r => {
+    const unlocked=xp>=r.xp, d=document.createElement('div');
+    d.className='rcard '+(unlocked?'unlocked':'locked');
+    d.innerHTML=`<div class="rico">${r.icon}</div><div class="rname">${r.name}</div><div class="rxp">${r.xp} XP</div>${unlocked?'<div class="ubadge">✓ unlocked</div>':''}`;
+    el.appendChild(d);
+  });
+}
+
+function renderLog() {
+  const el=document.getElementById('logEntries');
+  if(!state.log||!state.log.length){el.innerHTML='<div class="log-empty">No activity yet today.</div>';return;}
+  el.innerHTML='';
+  [...state.log].reverse().forEach(e=>{
+    const d=document.createElement('div');d.className='log-entry';
+    d.innerHTML=`<span class="log-time">${e.time}</span><span>${e.msg}</span>`;
+    el.appendChild(d);
+  });
+}
+
+function addLog(time,msg){
+  if(!state.log)state.log=[];
+  state.log.push({time,msg});
+  if(state.log.length>50)state.log=state.log.slice(-50);
+}
+
+// ── MODALS ────────────────────────────────────────────────────────────────
+function showResetModal(){document.getElementById('resetModal').classList.add('open')}
+function showWipeModal(){document.getElementById('wipeModal').classList.add('open')}
+function closeModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'))}
+function confirmReset(){state.done=[];state.xpByTag={ai:0,dsa:0,web:0};state.log=[];save();closeModals();render();showToast("Day reset. Let's go!")}
+function confirmWipe(){localStorage.removeItem('questBoardV4');state=freshState();save();closeModals();render();showToast('All data wiped.')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+
+// ── EXPORT ────────────────────────────────────────────────────────────────
+function exportNotes(){
+  const lines=[`# Quest Notes — ${todayKey()}`,''];
+  QUESTS.forEach(q=>{const n=state.notes[q.id];if(n&&n.trim()){lines.push(`## ${q.name}`);lines.push(n.trim());lines.push('');}});
+  if(lines.length<=2){showToast('No notes to export yet.');return;}
+  const b=new Blob([lines.join('\n')],{type:'text/markdown'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`notes-${todayKey()}.md`;a.click();
+  showToast('Notes exported!');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2400);}
+
+// ── TRAP SESSION ENGINE ───────────────────────────────────────────────────
+const KEY_STORE = 'sid_anthropic_key';
+function getApiKey(){ return localStorage.getItem(KEY_STORE)||''; }
+
+let trapState = {
+  open: false,
+  topic: '',
+  pillar: 'T',   // T → R → A → P → done
+  messages: [],  // {role, content, pillarLabel}
+  sessionScore: null,
+  loading: false
+};
+
+const PILLARS = ['T','R','A','P'];
+const PILLAR_LABELS = { T:'T · Test', R:'R · Retain', A:'A · Associate', P:'P · Perform' };
+const PILLAR_CLASSES = { T:'t-active', R:'r-active', A:'a-active', P:'p-active' };
+const PILLAR_CSS = { T:'pl-t', R:'pl-r', A:'pl-a', P:'pl-p' };
+
+const TRAP_SYSTEM = (topic, pillar) => {
+  const pillarInstructions = {
+    T: `You are running the T (Test) pillar of the TRAP learning framework.
+Topic: "${topic}"
+Sid is a Senior AI/ML Engineer with 7+ years of production experience (ECU Worldwide document extraction with Gemini, XPO Logistics IDP, ADB Philippines pre-LLM NLP, Google CCAI voice bot, GST/TDS CrewAI multi-agent system, life insurance fraud ML).
+
+Your job:
+1. Ask Sid to explain "${topic}" from memory in his own words — don't give him any hints yet.
+2. When he answers, identify specifically what he got right, what gaps exist, and what's imprecise.
+3. If he's vague or stuck, probe with ONE follow-up question targeting the gap — don't explain yet.
+4. Only after 2-3 exchanges, if gaps remain, give the precise technical detail he's missing — concisely.
+5. Connect to his production experience where relevant (e.g. "this is why your ECU invoice costs were X").
+Be direct. This is interview prep. Don't be encouraging in a fluffy way — be like a good technical interviewer.
+Keep responses concise. Max 150 words per response.`,
+
+    R: `You are running the R (Retain) pillar of the TRAP learning framework.
+Topic: "${topic}"
+The Test pillar is complete. Now set up Sid's spaced repetition schedule.
+
+Your job:
+1. Give Sid exactly THREE things to remember about "${topic}" — make them crisp, memorable, and specific to what he got wrong or was shaky on in the Test phase.
+2. Tell him his spaced repetition schedule: revisit tomorrow, in 3 days, and in 1 week. Tell him to set reminders now.
+3. Ask him to say the three things back to you from memory before you move on.
+4. If he recalls them correctly, confirm and move on. If he misses one, have him say it once more.
+Keep it tight. Max 120 words per response.`,
+
+    A: `You are running the A (Associate) pillar of the TRAP learning framework.
+Topic: "${topic}"
+Your job: help Sid create a memorable anchor by connecting "${topic}" to something he already knows deeply.
+
+1. Ask: "What does ${topic} remind you of from your actual production work or everyday life?"
+2. Whatever analogy he gives — extend it, sharpen it, or redirect it to make the connection stickier.
+3. Then give him YOUR best analogy that connects to his specific background (ECU invoices, CrewAI agents, CCAI voice latency, Elasticsearch, etc.).
+4. End by asking him to say the analogy back in one sentence — that sentence is his memory hook.
+Keep it conversational and concrete. Max 100 words per response.`,
+
+    P: `You are running the P (Perform) pillar of the TRAP learning framework.
+Topic: "${topic}"
+This is the final pillar. No more studying — time to perform.
+
+Choose ONE of these tasks (pick whichever is most appropriate for the topic):
+a) "Explain ${topic} to me as if I'm your interviewer at Adobe — you have 2 minutes, go."
+b) Give a specific mini coding/design task directly related to ${topic}.
+c) "Walk me through a system design decision that involves ${topic} from one of your real projects."
+
+After he performs, score him 1-5 and tell him:
+- What landed well (be specific)
+- The one thing that would take it from a 3 to a 5 in a real interview
+- His overall TRAP session score (average of Test + Perform pillar scores, out of 5)
+End with: "Session complete. You've earned your XP. ✓"
+Keep responses tight. Max 150 words.`
+  };
+  return pillarInstructions[pillar];
+};
+
+function openTRAP() {
+  const key = getApiKey();
+  if (!key) {
+    const fix = confirm('This feature needs your Anthropic API key to run Claude as your study coach.\n\nOpen the Skills Test to enter your key? (It\'s stored only in your browser)');
+    if (fix) window.location.href = 'skill-test.html';
+    return;
+  }
+  const focus = getTodayFocus();
+  if (!focus) return;
+  trapState = { open:true, topic:focus.topic, pillar:'T', messages:[], sessionScore:null, loading:false };
+  document.getElementById('trapTopicPill').textContent = focus.topic;
+  document.getElementById('trapOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updatePillarUI();
+  renderTrapMessages();
+  // Kick off with Claude's opening T-pillar challenge
+  startPillar('T');
+}
+
+function closeTRAP() {
+  document.getElementById('trapOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  trapState.open = false;
+}
+
+function trapKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTRAP(); }
+}
+
+function updatePillarUI() {
+  const order = ['T','R','A','P'];
+  const cur = order.indexOf(trapState.pillar);
+  order.forEach((p, i) => {
+    const el = document.getElementById('pillar-' + p.toLowerCase());
+    if (!el) return;
+    el.className = 'pillar';
+    if (i < cur) el.classList.add('done');
+    else if (i === cur) { el.classList.add('active'); el.classList.add(PILLAR_CLASSES[p]); }
+  });
+}
+
+async function startPillar(pillar) {
+  trapState.pillar = pillar;
+  trapState.loading = true;
+  updatePillarUI();
+  renderTrapMessages();
+  setTrapInput(false);
+
+  // Claude opens the pillar with its first message
+  const systemPrompt = TRAP_SYSTEM(trapState.topic, pillar);
+  const openingPrompts = {
+    T: `Start the Test pillar. Challenge me to explain "${trapState.topic}" from memory. Be direct.`,
+    R: `The Test phase is complete. Start the Retain pillar for "${trapState.topic}".`,
+    A: `Now start the Associate pillar for "${trapState.topic}".`,
+    P: `Now start the Perform pillar for "${trapState.topic}". Give me my task.`
+  };
+
+  const response = await callClaude(systemPrompt, [{ role:'user', content: openingPrompts[pillar] }]);
+  trapState.loading = false;
+  if (response) {
+    trapState.messages.push({ role:'assistant', content:response, pillarLabel:pillar });
+  }
+  setTrapInput(true);
+  renderTrapMessages();
+}
+
+async function sendTRAP() {
+  const input = document.getElementById('trapInput');
+  const text = input.value.trim();
+  if (!text || trapState.loading) return;
+  input.value = '';
+
+  trapState.messages.push({ role:'user', content:text, pillarLabel:trapState.pillar });
+  trapState.loading = true;
+  setTrapInput(false);
+  renderTrapMessages();
+
+  const systemPrompt = TRAP_SYSTEM(trapState.topic, trapState.pillar);
+  const history = trapState.messages.map(m => ({ role:m.role, content:m.content }));
+  const response = await callClaude(systemPrompt, history);
+
+  trapState.loading = false;
+  if (response) {
+    trapState.messages.push({ role:'assistant', content:response, pillarLabel:trapState.pillar });
+    // Check if this pillar is complete (Claude ends with a signal)
+    checkPillarComplete(response);
+  }
+  setTrapInput(true);
+  renderTrapMessages();
+}
+
+function checkPillarComplete(response) {
+  const lower = response.toLowerCase();
+  const pillarDoneSignals = {
+    T: ['move to retain','move on to r','retain pillar','next pillar'],
+    R: ['move to associate','associate pillar','associate phase','ready to associate'],
+    A: ['move to perform','perform pillar','perform phase','ready to perform'],
+    P: ['session complete','earned your xp','trap session']
+  };
+  const signals = pillarDoneSignals[trapState.pillar] || [];
+  if (signals.some(s => lower.includes(s))) {
+    const order = ['T','R','A','P'];
+    const nextIdx = order.indexOf(trapState.pillar) + 1;
+    if (nextIdx < order.length) {
+      // Show "next pillar" button
+      showNextPillarAction(order[nextIdx]);
+    } else {
+      showSessionComplete();
+    }
+  }
+}
+
+function showNextPillarAction(nextPillar) {
+  const el = document.getElementById('trapActions');
+  const names = { R:'Retain', A:'Associate', P:'Perform' };
+  el.innerHTML = `<button class="trap-action-btn primary" onclick="startPillar('${nextPillar}')">→ Start ${names[nextPillar]} Pillar</button>`;
+}
+
+function showSessionComplete() {
+  // Award bonus XP
+  addLog(new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}), `TRAP session complete — ${trapState.topic}`);
+  showToast('🧠 TRAP complete! +50 bonus XP noted in log.');
+  const el = document.getElementById('trapActions');
+  // Spaced repetition reminder chips
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const day3 = new Date(); day3.setDate(day3.getDate()+3);
+  const week1 = new Date(); week1.setDate(week1.getDate()+7);
+  const fmt = d => d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  el.innerHTML = `
+    <div style="width:100%">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">📅 Set reminders to revisit <strong style="color:var(--fg)">${trapState.topic}</strong>:</div>
+      <div class="sr-chips">
+        <span class="sr-chip">🔁 Tomorrow · ${fmt(tomorrow)}</span>
+        <span class="sr-chip">🔁 +3 days · ${fmt(day3)}</span>
+        <span class="sr-chip">🔁 +1 week · ${fmt(week1)}</span>
+      </div>
+      <button class="trap-action-btn primary" onclick="closeTRAP()" style="margin-top:4px">✓ Done — back to quests</button>
+    </div>`;
+}
+
+function setTrapInput(enabled) {
+  const input = document.getElementById('trapInput');
+  const btn = document.getElementById('trapSend');
+  if (input) input.disabled = !enabled;
+  if (btn) btn.disabled = !enabled;
+}
+
+function renderTrapMessages() {
+  const el = document.getElementById('trapMessages');
+  if (!el) return;
+  let html = '';
+  trapState.messages.forEach(m => {
+    const isClaude = m.role === 'assistant';
+    const avatarIcon = isClaude ? '🤖' : '👤';
+    const pillarBadge = m.pillarLabel ? `<span class="pillar-label ${PILLAR_CSS[m.pillarLabel]}">${PILLAR_LABELS[m.pillarLabel]}</span><br/>` : '';
+    const content = m.content.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/\n/g,'<br/>');
+    html += `<div class="msg ${isClaude?'claude':'user'}">
+      <div class="msg-avatar">${avatarIcon}</div>
+      <div class="msg-bubble">${isClaude?pillarBadge:''}${content}</div>
+    </div>`;
+  });
+  if (trapState.loading) {
+    html += `<div class="msg claude">
+      <div class="msg-avatar">🤖</div>
+      <div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+    </div>`;
+  }
+  el.innerHTML = html;
+  el.scrollTop = el.scrollHeight;
+}
+
+async function callClaude(systemPrompt, messages) {
+  const key = getApiKey();
+  if (!key) return null;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:600,
+        system: systemPrompt,
+        messages: messages
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      if (res.status === 401) {
+        trapState.messages.push({ role:'assistant', content:'⚠️ API key rejected (401). Go to the Skills Test page to update your key, then come back.', pillarLabel:trapState.pillar });
+        renderTrapMessages(); return null;
+      }
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text || '';
+  } catch(err) {
+    trapState.messages.push({ role:'assistant', content:`⚠️ Error: ${err.message}. Check your API key has credits and try again.`, pillarLabel:trapState.pillar });
+    renderTrapMessages();
+    return null;
+  }
+}
+function render(){
+  renderWeekBanner();
+  renderFocus();
+  renderQuests();
+  renderXP();
+  renderWeekGrid();
+  renderRewards();
+  renderLog();
+}
+
+checkDayReset();
+buildWeekSelector();
+render();
+</script>
+</body>
+</html>
